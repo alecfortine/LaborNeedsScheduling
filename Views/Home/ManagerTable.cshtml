@@ -1,0 +1,503 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Web.UI.HtmlControls;
+@using LaborNeedsScheduling.Models
+
+@model LaborNeedsScheduling.Models.LaborScheduling
+
+
+<head>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="~/MVCGridHandler.axd/script.js"></script>
+
+    @{
+        ViewData["Title"] = "Home Page";
+    }
+
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 1100px;
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+            table-layout: fixed;
+            word-break: break-all;
+            /*margin-left: auto;
+            margin-right: auto;*/
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+            /*background-color: white;*/
+        }
+
+            td.highlight:hover {
+                background-color: white;
+            }
+
+            td:first-child {
+                font-weight: bold;
+                text-align: left;
+            }
+
+        .container {
+            /*position: fixed;*/
+            /*padding-left: 150px;*/
+            align-content: center;
+            margin: 0;
+        }
+
+        .left-element {
+            display: inline;
+            float: left;
+        }
+
+        .right-element {
+            display: inline;
+            float: right;
+            padding-right: 50px;
+        }
+
+        body {
+            padding-left: 200px;
+            padding-top: 70px;
+        }
+
+        .testing-left {
+            display: inline;
+            float: left;
+            padding: 5px;
+            border-style: solid;
+            border-width: 1px;
+            text-align: center;
+            font-size: 70%;
+        }
+    </style>
+
+    <style>
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .8);
+        }
+
+
+        .lightbox_table {
+            width: 100%;
+            height: 100%;
+            /*color: green;*/
+        }
+
+
+        .lightbox_table_cell {
+            vertical-align: middle;
+        }
+
+        .lightbox_table td:hover {
+            color: green;
+        }
+
+        .closePopup {
+            float: right;
+            font-weight: bold;
+            color: red;
+            cursor: pointer;
+        }
+    </style>
+
+    <style>
+        .testbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .8);
+        }
+
+
+
+        .testbox_table {
+            position: fixed;
+            top: 12%;
+            left: 12%;
+            width: 300px;
+            height: 300px;
+        }
+
+
+
+        .testbox_table_cell {
+            vertical-align: middle;
+        }
+
+        .testbox_table td:hover {
+            /*color: green;*/
+        }
+
+        td.light-highlight {
+            background-color: white;
+        }
+
+            td.light-highlight:hover {
+                background-color: yellow;
+            }
+
+        .closePopup {
+            float: right;
+            font-weight: bold;
+            color: red;
+            cursor: pointer;
+        }
+    </style>
+
+    <script>
+        //function showPopup() {
+
+        //    document.getElementById('blackOverlay').style.display = 'block';
+        //    document.getElementById('popup').style.display = 'block';
+
+        //}
+
+        //function closePopup() {
+
+        //    document.getElementById('blackOverlay').style.display = 'none';
+        //    document.getElementById('popup').style.display = 'none';
+
+        //}
+    </script>
+
+    <style>
+        a {
+            color: white;
+            text-decoration: none;
+        }
+
+
+        #child, #child2, #child3, #child4 {
+            position: absolute;
+            display: none;
+            top: 200px;
+            z-index: 9;
+            color: red;
+        }
+
+            #child:target, #child2:target, #child3:target, #child4:target {
+                display: block;
+            }
+
+
+
+        table.coolTable td {
+            background-color: purple;
+        }
+
+            table.coolTable td:hover {
+                background-color: green;
+                color: green;
+            }
+    </style>
+
+    <script type='text/javascript'>
+        function colorChange(x) {
+
+            el.style.backgroundColor = '#007d00';
+
+            //var x = document.getElementById('cell');
+            //if (x.style.backgroundColor === 'white') {
+            //    x.style.display = 'red';
+            //} else {
+            //    x.style.display = 'white';
+            //}
+        }
+    </script>
+
+</head>
+
+<body>
+
+
+    <br>
+    <br>
+
+
+    @using (Html.BeginForm("ManagerTable", "Home", FormMethod.Post))
+    {
+        <div class="container">
+            <div class="left-element">
+
+                <div class="left-element">
+                    <label>Weekly Hours: </label><br />
+                    <label>Minimum Employees: </label><br />
+                    <label>Maximum Employees: </label><br />
+                </div>
+
+                <div class="left-element">
+                    @Html.TextBoxFor(m => m.ThisWeek.PayrollWeeklyHours)<br>
+                    @Html.TextBoxFor(m => m.ThisWeek.MinEmployees)<br>
+                    @Html.TextBoxFor(m => m.ThisWeek.MaxEmployees)<br>
+                </div>
+
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+
+                <label>Exclude dates: </label><br />
+                @*@Html.TextBoxFor(m => m.ThisWeek.hourChecks[1,5])<br>*@
+                @*@Html.CheckBoxFor(m => m.ThisWeek.monday6check, new { @checked = "True" })
+
+                    @Html.EditorFor(model => model.monday6check)*@
+
+
+                @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
+                {
+
+                    int counter = 0;
+
+                    <div>
+
+                        @foreach (KeyValuePair<DateTime, bool>
+                            kvp in Model.ThisWeek.ExclusionDates.Skip(7 * i))
+                        {
+                            <div class="testing-left">
+                                <label>@kvp.Key.ToShortDateString() </label><br />
+                                @Html.CheckBoxFor(model => model.ThisWeek.ExclusionDates[kvp.Key])
+                                @*<input type="checkbox" name="@("ExclusionDates[" + kvp.Key + "]")"
+                                       value="@kvp.Value" />*@
+                                @Html.DisplayTextFor(model => model.ThisWeek.ExclusionDates[kvp.Key])
+                            </div>
+                            counter++;
+                            if (counter == 7)
+                            {
+                                break;
+                            }
+                        }
+                    </div>
+
+                }
+
+            </div>
+
+            <div class="right-element">
+                <label>Week Weighting: </label><br />
+                @for (int i = 0; i < Model.ThisWeek.weekWeighting.Length; i++)
+                {
+                    <label>@Html.Raw((i + 1).ToString()): </label>
+                    @Html.TextBoxFor(m => Model.ThisWeek.weekWeighting[i])<br>
+
+                }
+
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+
+                <button type="submit">Update</button><br>
+
+            </div>
+
+        </div>
+    }
+
+    <br />
+
+    @*<button onclick="document.getElementById('lightbox').style.display='inline';">
+            Show lightbox
+        </button>*@
+
+    <button onclick="document.getElementById('testbox').style.display='inline';" float="right">
+        Show testbox
+    </button>
+
+
+
+    <div id="testbox" class="testbox" style="display:none"
+         onclick="document.getElementById('testbox').style.display = 'none';">
+
+        <table class="testbox_table">
+            <tr>
+                <td class="testbox_table_cell" align="center">
+                    <div id="testbox_content" style="width:1150px; background-color:white; border:5px solid black;">
+
+                        @if (Model.ThisWeek.LaborSchedule != null)
+                        {
+                            <table border="1" cellpadding="5" id="table_id">
+                                <thead>
+                                    <tr>
+                                        @foreach (DataColumn col in Model.ThisWeek.LaborSchedule.Columns)
+                                        {
+                                            <th>@col.Caption</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (DataRow row in Model.ThisWeek.LaborSchedule.Rows)
+                                    {
+                                        <tr>
+                                            @foreach (var cell in row.ItemArray)
+                                            {
+                                                <td class="light-highlight" id="cell" onclick="colorChange(this);">@cell.ToString()</td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+
+
+    <!-- LIGHTBOX CODE BEGIN -->
+    @*<div id="lightbox" class="lightbox" style="display:none"
+               onclick="document.getElementById('lightbox').style.display='none';">
+
+
+            <table class="lightbox_table">
+
+                <tr>
+
+                    <td class="lightbox_table_cell" align="center">
+
+                        <div id="lightbox_content" style="width:1150px; background-color:white; border:5px solid black;">
+
+                            <table border="1" cellpadding="5" id="table_id">
+                                <thead>
+                                    <tr>
+                                        @foreach (DataColumn col in Model.LaborSchedule.Columns)
+                                        {
+                                        <th>@col.Caption</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (DataRow row in Model.LaborSchedule.Rows)
+                                    {
+                                    <tr>
+                                        @foreach (var cell in row.ItemArray)
+                                        {
+                                        <td>@cell.ToString()</td>
+                                        }
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                            <div id="popup" class="popup">
+                                <span class="closePopup" onclick="closePopup()">X</span>
+                            </div>
+
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+
+            @*<table class="lightbox_table">
+                <tr>
+                    <th colspan="2">Title</th>
+                </tr>
+                <tr>
+                    <td onClick="Title">
+                        <a href='#child' class="parent1">Parent1</a>
+                        <div id="child">
+                            <h3>Child1</h3>
+                            <p> Here pops Info on something when parent1 is clicked.</p>
+                        </div><!--EO Child1 -->
+                    </td>
+                    <td>
+                        <a href='#child2' class="parent2">Row way bigger than row under</a>
+                        <div id="child2">
+                            <h3>Child2</h3>
+                            <p> Here pops Info on something when parent2 is clicked.</p>
+                        </div><!--EO Child2 -->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <a href='#child3' class="parent3">Parent3</a>
+                        <div id="child3">
+                            <h3>Child3</h3>
+                            <p> Here pops Info on something when parent1 is clicked.</p>
+                        </div><!--EO Child1 -->
+                    </td>
+                    <td onClick="document.location.href=Title">
+                        <a href='#child4' class="parent4">Parent4</a>
+                        <div id="child4">
+                            <h3>Child4</h3>
+                            <p> Here pops Info on something when parent4 is clicked.</p>
+                        </div><!--EO Child2 -->
+                    </td>
+                </tr>
+            </table>
+
+
+
+        </div>*@
+
+    <!-- LIGHTBOX CODE END -->
+
+    <br>
+    <br>
+
+
+
+
+    @*where the table is printed*@
+
+    @if (Model.ThisWeek.LaborSchedule != null)
+    {
+        <table border="1" cellpadding="5" id="table_id">
+            <thead>
+                <tr>
+                    @foreach (DataColumn col in Model.ThisWeek.LaborSchedule.Columns)
+                {
+                        <th>@col.Caption</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (DataRow row in Model.ThisWeek.LaborSchedule.Rows)
+                {
+                    <tr>
+                        @foreach (var cell in row.ItemArray)
+                    {
+                            <td id="cell" onclick="colorChange(this);">@cell.ToString()</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+
+    }
+</body>
