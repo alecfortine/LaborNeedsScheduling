@@ -77,13 +77,13 @@ namespace LaborNeedsScheduling.Models
         public static DateTime weekMarker = DateTime.Parse("05/09/2015"); //DateTime.Today.AddDays(-1 * (int)DayOfWeek.Saturday); //change later
 
         // days of the current week
-        public string saturday0 = weekMarker.AddDays(1).ToString("M/d/yyyy");
-        public string friday0 = weekMarker.AddDays(2).ToString("M/d/yyyy");
-        public string thursday0 = weekMarker.AddDays(3).ToString("M/d/yyyy");
+        public string saturday0 = weekMarker.AddDays(7).ToString("M/d/yyyy");
+        public string friday0 = weekMarker.AddDays(6).ToString("M/d/yyyy");
+        public string thursday0 = weekMarker.AddDays(5).ToString("M/d/yyyy");
         public string wednesday0 = weekMarker.AddDays(4).ToString("M/d/yyyy");
-        public string tuesday0 = weekMarker.AddDays(5).ToString("M/d/yyyy");
-        public string monday0 = weekMarker.AddDays(6).ToString("M/d/yyyy");
-        public string sunday0 = weekMarker.AddDays(7).ToString("M/d/yyyy");
+        public string tuesday0 = weekMarker.AddDays(3).ToString("M/d/yyyy");
+        public string monday0 = weekMarker.AddDays(2).ToString("M/d/yyyy");
+        public string sunday0 = weekMarker.AddDays(1).ToString("M/d/yyyy");
 
         /// <summary>
         /// The number of weeks to use for calculations

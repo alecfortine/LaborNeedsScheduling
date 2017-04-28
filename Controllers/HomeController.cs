@@ -32,7 +32,7 @@ namespace LaborNeedsScheduling.Controllers
 
             lsViewModel.ThisWeek.FillDatatables();
 
-            lsViewModel.ThisWeek.LaborSchedule = lsViewModel.ThisWeek.WeightedAverageTraffic;
+            lsViewModel.ThisWeek.LaborSchedule = lsViewModel.ThisWeek.AllocatedHours;
 
             return View(lsViewModel);
         }

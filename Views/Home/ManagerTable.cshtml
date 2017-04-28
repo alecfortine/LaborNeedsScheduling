@@ -15,7 +15,7 @@
 
 <head>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="~/Scripts/jquery-1.10.2.min.js" type="text/javascript"></script>
     <script src="~/MVCGridHandler.axd/script.js"></script>
 
     @{
@@ -228,6 +228,20 @@
         }
     </script>
 
+    <script type="text/javascript">
+        var allTableCells = document.getElementsByTagName("td");
+        for (var i = 0, max = allTableCells.length; i < max; i++) {
+            var node = allTableCells[i];
+
+            //get the text from the first child node - which should be a text node
+            var currentText = node.childNodes[0].nodeValue;
+
+            //check for 'one' and assign this table cell's background color accordingly
+            if (currentText === "one")
+                node.style.backgroundColor = "red";
+        }
+    </script>
+
 </head>
 
 <body>
@@ -275,13 +289,13 @@
                     <div>
 
                         @foreach (KeyValuePair<DateTime, bool>
-                            kvp in Model.ThisWeek.ExclusionDates.Skip(7 * i))
+            kvp in Model.ThisWeek.ExclusionDates.Skip(7 * i))
                         {
                             <div class="testing-left">
                                 <label>@kvp.Key.ToShortDateString() </label><br />
                                 @Html.CheckBoxFor(model => model.ThisWeek.ExclusionDates[kvp.Key])
                                 @*<input type="checkbox" name="@("ExclusionDates[" + kvp.Key + "]")"
-                                       value="@kvp.Value" />*@
+                                    value="@kvp.Value" />*@
                                 @Html.DisplayTextFor(model => model.ThisWeek.ExclusionDates[kvp.Key])
                             </div>
                             counter++;
@@ -476,7 +490,7 @@
 
     @if (Model.ThisWeek.LaborSchedule != null)
     {
-        <table border="1" cellpadding="5" id="table_id">
+        <table border="1" cellpadding="5" id="tableID">
             <thead>
                 <tr>
                     @foreach (DataColumn col in Model.ThisWeek.LaborSchedule.Columns)
@@ -500,4 +514,21 @@
 
 
     }
+
+    <script>
+        var table = document.getElementById("tableID");
+        if (table != null) {
+            for (var i = 0; i < table.rows.length; i++) {
+                for (var j = 0; j < table.rows[i].cells.length; j++)
+                    table.rows[i].cells[j].onclick = function () {
+                        tableText(this);
+                    };
+            }
+        }
+
+        function tableText(tableCell) {
+            alert(tableCell.innerHTML);
+        }
+    </script>
+
 </body>
