@@ -17,6 +17,8 @@ namespace LaborNeedsScheduling.Models
         /// </summary>
         public WorkWeek ThisWeek { get; set; }
 
+        public AvailabilityViewModel Employee { get; set; }
+
         /// <summary>
         /// Set of previous work weeks of data
         /// </summary>

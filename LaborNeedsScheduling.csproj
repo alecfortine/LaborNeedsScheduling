@@ -205,8 +205,13 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Connection.cs" />
     <Compile Include="Models\DataManagement.cs" />
+    <Compile Include="Models\AvailabilityViewModel.cs" />
+    <Compile Include="Models\EmployeeModel.cs" />
+    <Compile Include="Models\FakeAPI.cs" />
+    <Compile Include="Models\Grading.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\LaborScheduling.cs" />
+    <Compile Include="Models\Configuration.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
@@ -227,6 +232,7 @@
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery-3.2.1.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
@@ -246,9 +252,9 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Home\Employee.cshtml" />
+    <Content Include="Views\Home\EmployeeHome.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
-    <Content Include="Views\Home\ManagerTable.cshtml" />
+    <Content Include="Views\Home\LaborSchedule.cshtml" />
     <Content Include="Views\Account\_ExternalLoginsListPartial.cshtml" />
     <Content Include="Views\Account\ConfirmEmail.cshtml" />
     <Content Include="Views\Account\ExternalLoginConfirmation.cshtml" />
@@ -269,9 +275,14 @@
     <Content Include="Views\Manage\VerifyPhoneNumber.cshtml" />
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
+    <Content Include="Views\Home\EmployeeAvailability.cshtml" />
+    <Content Include="Views\Home\ManagerConfiguration.cshtml" />
+    <Content Include="Views\Home\Grading.cshtml" />
+    <Content Include="Views\Home\EmployeeAvailabilityTable.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\FakeAPI\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
@@ -282,7 +293,7 @@
     <Content Include="Scripts\jquery-1.10.2.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\LSAData\LSAData.csproj">
+    <ProjectReference Include="..\LSAData\LSAData.csproj">
       <Project>{e3aa90c6-65fd-4eb0-909b-330c17e23c7f}</Project>
       <Name>LSAData</Name>
     </ProjectReference>

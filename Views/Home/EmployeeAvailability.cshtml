@@ -1,0 +1,65 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Diagnostics;
+@using System.Web.UI.HtmlControls;
+@using LaborNeedsScheduling.Models
+@model AvailabilityViewModel
+
+
+@{
+    ViewBag.Title = "EmployeeAvailability";
+}
+
+<head>
+
+</head>
+
+<body>
+
+    <br />
+    <br />
+    <h3>Employee Availability</h3>
+    <br />
+    <br />
+
+
+    @Html.DropDownListFor(m => m.empList, new SelectList(Model.empList.Items, "Key", "Value"), new { onchange = "showPartial()" , id = "EmployeeDropdown" })
+
+    <br />
+    <br />
+    <hr />
+    <br />
+    <br />
+
+    <div id="EmployeeAvailability">
+    </div> 
+
+</body>
+
+@section scripts
+{
+<script>
+        $('#EmployeeDropdown').change(function () {
+
+        /* Get the selected value of dropdownlist */
+        var selectedID = $(this).val();
+
+            /* Request the partial view with .get request. */
+            $.get('/Home/EmployeeAvailabilityTable/?EmployeeId=' + selectedID, function (data) {
+
+                /* data is the pure html returned from action method, load it to your page */
+                $('#EmployeeAvailability').html(data);
+                /* little fade in effect */
+                $('#EmployeeAvailability').fadeIn('fast');
+        });
+
+    });
+</script>
+}

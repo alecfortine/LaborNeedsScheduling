@@ -1,0 +1,527 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Diagnostics;
+@using System.Web.UI.HtmlControls;
+@using LaborNeedsScheduling.Models
+
+@model LaborNeedsScheduling.Models.LaborScheduling
+
+
+<head>
+
+    <script src="~/Scripts/jquery-1.10.2.min.js" type="text/javascript"></script>
+
+    @{
+        ViewData["Title"] = "Home Page";
+    }
+
+    @*table*@
+    <style>
+        table.LaborSchedule {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 1100px;
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+            table-layout: fixed;
+            word-break: break-all;
+            /*margin-left: auto;
+            margin-right: auto;*/
+        }
+
+        td.LaborCell, th.LaborCell {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000000;
+        }
+
+            td.LaborCellhighlight:hover {
+                background-color: white;
+            }
+
+            td.LaborCell:first-child {
+                font-weight: bold;
+                text-align: left;
+            }
+
+        .container {
+            /*position: fixed;*/
+            /*padding-left: 150px;*/
+            align-content: center;
+            margin: 0;
+        }
+
+        .left-element {
+            display: inline;
+            float: left;
+        }
+
+        .right-element {
+            display: inline;
+            float: right;
+            padding-right: 50px;
+        }
+
+        body {
+            padding-left: 200px;
+            padding-top: 70px;
+        }
+
+        .testing-left {
+            display: inline;
+            float: left;
+            padding: 5px;
+            border-style: solid;
+            border-width: 1px;
+            text-align: center;
+            font-size: 70%;
+        }
+    </style>
+
+
+    <style>
+        .hourcell:not(:first-child) {
+            background-color: #66ff89;
+        }
+    </style>
+
+    @*lightbox*@
+    <style>
+        .black_overlay {
+            display: none;
+            position: fixed;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            z-index: 1001;
+            -moz-opacity: 0.8;
+            opacity: .80;
+            filter: alpha(opacity=80);
+        }
+
+        .white_content {
+            position: fixed;
+            top: 10%;
+            left: 25%;
+            z-index: 1050;
+            width: 80%;
+            height: 80%;
+            margin-left: -280px;
+            background-color: #ffffff;
+            -webkit-border-radius: 20px;
+            -moz-border-radius: 20px;
+            border-radius: 20px;
+            border: 2px solid #FFFFFF;
+            background-color: #FFFFFF;
+            -webkit-box-shadow: #000000 8px 8px 8px;
+            -moz-box-shadow: #000000 8px 8px 8px;
+            box-shadow: #000000 8px 8px 8px;
+            display: none;
+        }
+
+        .white-header {
+            padding: 9px 15px;
+            border-bottom: 1px solid #eee;
+            height: 30px;
+        }
+
+        .modal-header .close {
+            margin-top: 2px;
+        }
+
+        a.close {
+            padding: 0;
+            cursor: pointer;
+            border: 0;
+            -webkit-appearance: none;
+        }
+
+        .close {
+            float: right;
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 20px;
+        }
+
+        .white-body {
+            position: relative;
+            max-height: 850px;
+            padding: 15px;
+            overflow-y: auto;
+            display: block;
+        }
+    </style>
+
+
+
+</head>
+
+<body>
+
+
+    <br>
+    <br>
+
+
+    @using (Html.BeginForm("LaborSchedule", "Home", FormMethod.Post))
+    {
+        <div class="container">
+            <div class="left-element">
+
+                <div class="left-element">
+                    <label>Weekly Hours: </label><br />
+                    <label>Minimum Employees: </label><br />
+                    <label>Maximum Employees: </label><br />
+                </div>
+
+                <div class="left-element">
+                    @Html.TextBoxFor(m => m.ThisWeek.PayrollWeeklyHours)<br>
+                    @Html.TextBoxFor(m => m.ThisWeek.MinEmployees)<br>
+                    @Html.TextBoxFor(m => m.ThisWeek.MaxEmployees)<br>
+                </div>
+
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+
+                @*Exclude dates lightbox*@
+                <div class="left-element">
+                    <p><button type="button" onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Exclude Dates</button></p>
+                    <div id="light" class="white_content">
+                        <div class="white-header">
+                            <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
+
+                        </div>
+                        <div class="white-body">
+
+                            @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
+                            {
+                                int counter = 0;
+                                <div>
+
+                                    @foreach (KeyValuePair<DateTime, bool> kvp in Model.ThisWeek.ExclusionDates.Skip(7 * i))
+                                    {
+                                        <div class="testing-left">
+                                            <label>@kvp.Key.ToShortDateString() </label><br />
+                                            @Html.CheckBoxFor(model => model.ThisWeek.ExclusionDates[kvp.Key])
+                                            @*<input type="checkbox" name="@(" ExclusionDates[" + kvp.Key + "]" )"
+                                                value="@kvp.Value" />*@
+                                            @Html.DisplayTextFor(model => model.ThisWeek.ExclusionDates[kvp.Key])
+                                        </div>
+                                        counter++;
+                                        if (counter == 7)
+                                        {
+                                            <br />
+                                            <br />
+                                            <br />
+                                            break;
+                                        }
+                                    }
+                                </div>
+
+                            }
+
+
+                            @*<table border="1" cellpadding="5" id="weekhours" class="weekhours">
+                                    <thead>
+                                        <tr>
+                                            @foreach (DataColumn col in Model.ThisWeek.CurrentWeekHours.Columns)
+                                            {
+                                                <th>@col.Caption</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (DataRow row in Model.ThisWeek.CurrentWeekHours.Rows)
+                                        {
+                                            <tr>
+                                                @foreach (var cell in row.ItemArray)
+                                                {
+                                                    <td id="hourcell" class="hourcell" onclick="colorChange(this);">@cell.ToString()</td>
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>*@
+                        </div>
+                    </div>
+                    <div id="fade" class="black_overlay"></div>
+                </div>
+            </div>
+
+
+
+            <div class="right-element">
+                <label>Weeks: </label><br />
+                @Html.TextBoxFor(m => Model.ThisWeek.NumberHistoricalWeeks)<br>
+                <br />
+                <label>Week Weighting: </label><br />
+                @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
+                {
+                    <label>@Html.Raw((i + 1).ToString()): </label>
+                    @Html.TextBoxFor(m => Model.ThisWeek.weekWeighting[i])<br>
+
+                }
+
+                <br />
+                <br />
+
+                <button type="submit">Update</button><br>
+
+            </div>
+
+        </div>
+    }
+
+    <br />
+
+
+
+    <br />
+    <br />
+    <hr />
+
+    @*where the table is printed*@
+    @if (Model.ThisWeek.LaborSchedule != null)
+    {
+        <table class="LaborSchedule" id="LaborSchedule" border="1" cellpadding="5">
+            <thead>
+                <tr>
+                    @foreach (DataColumn col in Model.ThisWeek.LaborSchedule.Columns)
+                    {
+                        <th class="LaborCell">@col.Caption</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (DataRow row in Model.ThisWeek.LaborSchedule.Rows)
+                {
+                    <tr>
+                        @foreach (var cell in row.ItemArray)
+                        {
+                            <td class="LaborCell" id="cell">@cell.ToString()</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <br />
+
+    }
+
+    <br />
+   
+
+@*power hour stuff (not in use)*@
+    <div>
+        @*Power hour table*@
+        @*@if (Model.ThisWeek.LaborSchedule != null)
+            {
+                bool[] weekdayCheck = new bool[8];
+                bool powerCheck = false;
+
+                <table border="1" cellpadding="5" id="powerhours">
+                    <thead>
+                        <tr>
+                            @foreach (DataColumn col in Model.ThisWeek.PowerHourForecast.Columns)
+                        {
+                                <th>@col.Caption</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (DataRow row in Model.ThisWeek.PowerHourForecast.Rows)
+                        {
+                            <tr>
+
+                                @foreach (var cell in row.ItemArray)
+                                {
+                                    for (int j = 0; j < HourOfWorkDay.powerHours.Length; j++)
+                                    {
+                                        if (@cell.ToString() == HourOfWorkDay.powerHours[j].ToString())
+                                        {
+                                            powerCheck = true;
+                                            weekdayCheck[j] = true;
+                                        }
+
+                                    }
+
+                                    if (powerCheck == true)
+                                    {
+                                        <td id="cell" bgcolor="#00ff00">@cell.ToString()</td>
+                                        powerCheck = false;
+                                    }
+                                    else
+                                    {
+                                        <td id="cell">@cell.ToString()</td>
+                                    }
+                                }
+
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            }*@
+
+
+        @*@if (Model.ThisWeek.LaborSchedule != null)
+            {
+            <table border="1" cellpadding="5" id="powerhours">
+                <thead>
+
+                </thead>
+                <tbody>
+                    <tr>
+                        @for (int i = 0; i < 8; i++)
+                        {
+                            for (int j = 0; j < 15; j++)
+                            {
+                                DataRow row = Model.ThisWeek.PowerHourForecast.Rows[j];
+                                var cell = row.ItemArray;
+                                <td id="cell">@cell.ToString()</td>
+                            }
+                        }
+                    </tr>
+                </tbody>
+
+
+            </table>
+            }*@
+    </div>
+
+    </body>
+
+    @section scripts
+{
+        <script>
+            var table = document.getElementById("LaborSchedule");
+            if (table != null) {
+                for (var i = 1; i < table.rows.length; i++) {
+                    for (var j = 1; j < table.rows[i].cells.length; j++)
+                        table.rows[i].cells[j].onclick = function () {
+                            var col = $(this).prevAll().length;
+                            var row = $(this).parent('tr').prevAll().length;
+                            showPartial(row, col);
+                        };
+                }
+            }
+
+            function tableText(value, row, col) {
+                alert(value.innerHTML + row + col);
+            }
+
+            function openHour(tableCell) {
+
+            }
+
+            function showPartial(row, col) {
+                document.getElementById("partial").style.display = "block";
+            }
+        </script>
+
+        @*<script>
+                    var table = document.getElementById("powerhours");
+                    if (table != null) {
+                        for (var i = 1; i < table.rows.length; i++) {
+                            for (var j = 1; j < table.rows[i].cells.length; j++)
+                                table.rows[i].cells[j].onclick = function () {
+                                    tableText(this);
+                                };
+                        }
+                    }
+
+                    function tableText(tableCell) {
+                        alert(tableCell.innerHTML);
+                    }
+            </script>*@
+
+        @*<script>
+                    var table = document.getElementById("powerhours");
+                    if (table != null) {
+                        for (var i = 1; i < table.rows.length; i++) {
+                            for (var j = 1; j < table.rows[i].cells.length; j++) {
+                                //if cell value = powerhour, color cell green
+                                if (tableCell.innerHTML == HourOfWorkDay.powerHours[i - 1]) {
+                                    this.style.backgroundColor = '#66ff89';
+                                }
+                                //color the two cells beneath it green
+                            }
+                        }
+                    }
+
+                    function tableText(tableCell) {
+                        alert(tableCell.innerHTML);
+                    }
+            </script>*@
+
+        @*<script>
+                    var table = document.getElementById("weekhours");
+                    if (table != null) {
+                        for (var i = 1; i < table.rows.length; i++) {
+                            for (var j = 1; j < table.rows[i].cells.length; j++)
+                                table.rows[i].cells[j].onclick = function () {
+                                    if (this.style.backgroundColor = '#66ff89') {
+                                        this.style.backgroundColor = '#ff6666'
+                                    } else if (this.style.backgroundColor = '#ff6666') {
+                                        this.style.backgroundColor = '#66ff89'
+                                    }
+                                };
+                        }
+                    }
+
+                    function tableText(tableCell) {
+                        alert(tableCell.innerHTML);
+                    }
+            </script>*@
+
+
+        @*<script>
+                    function openModal() {
+                        document.getElementById('testbox').style.display = "block";
+                    }
+
+                    function closeModal() {
+                        document.getElementById('myModal').style.display = "none";
+                    }
+
+                    var slideIndex = 1;
+                    showSlides(slideIndex);
+
+                    function showSlides(n) {
+                        var i;
+                        var slides = document.getElementsByClassName("mySlides");
+                        var dots = document.getElementsByClassName("demo");
+                        var captionText = document.getElementById("caption");
+                        if (n > slides.length) { slideIndex = 1 }
+                        if (n < 1) { slideIndex = slides.length }
+                        for (i = 0; i < slides.length; i++) {
+                            slides[i].style.display = "none";
+                        }
+                        for (i = 0; i < dots.length; i++) {
+                            dots[i].className = dots[i].className.replace(" active", "");
+                        }
+                        slides[slideIndex - 1].style.display = "block";
+                        dots[slideIndex - 1].className += " active";
+                        captionText.innerHTML = dots[slideIndex - 1].alt;
+                    }
+            </script>*@
+
+
+    }

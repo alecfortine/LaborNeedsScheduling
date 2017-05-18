@@ -77,8 +77,8 @@ c:\users\forti\documents\visual studio 2015\Projects\LaborNeedsScheduling\bin\Mi
 c:\users\forti\documents\visual studio 2015\Projects\LaborNeedsScheduling\bin\Microsoft.Owin.Security.Google.xml
 c:\users\forti\documents\visual studio 2015\Projects\LaborNeedsScheduling\bin\Microsoft.Owin.Security.Twitter.xml
 c:\users\forti\documents\visual studio 2015\Projects\LaborNeedsScheduling\bin\Microsoft.Owin.Security.MicrosoftAccount.xml
-c:\users\forti\documents\visual studio 2015\Projects\LaborNeedsScheduling\obj\Debug\LaborNeedsScheduling.csprojResolveAssemblyReference.cache
 c:\users\forti\documents\visual studio 2015\Projects\LaborNeedsScheduling\obj\Debug\LaborNeedsScheduling.dll
 c:\users\forti\documents\visual studio 2015\Projects\LaborNeedsScheduling\obj\Debug\LaborNeedsScheduling.pdb
 c:\users\forti\documents\visual studio 2015\Projects\LaborNeedsScheduling\bin\LSAData.dll
 c:\users\forti\documents\visual studio 2015\Projects\LaborNeedsScheduling\bin\LSAData.pdb
+C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\obj\Debug\LaborNeedsScheduling.csprojResolveAssemblyReference.cache

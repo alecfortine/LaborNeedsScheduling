@@ -1,0 +1,347 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Diagnostics;
+@using System.Web.UI.HtmlControls;
+@using LaborNeedsScheduling.Models
+@model LaborScheduling
+
+
+@{
+    ViewBag.Title = "Grading";
+}
+
+<head>
+
+    @*lightbox*@
+    <style>
+        .black_overlay {
+            display: none;
+            position: fixed;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            z-index: 1001;
+            -moz-opacity: 0.8;
+            opacity: .80;
+            filter: alpha(opacity=80);
+        }
+
+        .white_content {
+            position: fixed;
+            top: 10%;
+            left: 25%;
+            z-index: 1050;
+            width: 80%;
+            height: 80%;
+            margin-left: -280px;
+            background-color: #ffffff;
+            -webkit-border-radius: 20px;
+            -moz-border-radius: 20px;
+            border-radius: 20px;
+            border: 2px solid #FFFFFF;
+            background-color: #FFFFFF;
+            -webkit-box-shadow: #000000 8px 8px 8px;
+            -moz-box-shadow: #000000 8px 8px 8px;
+            box-shadow: #000000 8px 8px 8px;
+            display: none;
+        }
+
+        .white-header {
+            padding: 9px 15px;
+            border-bottom: 1px solid #eee;
+            height: 30px;
+        }
+
+        .modal-header .close {
+            margin-top: 2px;
+        }
+
+        a.close {
+            padding: 0;
+            cursor: pointer;
+            border: 0;
+            -webkit-appearance: none;
+        }
+
+        .close {
+            float: right;
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 20px;
+        }
+
+        .white-body {
+            position: relative;
+            max-height: 850px;
+            padding: 15px;
+            overflow-y: auto;
+            display: block;
+        }
+    </style>
+
+    @*messages*@
+    <style>
+        .approved {
+            padding: 20px;
+            background-color: #b35dff;
+            color: black;
+        }
+
+        .denied {
+            padding: 20px;
+            background-color: #fe954a;
+            color: black;
+        }
+
+        .closebtn {
+            margin-left: 15px;
+            color: white;
+            font-weight: bold;
+            float: right;
+            font-size: 22px;
+            line-height: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            .closebtn:hover {
+                color: black;
+            }
+    </style>
+
+    <style>
+        div {
+        }
+
+        .inline {
+            display: inline-block;
+            margin-right: 15px;
+        }
+    </style>
+
+    @*table*@
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 1100px;
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+            table-layout: fixed;
+            word-break: break-all;
+            /*margin-left: auto;
+        margin-right: auto;*/
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000000;
+        }
+
+            td.highlight:hover {
+                background-color: white;
+            }
+
+            td:first-child {
+                font-weight: bold;
+                text-align: left;
+            }
+
+        .container {
+            /*position: fixed;*/
+            /*padding-left: 150px;*/
+            align-content: center;
+            margin: 0;
+        }
+
+        .left-element {
+            display: inline;
+            float: left;
+        }
+
+        .right-element {
+            display: inline;
+            float: right;
+            padding-right: 50px;
+        }
+
+        body {
+            padding-left: 200px;
+            padding-top: 70px;
+        }
+
+        .testing-left {
+            display: inline;
+            float: left;
+            padding: 5px;
+            border-style: solid;
+            border-width: 1px;
+            text-align: center;
+            font-size: 70%;
+        }
+
+        td:first-child {
+            background-color: white;
+        }
+    </style>
+
+    <style>
+        .true {
+            background: #51ff62;
+        }
+
+        .false {
+            background: #ff5555;
+        }
+    </style>
+
+    <style>
+        .wrapper {
+            border: 1px solid #aeaeae;
+            background-color: #eaeaea;
+            width: 1000px;
+            height: 500px;
+            position: relative;
+        }
+
+            .wrapper > div.one {
+                bottom: 0px;
+                width: 50px;
+                position: absolute;
+                background-color: #48aa3d;
+                margin: 1px;
+                display: inline-block;
+            }
+
+            .wrapper > div.two {
+                bottom: 0px;
+                width: 50px;
+                position: absolute;
+                background-color: #3949fb;
+                margin: 1px;
+                display: inline-block;
+            }
+    </style>
+
+</head>
+
+<body>
+
+    <br />
+    <br />
+
+    @*messages*@
+    <p><button onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Messages</button></p>
+    <div id="light" class="white_content">
+        <div class="white-header">
+            <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
+
+        </div>
+        <div class="white-body">
+            <div class="approved">
+                <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                Message from Employee 7
+            </div><br />
+
+            <div class="denied">
+                <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                Time off request from Employee 3
+            </div><br />
+
+            <div class="approved">
+                <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                Message from Employee 5
+            </div><br />
+        </div>
+    </div>
+    <div id="fade" class="black_overlay"></div>
+
+    <br />
+    <hr />
+    <br />
+
+    @*graph*@
+    <div class="wrapper">
+        <div class="one" style="left:0px;height:50px;"></div>
+        <div class="two" style="left:50px;height:100px;"></div>
+
+        <div class="one" style="left:150px;height:150px;"></div>
+        <div class="two" style="left:200px;height:140px;"></div>
+
+        <div class="one" style="left:300px;height:480px;"></div>
+        <div class="two" style="left:350px;height:420px;"></div>
+
+        <div class="one" style="left:450px;height:320px;"></div>
+        <div class="two" style="left:500px;height:350px;"></div>
+
+        <div class="one" style="left:600px;height:50px;"></div>
+        <div class="two" style="left:650px;height:90px;"></div>
+
+        <div class="one" style="left:750px;height:150px;"></div>
+        <div class="two" style="left:800px;height:120px;"></div>
+
+    </div>
+
+    <br />
+    <br />
+
+    <hr />
+
+    <br />
+
+    <h4>Grading</h4>
+
+    <br />
+
+    @using (Html.BeginForm("Grading", "Home", FormMethod.Post))
+    {
+        <label>Grade:</label><br />
+        <select id="dropdown">
+            <option disabled selected value> -- select -- </option>
+            <option>A</option>
+            <option>B</option>
+            <option>C</option>
+            <option>D</option>
+            <option>F</option>
+        </select>
+        <text>[hour selected]</text>
+        <br />
+
+        <br />
+
+        <label>Reason:</label><br />
+        <textarea></textarea><br />
+
+        <br />
+
+        <div class="inline">
+            <button type="submit">Submit</button><br>
+        </div>
+    }
+    <br />
+    <br />
+
+    <script>
+        var cells = document.querySelectorAll("td");
+
+        for (var i = 0; i < cells.length; i++) {
+            cells[i].addEventListener("click", function () {
+                this.className = this.className == "false" ? "true" : "false";
+            });
+        }
+    </script>
+
+</body>

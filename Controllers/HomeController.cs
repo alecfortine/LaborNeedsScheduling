@@ -12,7 +12,7 @@ namespace LaborNeedsScheduling.Controllers
     {
 
         [HttpGet]
-        public ActionResult ManagerTable()
+        public ActionResult LaborSchedule()
         {
 
             LaborScheduling lsViewModel = new LaborScheduling();
@@ -22,7 +22,7 @@ namespace LaborNeedsScheduling.Controllers
         }
 
         [HttpPost]
-        public ActionResult ManagerTable(LaborScheduling lsViewModel)
+        public ActionResult LaborSchedule(LaborScheduling lsViewModel)
         {
 
             LaborScheduling oldModel = (LaborScheduling)Session["lsViewModel"];
@@ -33,21 +33,81 @@ namespace LaborNeedsScheduling.Controllers
             lsViewModel.ThisWeek.FillDatatables();
 
             lsViewModel.ThisWeek.LaborSchedule = lsViewModel.ThisWeek.AllocatedHours;
+            lsViewModel.ThisWeek.HourSchedule = lsViewModel.ThisWeek.CurrentWeekHours;
+
 
             return View(lsViewModel);
         }
 
-
-        public ActionResult Employee()
+        [HttpGet]
+        public ActionResult EmployeeHome(string LocationCode, string EmployeeID)
         {
-            ViewBag.Message = "Your application description page.";
+            EmployeeModel model = new EmployeeModel(LocationCode, "001");
+
+            return View(model);
+        }
+        [HttpPost]
+        public ActionResult EmployeeHome(LaborScheduling EmployeeSchedule)
+        {
+            ViewBag.Message = "Employee page.";
+
+            return View(EmployeeSchedule);
+        }
+
+
+
+
+        [HttpGet]
+        public ActionResult EmployeeAvailability(string LocationCode)
+        {
+            AvailabilityViewModel avm = new AvailabilityViewModel(LocationCode);
+
+            Session["AvailabilityViewModel"] = avm;
+
+            return View(avm);
+        }
+        [HttpPost]
+        public ActionResult EmployeeAvailability(AvailabilityViewModel model)
+        {
+            ViewBag.Message = "Availability page.";
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public ActionResult EmployeeAvailabilityTable(string EmployeeID)
+        {
+            AvailabilityViewModel avm = (AvailabilityViewModel)Session["AvailabilityViewModel"];
+
+            return PartialView("AvailabilityTable", avm.EmpAvail[EmployeeID]);
+        }
+
+
+
+
+        public ActionResult ManagerConfiguration(LaborScheduling lsViewModel)
+        {
+            ViewBag.Message = "Configuration page.";
+
+            LaborScheduling oldModel = (LaborScheduling)Session["lsViewModel"];
+
+            lsViewModel.ThisWeek.FillDatatables();
+
+            lsViewModel.ThisWeek.LaborSchedule = lsViewModel.ThisWeek.TimeSelectionTable;
+
+            return View(lsViewModel);
+        }
+
+        public ActionResult Grading()
+        {
+            ViewBag.Message = "Grading page.";
 
             return View();
         }
 
         public ActionResult Contact()
         {
-            ViewBag.Message = "Your contact page.";
+            ViewBag.Message = "Contact page.";
 
             return View();
         }
