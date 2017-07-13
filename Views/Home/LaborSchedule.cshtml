@@ -9,9 +9,9 @@
 @using System.Text
 @using System.Diagnostics;
 @using System.Web.UI.HtmlControls;
+@using System.Data.Entity;
 @using LaborNeedsScheduling.Models
-
-@model LaborNeedsScheduling.Models.LaborScheduling
+@model LaborScheduling
 
 
 <head>
@@ -22,7 +22,7 @@
         ViewData["Title"] = "Home Page";
     }
 
-    @*table*@
+    @*tables*@
     <style>
         table.LaborSchedule {
             font-family: arial, sans-serif;
@@ -33,8 +33,9 @@
             padding: 8px;
             table-layout: fixed;
             word-break: break-all;
-            /*margin-left: auto;
-            margin-right: auto;*/
+            margin-left: auto;
+            margin-right: auto;
+            empty-cells: show;
         }
 
         td.LaborCell, th.LaborCell {
@@ -45,14 +46,92 @@
             border: 1px solid #000000;
         }
 
-            td.LaborCellhighlight:hover {
-                background-color: white;
-            }
+        table.EmployeeList {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+            table-layout: fixed;
+            word-break: break-all;
+            empty-cells: show;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-            td.LaborCell:first-child {
-                font-weight: bold;
-                text-align: left;
-            }
+        td.EmployeeCell {
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000000;
+            height: 20px;
+            background-color: #ffffff;
+            white-space: nowrap;
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+
+        td.EmployeeCellSelected {
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000000;
+            height: 20px;
+            background-color: #66ff89;
+            white-space: nowrap;
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+
+        td.LaborCellhighlight:hover {
+            background-color: white;
+        }
+
+        td.LaborCell:first-child {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        td.PowerCell, th.PowerCell {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000000;
+            background-color: #66ff89;
+        }
+
+        td.LowCell, th.LowCell {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000000;
+            background-color: #ff6161;
+        }
+
+        table.AssignmentView {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+            table-layout: fixed;
+            word-break: break-all;
+            empty-cells: show;
+            margin-left: auto;
+            margin-right: auto;
+            /*width: 1300px;*/
+        }
+
+        td.AssignmentCell, th.AssignmentCell {
+            border: 1px solid #dddddd;
+            padding: 3px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000000;
+            height: 50px;
+            width: 100px;
+            /*white-space: nowrap;*/
+        }
 
         .container {
             /*position: fixed;*/
@@ -77,7 +156,7 @@
             padding-top: 70px;
         }
 
-        .testing-left {
+        .left-align {
             display: inline;
             float: left;
             padding: 5px;
@@ -86,14 +165,14 @@
             text-align: center;
             font-size: 70%;
         }
-    </style>
 
-
-    <style>
-        .hourcell:not(:first-child) {
-            background-color: #66ff89;
+        div.EmployeeScheduler {
+            margin-left: auto;
+            margin-right: auto;
+            display: inline;
         }
     </style>
+
 
     @*lightbox*@
     <style>
@@ -170,13 +249,13 @@
 
 <body>
 
-
     <br>
     <br>
-
 
     @using (Html.BeginForm("LaborSchedule", "Home", FormMethod.Post))
     {
+        //using (Html.BeginForm("LaborSchedule", "Home", FormMethod.Post))
+        //{
         <div class="container">
             <div class="left-element">
 
@@ -187,9 +266,9 @@
                 </div>
 
                 <div class="left-element">
-                    @Html.TextBoxFor(m => m.ThisWeek.PayrollWeeklyHours)<br>
-                    @Html.TextBoxFor(m => m.ThisWeek.MinEmployees)<br>
-                    @Html.TextBoxFor(m => m.ThisWeek.MaxEmployees)<br>
+                    @Html.TextBoxFor(m => m.ThisWeek.PayrollWeeklyHours, new { style = "width:50px;" })<br>
+                    @Html.TextBoxFor(m => m.ThisWeek.MinEmployees, new { style = "width:50px;" })<br>
+                    @Html.TextBoxFor(m => m.ThisWeek.MaxEmployees, new { style = "width:50px;" })<br>
                 </div>
 
                 <br />
@@ -215,12 +294,15 @@
 
                                     @foreach (KeyValuePair<DateTime, bool> kvp in Model.ThisWeek.ExclusionDates.Skip(7 * i))
                                     {
-                                        <div class="testing-left">
+                                        <div class="left-align">
                                             <label>@kvp.Key.ToShortDateString() </label><br />
                                             @Html.CheckBoxFor(model => model.ThisWeek.ExclusionDates[kvp.Key])
                                             @*<input type="checkbox" name="@(" ExclusionDates[" + kvp.Key + "]" )"
                                                 value="@kvp.Value" />*@
                                             @Html.DisplayTextFor(model => model.ThisWeek.ExclusionDates[kvp.Key])
+                                            @*@Html.DisplayTextFor(model => model.ThisWeek.ExclusionDates[kvp.Value])*@
+
+
                                         </div>
                                         counter++;
                                         if (counter == 7)
@@ -234,47 +316,34 @@
                                 </div>
 
                             }
+                            <button type="submit">Update</button><br>
 
-
-                            @*<table border="1" cellpadding="5" id="weekhours" class="weekhours">
-                                    <thead>
-                                        <tr>
-                                            @foreach (DataColumn col in Model.ThisWeek.CurrentWeekHours.Columns)
-                                            {
-                                                <th>@col.Caption</th>
-                                            }
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (DataRow row in Model.ThisWeek.CurrentWeekHours.Rows)
-                                        {
-                                            <tr>
-                                                @foreach (var cell in row.ItemArray)
-                                                {
-                                                    <td id="hourcell" class="hourcell" onclick="colorChange(this);">@cell.ToString()</td>
-                                                }
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>*@
                         </div>
                     </div>
                     <div id="fade" class="black_overlay"></div>
                 </div>
-            </div>
 
+                <br />
+
+                <div class="left-element">
+
+                    Week Hours: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[0], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[0], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
+
+                </div>
+            </div>
 
 
             <div class="right-element">
                 <label>Weeks: </label><br />
-                @Html.TextBoxFor(m => Model.ThisWeek.NumberHistoricalWeeks)<br>
+                @Html.TextBoxFor(m => Model.ThisWeek.NumberHistoricalWeeks, new { style = "width:25px;text-align:center;" })<br>
                 <br />
                 <label>Week Weighting: </label><br />
                 @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
                 {
                     <label>@Html.Raw((i + 1).ToString()): </label>
-                    @Html.TextBoxFor(m => Model.ThisWeek.weekWeighting[i])<br>
-
+                    @Html.TextBoxFor(m => Model.ThisWeek.weekWeighting[i], new { style = "width:25px;text-align:center;" })
+                    <text>%</text>
+                    <br>
                 }
 
                 <br />
@@ -285,243 +354,326 @@
             </div>
 
         </div>
-    }
+        //}
 
-    <br />
+        <br />
+        <br />
+        <br />
+        <hr />
+        <br />
+        <br />
 
-
-
-    <br />
-    <br />
-    <hr />
-
-    @*where the table is printed*@
-    @if (Model.ThisWeek.LaborSchedule != null)
+        @*where the table is printed*@
+    if (Model.ThisWeek.LaborSchedule != null)
     {
+
         <table class="LaborSchedule" id="LaborSchedule" border="1" cellpadding="5">
+
             <thead>
                 <tr>
-                    @foreach (DataColumn col in Model.ThisWeek.LaborSchedule.Columns)
+                    @foreach (DataColumn c in Model.ThisWeek.LaborSchedule.Columns)
                     {
-                        <th class="LaborCell">@col.Caption</th>
+                        <th class="LaborCell">@c.Caption</th>
                     }
                 </tr>
             </thead>
-            <tbody>
-                @foreach (DataRow row in Model.ThisWeek.LaborSchedule.Rows)
-                {
-                    <tr>
-                        @foreach (var cell in row.ItemArray)
-                        {
-                            <td class="LaborCell" id="cell">@cell.ToString()</td>
-                        }
-                    </tr>
-                }
-            </tbody>
-        </table>
-
-        <br />
-
-    }
-
-    <br />
-   
-
-@*power hour stuff (not in use)*@
-    <div>
-        @*Power hour table*@
-        @*@if (Model.ThisWeek.LaborSchedule != null)
+            @if (Model.ThisWeek.LaborSchedule.Columns.Count > 0)
             {
-                bool[] weekdayCheck = new bool[8];
-                bool powerCheck = false;
+                <tbody>
 
-                <table border="1" cellpadding="5" id="powerhours">
-                    <thead>
+                    @{int count = 0;}
+
+                    @for (int j = 0; j <= Model.ThisWeek.LaborSchedule.Rows.Count; j++)
+                    {
                         <tr>
-                            @foreach (DataColumn col in Model.ThisWeek.PowerHourForecast.Columns)
-                        {
-                                <th>@col.Caption</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                        @foreach (DataRow row in Model.ThisWeek.PowerHourForecast.Rows)
-                        {
-                            <tr>
-
-                                @foreach (var cell in row.ItemArray)
+                            @for (int h = 0; h < 8; h++)
+                            {
+                                if (j < Model.ThisWeek.LaborSchedule.Rows.Count)
                                 {
-                                    for (int j = 0; j < HourOfWorkDay.powerHours.Length; j++)
+                                    if (Model.ThisWeek.PowerHourCells[count] == true)
                                     {
-                                        if (@cell.ToString() == HourOfWorkDay.powerHours[j].ToString())
-                                        {
-                                            powerCheck = true;
-                                            weekdayCheck[j] = true;
-                                        }
-
+                                        <td class="PowerCell" id="cell">@Model.ThisWeek.LaborSchedule.Rows[j][h]</td>
+                                        count++;
                                     }
-
-                                    if (powerCheck == true)
+                                    else if (Model.ThisWeek.LowHourCells[count] == true)
                                     {
-                                        <td id="cell" bgcolor="#00ff00">@cell.ToString()</td>
-                                        powerCheck = false;
+                                        <td class="LowCell" id="cell">@Model.ThisWeek.LaborSchedule.Rows[j][h]</td>
+                                        count++;
                                     }
                                     else
                                     {
-                                        <td id="cell">@cell.ToString()</td>
+                                        <td class="LaborCell" id="cell">@Model.ThisWeek.LaborSchedule.Rows[j][h]</td>
+                                        count++;
                                     }
                                 }
+                                else if (h == 0 && j == Model.ThisWeek.LaborSchedule.Rows.Count)
+                                {
+                                    <td></td>
+                                }
+                                else if (h > 0 && j == Model.ThisWeek.LaborSchedule.Rows.Count)
+                                {
+                                    <td class="ButtonCell" id="cell"><button onclick="showAssignmentPartial(col)" id="LaborSchedule" class="LaborSchedule" type="button" style="width:100%; height:100%; background-color:#ff6a00">⚇</button></td>
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+                        }
+        </table>
 
+        <br />
+        <br />
+        <br />
+
+        <div class="white-body">
+            <table class="AssignmentView" id="AssignmentView" border="1" cellpadding="5">
+                <thead>
+                    <tr>
+                        @foreach (DataColumn c in Model.ThisWeek.AssignmentView.Columns)
+                        {
+                            <th class="AssignmentCell">@c.Caption</th>
+                        }
+                    </tr>
+                </thead>
+                @if (Model.ThisWeek.AssignmentView.Columns.Count > 0)
+                {
+                    <tbody>
+                        @for (int n = 0; n < Model.ThisWeek.AssignmentView.Rows.Count; n++)
+                        {
+                            <tr>
+                                @for (int h = 0; h < Model.ThisWeek.AssignmentView.Columns.Count; h++)
+                                {
+                                    <td class="AssignmentCell" id="cell">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
+                                }
                             </tr>
                         }
                     </tbody>
-
-                </table>
-            }*@
-
-
-        @*@if (Model.ThisWeek.LaborSchedule != null)
-            {
-            <table border="1" cellpadding="5" id="powerhours">
-                <thead>
-
-                </thead>
-                <tbody>
-                    <tr>
-                        @for (int i = 0; i < 8; i++)
-                        {
-                            for (int j = 0; j < 15; j++)
-                            {
-                                DataRow row = Model.ThisWeek.PowerHourForecast.Rows[j];
-                                var cell = row.ItemArray;
-                                <td id="cell">@cell.ToString()</td>
-                            }
-                        }
-                    </tr>
-                </tbody>
-
-
+                }
             </table>
-            }*@
-    </div>
+        </div>
 
-    </body>
+        <br />
 
-    @section scripts
+        <div class="EmployeeScheduler" align="center" style="display: inline">
+            @*@using (Html.BeginForm("LaborSchedule", "Home", FormMethod.Post))
+                {*@
+            <div>
+                <p style="display:inline-block"><b>Schedule</b></p> <p style="display:inline-block" id="employeeName"><b>[Employee Name]</b></p>
+
+                <br />
+
+                <div class="EmployeeScheduler">
+                    Start:
+                    @*@{int empid = 0;}
+                        @for (int i = 0; i < LaborScheduling.EmployeeList.Count; i++)
+                        {
+                            if (Model.ThisWeek.selectedEmployee == LaborScheduling.EmployeeList[i].id)
+                            {
+                                Model.ThisWeek.selectedEmployeeId = i;
+                            }
+                        }*@
+
+                    @Html.DropDownListFor(m => m.ThisWeek.startHour, new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key"))
+                </div>
+
+                <div class="EmployeeScheduler" style="padding-left: 20px">
+                    End:
+                    @Html.DropDownListFor(m => m.ThisWeek.endHour, new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key"))
+                    @*@Html.DropDownListFor(m => LaborScheduling.EmployeeList[empid].startEndTimes[Model.ThisWeek.selectedWeekday], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key"))*@
+                </div>
+
+                <div class="EmployeeScheduler" style="padding-left: 20px">
+                    <button type="submit" @*onclick="updateEmployeeHours()"*@>Submit</button><br>
+                </div>
+            </div>
+
+            @*}*@
+        </div>
+
+
+
+        <div class="white-body">
+            <div style="text-align:center"><label>Employee List</label></div>
+            <table class="EmployeeList" id="LaborSchedule" border="1" cellpadding="5">
+                @if (Model.ThisWeek.AssignmentView.Columns.Count > 0)
+                {
+                    <thead>
+                        <tr>
+                            <th class="LaborCell">Id</th>
+                            <th class="LaborCell">Name</th>
+                            <th class="LaborCell">Role</th>
+                            <th class="LaborCell">Rank</th>
+                            <th class="LaborCell">Hours</th>
+                            <th class="LaborCell">Remaining</th>
+                            <th class="LaborCell"></th>
+                        </tr>
+                    </thead>
+
+                    string[] employeeIds = new string[LaborScheduling.EmployeeList.Count];
+
+                    for (int i = 0; i < LaborScheduling.EmployeeList.Count; i++)
+                    {
+                        employeeIds[i] = LaborScheduling.EmployeeList[i].id;
+                    }
+
+                    <tbody>
+                        @foreach (Employees emp in LaborScheduling.EmployeeList)
+                        {
+                            <tr>
+                                <td class="EmployeeCell" onclick="getEmployee(@emp.id)">@emp.id</td>
+                                <td class="EmployeeCell" onclick="getEmployee(@emp.id)">@emp.name</td>
+                                <td class="EmployeeCell" onclick="getEmployee(@emp.id)">@emp.role</td>
+                                <td class="EmployeeCell" onclick="getEmployee(@emp.id)">@emp.rank</td>
+                                <td class="EmployeeCell" onclick="getEmployee(@emp.id)">@emp.hours</td>
+                                <td class="EmployeeCell" onclick="getEmployee(@emp.id)">[hours left]</td>
+                                <td class="EmployeeCell" onclick="getEmployee(@emp.id)" style="color:#00a1ff">[check schedule]</td>
+                            </tr>
+                        }
+                    </tbody>
+                }
+            </table>
+
+        </div>
+
+
+                        }
+
+
+                        <div id="AssignmentTable">
+                        </div>
+
+                        @Html.Hidden("selectedEmployeeId", Model.ThisWeek.selectedEmployeeId)
+                        @Html.HiddenFor(m => m.ThisWeek.selectedEmployeeId, new { id = "hiddenState" })
+
+                            @*@Html.(m => m.ThisWeek.selectedEmployeeId);*@
+                        }
+
+    <br />
+    <br />
+
+</body>
+
+
+@section scripts
 {
-        <script>
-            var table = document.getElementById("LaborSchedule");
-            if (table != null) {
-                for (var i = 1; i < table.rows.length; i++) {
-                    for (var j = 1; j < table.rows[i].cells.length; j++)
-                        table.rows[i].cells[j].onclick = function () {
-                            var col = $(this).prevAll().length;
-                            var row = $(this).parent('tr').prevAll().length;
-                            showPartial(row, col);
-                        };
+    <script>
+        //get the name/id of the selected employee and highlight their row on the selection table
+        function getEmployee(emp) {
+
+            var employee = emp;
+            var EmployeeList = @Html.Raw(Json.Encode(LaborScheduling.EmployeeList));
+            var CurrentEmployee = @Html.Raw(Json.Encode(Model.ThisWeek.selectedEmployee));
+            var CurrentEmployeeId = @Html.Raw(Json.Encode(Model.ThisWeek.selectedEmployeeId));
+
+            // set the current employee model variable
+            for(i = 0; i < EmployeeList.length; i++){
+                if (employee == EmployeeList[i].id){
+                    selectedEmployeeName = EmployeeList[i].name;
+                    selectedEmployeeId = EmployeeList[i].id;
+
+                    //alert(selectedEmployeeId);
+                    document.getElementById("employeeName").innerHTML = selectedEmployeeName;
+                    document.getElementById("hiddenState").value = selectedEmployeeId;
+                    //alert(document.getElementById("hiddenState").value);
+
                 }
             }
 
-            function tableText(value, row, col) {
-                alert(value.innerHTML + row + col);
+            // highlight selected employee row
+            var employeeCells = document.querySelectorAll("td.EmployeeCell");
+            var selectedEmployeeCells = document.querySelectorAll("td.EmployeeCellSelected");
+
+            for(i = 0; i < selectedEmployeeCells.length; i++){
+                for (i = 0; i < selectedEmployeeCells.length; i++){
+                    selectedEmployeeCells[i].classList.remove('EmployeeCellSelected');
+                    selectedEmployeeCells[i].classList.add('EmployeeCell');
+                }
             }
 
-            function openHour(tableCell) {
+            // unhighlight all other cells
+            for(i = 0; i < employeeCells.length; i++){
+                if (employeeCells[i].innerHTML == employee){
+                    for(n = 0; n < 7; n++){
 
+                        employeeCells[i + n].classList.remove('EmployeeCell');
+                        employeeCells[i + n].classList.add('EmployeeCellSelected');
+
+                    }
+                }
             }
 
-            function showPartial(row, col) {
-                document.getElementById("partial").style.display = "block";
+
+        }
+
+    </script>
+
+    <script>
+        function updateEmployeeHours(emp){
+            var EmployeeId = @Html.Raw(Json.Encode(Model.ThisWeek.selectedEmployeeId));
+            //alert(emp);
+            @*var hour1 = @Html.Raw(Json.Encode(Model.ThisWeek.startHour));*@
+
+            var employee = emp;
+            var EmployeeList = @Html.Raw(Json.Encode(LaborScheduling.EmployeeList));
+            var CurrentEmployee = @Html.Raw(Json.Encode(Model.ThisWeek.selectedEmployee));
+
+            for(i = 0; i < EmployeeList.length; i++){
+                if (employee == EmployeeList[i].id){
+                    EmployeeList[i].startEndHours = hour1;
+                    //alert(hour1);
+                }
             }
-        </script>
+        }
+    </script>
 
-        @*<script>
-                    var table = document.getElementById("powerhours");
-                    if (table != null) {
-                        for (var i = 1; i < table.rows.length; i++) {
-                            for (var j = 1; j < table.rows[i].cells.length; j++)
-                                table.rows[i].cells[j].onclick = function () {
-                                    tableText(this);
-                                };
-                        }
-                    }
+    <script>
+        var table = document.getElementById("LaborSchedule");
+        if (table != null) {
+            for (var i = 1; i < table.rows.length; i++) {
+                for (var j = 1; j < table.rows[i].cells.length; j++)
+                    table.rows[i].cells[j].onclick = function () {
+                        var col = $(this).prevAll().length;
+                        var row = $(this).parent('tr').prevAll().length;
+                        showPartial(row, col);
+                    };
+            }
+        }
 
-                    function tableText(tableCell) {
-                        alert(tableCell.innerHTML);
-                    }
-            </script>*@
+        function tableText(value, row, col) {
+            alert(value.innerHTML + row + col);
+        }
 
-        @*<script>
-                    var table = document.getElementById("powerhours");
-                    if (table != null) {
-                        for (var i = 1; i < table.rows.length; i++) {
-                            for (var j = 1; j < table.rows[i].cells.length; j++) {
-                                //if cell value = powerhour, color cell green
-                                if (tableCell.innerHTML == HourOfWorkDay.powerHours[i - 1]) {
-                                    this.style.backgroundColor = '#66ff89';
-                                }
-                                //color the two cells beneath it green
-                            }
-                        }
-                    }
+        function openHour(tableCell) {
 
-                    function tableText(tableCell) {
-                        alert(tableCell.innerHTML);
-                    }
-            </script>*@
+        }
 
-        @*<script>
-                    var table = document.getElementById("weekhours");
-                    if (table != null) {
-                        for (var i = 1; i < table.rows.length; i++) {
-                            for (var j = 1; j < table.rows[i].cells.length; j++)
-                                table.rows[i].cells[j].onclick = function () {
-                                    if (this.style.backgroundColor = '#66ff89') {
-                                        this.style.backgroundColor = '#ff6666'
-                                    } else if (this.style.backgroundColor = '#ff6666') {
-                                        this.style.backgroundColor = '#66ff89'
-                                    }
-                                };
-                        }
-                    }
+        function showPartial(row, col) {
+            document.getElementById("partial").style.display = "block";
+        }
+    </script>
 
-                    function tableText(tableCell) {
-                        alert(tableCell.innerHTML);
-                    }
-            </script>*@
+    <script>
+        function showPartial(column) {
+            document.getElementById("partial").style.display = "block";
+        }
+    </script>
 
+    <script>
+        $('#LaborSchedule').onclick(function () {
 
-        @*<script>
-                    function openModal() {
-                        document.getElementById('testbox').style.display = "block";
-                    }
+            /* Get the selected value of dropdownlist */
+            var selectedColumn = 1;
 
-                    function closeModal() {
-                        document.getElementById('myModal').style.display = "none";
-                    }
+            /* Request the partial view with .get request. */
+            $.get('/Home/LaborSchedule/?AssignColumn=' + selectedColumn, function (data) {
 
-                    var slideIndex = 1;
-                    showSlides(slideIndex);
+                /* data is the pure html returned from action method, load it to your page */
+                $('#LaborSchedule').html(data);
+                /* little fade in effect */
+                $('#LaborSchedule').fadeIn('fast');
+            });
 
-                    function showSlides(n) {
-                        var i;
-                        var slides = document.getElementsByClassName("mySlides");
-                        var dots = document.getElementsByClassName("demo");
-                        var captionText = document.getElementById("caption");
-                        if (n > slides.length) { slideIndex = 1 }
-                        if (n < 1) { slideIndex = slides.length }
-                        for (i = 0; i < slides.length; i++) {
-                            slides[i].style.display = "none";
-                        }
-                        for (i = 0; i < dots.length; i++) {
-                            dots[i].className = dots[i].className.replace(" active", "");
-                        }
-                        slides[slideIndex - 1].style.display = "block";
-                        dots[slideIndex - 1].className += " active";
-                        captionText.innerHTML = dots[slideIndex - 1].alt;
-                    }
-            </script>*@
+        });
+    </script>
 
-
-    }
+}

@@ -221,7 +221,7 @@
                 bottom: 0px;
                 width: 50px;
                 position: absolute;
-                background-color: #48aa3d;
+                background-color: #72e066;
                 margin: 1px;
                 display: inline-block;
             }
@@ -230,7 +230,7 @@
                 bottom: 0px;
                 width: 50px;
                 position: absolute;
-                background-color: #3949fb;
+                background-color: #7480ff;
                 margin: 1px;
                 display: inline-block;
             }
@@ -244,13 +244,14 @@
     <br />
 
     @*messages*@
-    <p><button onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Messages</button></p>
+    @*<p><button onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Messages</button></p>
     <div id="light" class="white_content">
         <div class="white-header">
             <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
 
-        </div>
-        <div class="white-body">
+        </div>*@
+
+        @*<div class="white-body">*@
             <div class="approved">
                 <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
                 Message from Employee 7
@@ -265,9 +266,9 @@
                 <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
                 Message from Employee 5
             </div><br />
-        </div>
-    </div>
-    <div id="fade" class="black_overlay"></div>
+        @*</div>*@
+    @*</div>*@
+    @*<div id="fade" class="black_overlay"></div>*@
 
     <br />
     <hr />

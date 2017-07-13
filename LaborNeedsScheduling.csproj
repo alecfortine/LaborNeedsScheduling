@@ -253,7 +253,6 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\EmployeeHome.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\LaborSchedule.cshtml" />
     <Content Include="Views\Account\_ExternalLoginsListPartial.cshtml" />
     <Content Include="Views\Account\ConfirmEmail.cshtml" />
@@ -279,6 +278,7 @@
     <Content Include="Views\Home\ManagerConfiguration.cshtml" />
     <Content Include="Views\Home\Grading.cshtml" />
     <Content Include="Views\Home\EmployeeAvailabilityTable.cshtml" />
+    <Content Include="Views\Home\LaborScheduleAssignmentTable.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

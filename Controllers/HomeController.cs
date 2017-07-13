@@ -14,35 +14,43 @@ namespace LaborNeedsScheduling.Controllers
         [HttpGet]
         public ActionResult LaborSchedule()
         {
-
             LaborScheduling lsViewModel = new LaborScheduling();
             Session["lsViewModel"] = lsViewModel;
 
             return View(lsViewModel);
         }
-
         [HttpPost]
         public ActionResult LaborSchedule(LaborScheduling lsViewModel)
         {
-
             LaborScheduling oldModel = (LaborScheduling)Session["lsViewModel"];
 
             lsViewModel.ThisWeek.ExclusionDates = oldModel.ThisWeek.ExclusionDates;
-            lsViewModel.ThisWeek.WeeksAgo = oldModel.ThisWeek.WeeksAgo;
+            //lsViewModel.ThisWeek.WeeksAgo = oldModel.ThisWeek.WeeksAgo;
 
             lsViewModel.ThisWeek.FillDatatables();
 
-            lsViewModel.ThisWeek.LaborSchedule = lsViewModel.ThisWeek.AllocatedHours;
+            lsViewModel.ThisWeek.LaborSchedule = lsViewModel.ThisWeek.AllocatedHoursDisplay;
             lsViewModel.ThisWeek.HourSchedule = lsViewModel.ThisWeek.CurrentWeekHours;
-
 
             return View(lsViewModel);
         }
 
         [HttpGet]
+        public ActionResult LaborScheduleAssignmentTable(int selectedColumn)
+        {
+            LaborScheduling avm = (LaborScheduling)Session["lsViewModel"];
+
+            return PartialView("LaborScheduleAssignmentTable", avm.AssignmentTable.Rows[selectedColumn]);
+        }
+
+
+
+        [HttpGet]
         public ActionResult EmployeeHome(string LocationCode, string EmployeeID)
         {
-            EmployeeModel model = new EmployeeModel(LocationCode, "001");
+            EmployeeModel model = new EmployeeModel(LocationCode, "3213");
+
+            EmployeeTimeOffRequest TimeOffRequest = new EmployeeTimeOffRequest();
 
             return View(model);
         }
@@ -53,7 +61,6 @@ namespace LaborNeedsScheduling.Controllers
 
             return View(EmployeeSchedule);
         }
-
 
 
 
@@ -74,22 +81,32 @@ namespace LaborNeedsScheduling.Controllers
             return View(model);
         }
 
+
+
         [HttpGet]
         public ActionResult EmployeeAvailabilityTable(string EmployeeID)
         {
             AvailabilityViewModel avm = (AvailabilityViewModel)Session["AvailabilityViewModel"];
 
-            return PartialView("AvailabilityTable", avm.EmpAvail[EmployeeID]);
+            return PartialView("EmployeeAvailabilityTable", avm.EmpAvail[EmployeeID]);
         }
 
 
 
+        [HttpGet]
+        public ActionResult ManagerConfiguration()
+        {
+            LaborScheduling lsViewModel = new LaborScheduling();
+            //Session["lsViewModel"] = lsViewModel;
 
+            return View(lsViewModel);
+        }
+        [HttpPost]
         public ActionResult ManagerConfiguration(LaborScheduling lsViewModel)
         {
             ViewBag.Message = "Configuration page.";
 
-            LaborScheduling oldModel = (LaborScheduling)Session["lsViewModel"];
+            //LaborScheduling oldModel = (LaborScheduling)Session["lsViewModel"];
 
             lsViewModel.ThisWeek.FillDatatables();
 
@@ -98,6 +115,8 @@ namespace LaborNeedsScheduling.Controllers
             return View(lsViewModel);
         }
 
+
+
         public ActionResult Grading()
         {
             ViewBag.Message = "Grading page.";
@@ -105,12 +124,12 @@ namespace LaborNeedsScheduling.Controllers
             return View();
         }
 
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Contact page.";
+        //public ActionResult Contact()
+        //{
+        //    ViewBag.Message = "Contact page.";
 
-            return View();
-        }
+        //    return View();
+        //}
     }
 }
 

@@ -92,14 +92,14 @@
     <style>
         .approved {
             padding: 20px;
-            background-color: #51ff62;
-            color: white;
+            background-color: #8fff9a;
+            color: black;
         }
 
         .denied {
             padding: 20px;
-            background-color: #ff5555;
-            color: white;
+            background-color: #ff6868;
+            color: black;
         }
 
         .closebtn {
@@ -160,6 +160,10 @@
                 text-align: left;
             }
 
+            td.hourCell {
+                font-size: 11px;
+            }
+
         .container {
             /*position: fixed;*/
             /*padding-left: 150px;*/
@@ -198,15 +202,15 @@
         }
     </style>
 
-    <style>
-        .true {
-            background: #51ff62;
-        }
+    @*<style>
+            .true {
+                background: #51ff62;
+            }
 
-        .false {
-            background: #ff5555;
-        }
-    </style>
+            .false {
+                background: #ff5555;
+            }
+        </style>*@
 </head>
 
 <body>
@@ -214,40 +218,37 @@
     <br />
     <br />
 
-    <p><button onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Messages</button></p>
+    @*<p><button onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Messages</button></p>*@
 
-    <div id="light" class="white_content">
-        <div class="white-header">
+    @*<div id="light" class="white_content">*@
+    @*<div class="white-header">
             <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
+        </div>*@
 
-        </div>
-
-        <div class="white-body">
-            @foreach (EmployeeNotification e in Model.EmployeeNotifications)
+    <div class="white-body">
+        @foreach (EmployeeNotification e in Model.EmployeeNotifications)
+        {
+            if (e.accepted == true)
             {
-                if (e.accepted == true)
-                {
-                    <div class="approved">
-                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-                        @e.message
-                    </div>
-                }
-                else if (e.accepted == false)
-                {
-                    <div class="denied">
-                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-                        @e.message
-                    </div>
-                }
+                <div class="approved">
+                    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                    @e.message
+                </div>
             }
-        </div>
+            else if (e.accepted == false)
+            {
+                <div class="denied">
+                    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                    @e.message
+                </div>
+            }
+        }
     </div>
+    @*</div>*@
     <div id="fade" class="black_overlay"></div>
 
     <br />
-
     <hr />
-
     <br />
 
     @*display lightbox for employee schedule table*@
@@ -256,19 +257,50 @@
         <table border="1" cellpadding="5" id="weekhours" class="weekhours">
             <thead>
                 <tr>
-                    @foreach (DataColumn col in EmployeeModel.EmpSchedule.Columns)
+                    @foreach (DataColumn col in EmployeeModel.EmployeeSchedule.Columns)
                     {
-                        <th>@col.Caption</th>
+                        <th id="scheduleCell" class="scheduleCell">@col.Caption</th>
                     }
                 </tr>
             </thead>
             <tbody>
-                @foreach (DataRow row in EmployeeModel.EmpSchedule.Rows)
+
+                @for (int n = 0; n < EmployeeModel.EmployeeSchedule.Rows.Count; n++)
                 {
                     <tr>
-                        @foreach (var cell in row.ItemArray)
+                        @for (int h = 0; h < EmployeeModel.EmployeeSchedule.Columns.Count; h++)
                         {
-                            <td class="true">@cell.ToString()</td>
+
+                            if (EmployeeModel.EmployeeSchedule.Rows[n][h].ToString() == "True")
+                            {
+                                <td id="scheduleCell" class="scheduleCell">♦</td>
+                            }
+                            else if (EmployeeModel.EmployeeSchedule.Rows[n][h].ToString() == "False")
+                            {
+                                <td id="scheduleCell" class="scheduleCell"></td>
+                            }
+                            else
+                            {
+
+                                string[] ScheduleHourSlots = { "6AM-7AM", "7AM-8AM","8AM-9AM","9AM-10AM","10AM-11AM","11AM-12PM","12PM-1PM", "1PM-2PM", "2PM-3PM",
+                                                           "3PM-4PM","4PM-5PM", "5PM-6PM", "6PM-7PM", "7PM-8PM", "8PM-9PM", "9PM-10PM", "10PM-11PM", "11PM-12AM", "12AM-1AM"};
+
+                                string[] replaceRows = {"6:00AM", "7:00AM","8:00AM","9:00AM","10:00AM","11:00AM","12:00PM", "1:00PM", "2:00PM", "3:00PM",
+                                                    "4:00PM", "5:00PM", "6:00PM", "7:00PM", "8:00PM", "9:00PM", "10:00PM", "11:00PM", "12:00AM", "1:00AM"};
+
+                                for (int i = 0; i < ScheduleHourSlots.Length; i++)
+                                {
+                                    if (EmployeeModel.EmployeeSchedule.Rows[n][h].ToString() == ScheduleHourSlots[i])
+                                    {
+                                        <td id="hourCell" class="hourCell">
+                                            @replaceRows[i]
+                                            -
+                                            <br />
+                                            @replaceRows[i + 1]
+                                        </td>
+                                    }
+                                }
+                            }
                         }
                     </tr>
                 }
@@ -300,32 +332,35 @@
             </select>
         </div>
 
-        @*<div class="inline">
+        <div class="inline">
             <label>Start: </label>
-            @Html.TextBoxFor(m => EmployeeTimeOffRequest.StartHourID)
+            @*@Html.TextBoxFor(m => m.ListOfEmployees.)*@
+            <input type="text">
         </div>
 
         <div class="inline">
             <label>End: </label>
-            @Html.TextBoxFor(m => EmployeeTimeOffRequest.EndHourID)
+            @*@Html.TextBoxFor(m => EmployeeTimeOffRequest.EndHourID)*@
+            @*@Html.DropDownListFor(m => EmployeeTimeOffRequest.EndHourID, new SelectList(EmployeeModel.ScheduleHours))*@
         </div>
 
         <div class="inline">
-            @Html.CheckBoxFor(m => EmployeeTimeOffRequest.IsAllDay)
+            @*@Html.CheckBoxFor(m => EmployeeTimeOffRequest.IsAllDay)*@
+            <input type="checkbox">
             <label>All day </label>
-        </div>*@
+        </div>
 
-            <div class="inline">
-                <label></label>
-            </div>
+        <div class="inline">
+            <label></label>
+        </div>
 
-            <div class="inline">
-                <label></label>
-            </div>
+        <div class="inline">
+            <label></label>
+        </div>
 
-            <div class="inline">
-                <label></label>
-            </div>
+        <div class="inline">
+            <label></label>
+        </div>
 
         //if (Model.ThisWeek.AllDay == true)
         //{
@@ -349,5 +384,46 @@
                 });
             }
         </script>*@
+
+    <script>
+        var cells = document.querySelectorAll("td");
+
+        for (var i = 0; i < cells.length; i++) {
+
+            $('.scheduleCell:contains("♦")').css('background-color', '#8fff9a');
+            $('.scheduleCell:contains("False")').css('background-color', '#ff5555');
+
+
+            cells[i].addEventListener("click", function () {
+                //this.className = this.className == "NotAvailable" ? "Available" : "NotAvailable";
+
+                $(this.className).toggleClass('change_me Available');
+            });
+        }
+    </script>
+
+    <script>
+        var str = document.getElementById("scheduleCell").innerHTML;
+        var res = str.replace("#", "Environment.NewLine");
+        document.getElementById("scheduleCell").innerHTML = res;
+    </script>
+
+    <script>
+        $(function change_cell_content() {
+            $("td").on("click", function () {
+
+                var cell_id_ref = $(this).attr('cellID');
+                var $table = $(this).closest('table');
+                var newValue;
+
+                var currentValue = $(this).html();
+
+                var changeValue = prompt("Enter a new value. (Current " + currentValue + ")");
+                if (changeValue !== null) {
+                    $table.find('[cellID="' + cell_id_ref + '"]').text(changeValue);
+                }
+            });
+        });
+    </script>
 
 </body>

@@ -14,10 +14,14 @@ namespace LaborNeedsScheduling.Models
 
         public List<EmployeeNotification> EmployeeNotifications { get; set; }
 
-        public static DataTable EmpSchedule { get; set; }
+        public static DataTable EmployeeSchedule { get; set; }
 
         public List<JakoEmployee> ListOfEmployees { get; set; }
 
+        public List<EmployeeTimeOffRequest> Requests { get; set; }
+
+        public static string[] ScheduleHours = { "9AM","10AM","11AM","12PM", "1PM", "2PM", "3PM",
+                                          "4PM", "5PM", "6PM", "7PM", "8PM", "9PM", "10PM"};
 
         //public static string StartHourID { get; set; }
         //public static string EndHourID { get; set; }
@@ -27,27 +31,19 @@ namespace LaborNeedsScheduling.Models
 
         public EmployeeModel(string LocationCode, string EmployeeID)
         {
-            //WorkWeek w = new WorkWeek();
-            //w.FillDatatables();
-
-            //notifications = new List<EmployeeNotification>();
-
             ListOfEmployees = FakeAPI.GetEmpsForStore(LocationCode);
 
             EmployeeNotifications = FakeAPI.CreateResponses(EmployeeID);
 
-            //foreach (EmployeeNotification e in EmployeeNotifications)
-            //{
-            //    EmployeeNotifications.Add(e);
-            //}
+            EmployeeSchedule = FakeAPI.GetEmployeeSchedule(EmployeeID);
 
-            foreach (JakoEmployee j in ListOfEmployees)
-            {
-                if (j.id == EmployeeID)
-                {
-                    EmpSchedule = j.AvailabilityTable;
-                }
-            }
+            //foreach (JakoEmployee j in ListOfEmployees)
+            //{
+            //    if (j.id == EmployeeID)
+            //    {
+            //        EmployeeSchedule = j.AvailabilityTable;
+            //    }
+            //}
         }
     }
 
@@ -58,7 +54,6 @@ namespace LaborNeedsScheduling.Models
         public static List<string> Hours { get; set; }
         public static string StartHourID { get; set; }
         public static string EndHourID { get; set; }
-
     }
 
     public class EmployeeNotification
@@ -69,15 +64,22 @@ namespace LaborNeedsScheduling.Models
         public bool accepted { get; set; }
     }
 
-    //public class EmployeeNotification
-    //{
-    //    List<EmployeeTimeOffRequest> Response { get; set; }
-    //}
+    public class Employees
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+        public string role { get; set; }
+        public string rank { get; set; }
+        public string hours { get; set; }
+        public bool[] availableHours { get; set; }
+        public bool[] scheduledHours { get; set; }
+        public DataTable weeklySchedule { get; set; }
+        public Dictionary<int, string[]> startEndTimes { get; set; }
+    }
 
-    //public class EmployeeSchedule
-    //{
-    //    DataTable EmpSchedule { get; set; }
-    //}
+    public class TimeOffRequest
+    {
+        public EmployeeTimeOffRequest Request { get; set; }
+    }
 
-    
 }

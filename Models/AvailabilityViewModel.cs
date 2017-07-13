@@ -22,7 +22,6 @@ namespace LaborNeedsScheduling.Models
         {
             ListOfEmployees = FakeAPI.GetEmpsForStore(LocationCode);
 
-
             //emp list
             EmpsForStore = new Dictionary<string, string>();
             //avail tables

@@ -195,7 +195,7 @@
 
         <div class="left-element">
             <br />
-            @Html.DisplayTextFor(m => m.ThisWeek.MinEmployees) / @Html.DisplayTextFor(m => m.ThisWeek.MaxEmployees)<br />
+            @Html.DisplayTextFor(m => m.ThisWeek.MinEmployeesDefault) / @Html.DisplayTextFor(m => m.ThisWeek.MaxEmployeesDefault)<br />
             @Html.DisplayTextFor(m => m.ThisWeek.WeekdayPowerHours) / @Html.DisplayTextFor(m => m.ThisWeek.WeekendPowerHours)<br />
             @Html.DisplayTextFor(m => m.ThisWeek.NumberHistoricalWeeks)<br />
         </div>
@@ -217,27 +217,36 @@
                 <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
             </div>
             <div class="white-body">
-                <table border="1" cellpadding="5" id="weekhours" class="weekhours">
-                    <thead>
-                        <tr>
-                            @foreach (DataColumn col in Model.ThisWeek.TimeSelectionTable.Columns)
-                            {
-                                <th>@col.Caption</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (DataRow row in Model.ThisWeek.TimeSelectionTable.Rows)
-                        {
+
+                Sunday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[0], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[0], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
+                Monday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[1], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[1], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
+                Tuesday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[2], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[2], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
+                Wednesday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[3], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[3], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
+                Thursday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[4], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[4], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
+                Friday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[5], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[5], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
+                Saturday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[6], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[6], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
+
+                @*<table border="1" cellpadding="5" id="weekhours" class="weekhours">
+                        <thead>
                             <tr>
-                                @foreach (var cell in row.ItemArray)
+                                @foreach (DataColumn col in Model.ThisWeek.TimeSelectionTable.Columns)
                                 {
-                                    <td>@cell.ToString()</td>
+                                    <th>@col.Caption</th>
                                 }
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (DataRow row in Model.ThisWeek.TimeSelectionTable.Rows)
+                            {
+                                <tr>
+                                    @foreach (var cell in row.ItemArray)
+                                    {
+                                        <td>@cell.ToString()</td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>*@
             </div>
             <button type="submit">Update</button><br>
         }
@@ -256,9 +265,9 @@
             <div class="white-body">
                 <h2>Employee Coverage</h2>
                 <label>Minimum Exployees:</label><br />
-                @Html.TextBoxFor(m => m.ThisWeek.MinEmployees)<br />
+                @Html.TextBoxFor(m => m.ThisWeek.MinEmployeesDefault)<br />
                 <label>Maximum Exployees:</label><br />
-                @Html.TextBoxFor(m => m.ThisWeek.MaxEmployees)<br />
+                @Html.TextBoxFor(m => m.ThisWeek.MaxEmployeesDefault)<br />
                 <br />
                 <h2>Power Hours</h2>
                 <label>Weekday:</label><br />

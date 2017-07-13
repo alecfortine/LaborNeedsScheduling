@@ -30,7 +30,7 @@
     <br />
 
 
-    @Html.DropDownListFor(m => m.empList, new SelectList(Model.empList.Items, "Key", "Value"), new { onchange = "showPartial()" , id = "EmployeeDropdown" })
+    @Html.DropDownListFor(m => m.empList, new SelectList(Model.empList.Items, "Key", "Value"), new { @*onchange = "showPartial()" ,*@ id = "EmployeeDropdown" })
 
     <br />
     <br />

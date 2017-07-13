@@ -31,8 +31,6 @@
             padding: 8px;
             table-layout: fixed;
             word-break: break-all;
-            /*margin-left: auto;
-        margin-right: auto;*/
         }
 
         td, th {
@@ -53,8 +51,6 @@
             }
 
         .container {
-            /*position: fixed;*/
-            /*padding-left: 150px;*/
             align-content: center;
             margin: 0;
         }
@@ -121,9 +117,26 @@
                         <tr>
                             @foreach (var cell in row.ItemArray)
                             {
-                                @*<td class=(bool.Parse(cell) ? (cell ? "\" true\"" : "\" false\"") : "\" none\"");>@cell.ToString()</td>*@
 
-                                <td id="scheduleCell" class="scheduleCell">@cell.ToString()</td>
+                            if (@cell.ToString() == "True")
+                            {
+                                <td id="scheduleCell" class="scheduleCell" onclick="changeText">
+                                    ●
+                                </td>
+                            }
+                            else if (@cell.ToString() == "False")
+                            {
+                                <td id="scheduleCell" class="scheduleCell" onclick="changeText">
+                                   
+                                </td>
+                            }
+                            else
+                            {
+                                <td id="scheduleCell" class="scheduleCell" onclick="changeText">
+                                    @cell.ToString()
+                                </td>
+                            }
+
                             }
                         </tr>
                     }
@@ -138,18 +151,46 @@
 
         for (var i = 0; i < cells.length; i++) {
 
-            $('.scheduleCell:contains("True")').css('color', 'green');
-            $('.scheduleCell:contains("False")').css('color', 'red');
+            $('.scheduleCell:contains("●")').css('background-color', '#51ff62');
+            $('.scheduleCell:contains("False")').css('background-color', '#ffffff');
 
 
-            $('.scheduleCell:contains("False")').css('color', 'red');
+            //cells[i].addEventListener("click", function () {
+            //    //this.className = this.className == "NotAvailable" ? "Available" : "NotAvailable";
 
-            cells[i].addEventListener("click", function () {
-                //this.className = this.className == "NotAvailable" ? "Available" : "NotAvailable";
-
-                $(this.className).toggleClass('change_me Available');
-            });
+            //    $(this.className).toggleClass('change_me Available');
+            //});
         }
+    </script>
+
+    @*<script>
+        $('td').click(function () {
+            $(this).html = 'heh';
+        });
+    </script>*@
+
+    @*<script>
+        function changeText() {
+            document.getElementById('scheduleCell').innerHTML = 'pls';
+        }
+    </script>*@
+
+    <script>
+        $(function change_cell_content() {
+            $("td").on("click", function () {
+
+                var cell_id_ref = $(this).attr('cellID');
+                var $table = $(this).closest('table');
+                var newValue;
+
+                var currentValue = $(this).html();
+
+                var changeValue = prompt("Enter a new value. (Current " + currentValue + ")");
+                if (changeValue !== null) {
+                    $table.find('[cellID="' + cell_id_ref + '"]').text(changeValue);
+                }
+            });
+        });
     </script>
 </body>
 
