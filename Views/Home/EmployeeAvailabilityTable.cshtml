@@ -88,109 +88,116 @@
 
     <style>
         .Available {
-            background: #51ff62;
+            background: #abffb3;
         }
 
         .NotAvailable {
-            background: #ff5555;
+            background: #d5d5d5;
+        }
+    </style>
+
+    <style>
+        ::-moz-selection {
+            background-color: Transparent;
+            color: #000;
+        }
+
+        ::selection {
+            background-color: Transparent;
+            color: #000;
         }
     </style>
 </head>
 
 <body>
 
-    @using (Html.BeginForm("EmployeeAvailability", "Home", FormMethod.Post))
-    {
-        <div class="white-body">
-            <table border="1" cellpadding="5" id="weekhours" class="weekhours">
-                <thead>
-                    <tr>
-                        @foreach (DataColumn col in Model.Columns)
-                        {
-                            <th>@col.Caption</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (DataRow row in Model.Rows)
-                    {
-                        <tr>
-                            @foreach (var cell in row.ItemArray)
-                            {
 
-                            if (@cell.ToString() == "True")
+    <h3></h3>
+    @*@using (Html.BeginForm("EmployeeAvailability", "Home", FormMethod.Post))
+        {*@
+    <div class="white-body">
+        <table border="1" cellpadding="5" id="weekhours" class="weekhours">
+            <thead>
+                <tr>
+                    @foreach (DataColumn col in Model.Columns)
+                    {
+                        <th>@col.Caption</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @{ List<string> cellValues = new List<string>();}
+                @foreach (DataRow row in Model.Rows)
+                {
+                    <tr>
+                        @foreach (var cell in row.ItemArray)
+                        {
+                            if (cell.ToString() == "True")
                             {
-                                <td id="scheduleCell" class="scheduleCell" onclick="changeText">
-                                    ●
-                                </td>
+                                <td class="Available" onclick="changeCell(this)" value=cell.ToString()>
+                                    ♦
+                                </td>;
+                                cellValues.Add(cell.ToString());
                             }
-                            else if (@cell.ToString() == "False")
+                            else if (cell.ToString() == "False")
                             {
-                                <td id="scheduleCell" class="scheduleCell" onclick="changeText">
-                                   
-                                </td>
+                                <td class="NotAvailable" onclick="changeCell(this)" value=cell.ToString()></td>
+                                cellValues.Add(cell.ToString());
                             }
                             else
                             {
-                                <td id="scheduleCell" class="scheduleCell" onclick="changeText">
+                                <td onclick="changeCell(this)">
                                     @cell.ToString()
                                 </td>
                             }
 
-                            }
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        <button type="submit" style="float:right">Update</button><br>
-    }
-
-    <script>
-        var cells = document.querySelectorAll("td");
-
-        for (var i = 0; i < cells.length; i++) {
-
-            $('.scheduleCell:contains("●")').css('background-color', '#51ff62');
-            $('.scheduleCell:contains("False")').css('background-color', '#ffffff');
-
-
-            //cells[i].addEventListener("click", function () {
-            //    //this.className = this.className == "NotAvailable" ? "Available" : "NotAvailable";
-
-            //    $(this.className).toggleClass('change_me Available');
-            //});
-        }
-    </script>
-
-    @*<script>
-        $('td').click(function () {
-            $(this).html = 'heh';
-        });
-    </script>*@
-
-    @*<script>
-        function changeText() {
-            document.getElementById('scheduleCell').innerHTML = 'pls';
-        }
-    </script>*@
-
-    <script>
-        $(function change_cell_content() {
-            $("td").on("click", function () {
-
-                var cell_id_ref = $(this).attr('cellID');
-                var $table = $(this).closest('table');
-                var newValue;
-
-                var currentValue = $(this).html();
-
-                var changeValue = prompt("Enter a new value. (Current " + currentValue + ")");
-                if (changeValue !== null) {
-                    $table.find('[cellID="' + cell_id_ref + '"]').text(changeValue);
+                        }
+                    </tr>
                 }
-            });
-        });
-    </script>
+
+            </tbody>
+        </table>
+    </div>
+
+    <br />
+
 </body>
 
+<script>
+    function changeCell(cell) {
+
+        if (cell.className == "NotAvailable") {
+            cell.className = "Available";
+            cell.innerHTML = "♦";
+        }
+        else if (cell.className == "Available") {
+            cell.className = "NotAvailable";
+            cell.innerHTML = "";
+        }
+
+
+        // get all the cells in the table
+        var table = document.getElementsByTagName("table")[0];
+        var cells = table.getElementsByTagName("td");
+
+        // set of class values to pass to the model
+        var cellvalues = new Array(cells.length);
+
+        // iterating over each cell
+        for (var i = 1; i < cells.length; i++) {
+            //var cellclass = cells[i];
+            if (cells[i].className == "NotAvailable") {
+                cellvalues[i - 1] = 'False';
+            }
+            else if (cells[i].className == "Available") {
+                cellvalues[i - 1] = 'True';
+            }
+            else {
+                cellvalues[i - 1] = 'timecell';
+            }
+        }
+
+        document.getElementById("hiddenUpdatedSchedule").value = cellvalues;
+    }
+
+</script>

@@ -23,56 +23,50 @@ namespace LaborNeedsScheduling.Models
         /// Set of previous work weeks of data
         /// </summary>
         public Dictionary<int, WorkWeek> PastWorkWeeks { get; set; }
+    
+        public static List<Employees> EmployeeListAll { get; set; }
+        public static List<Employees> EmployeeListStore { get; set; }
+        public List<ManagerNotification> ManagerMessageList { get; set; }
 
-        /// <summary>
-        /// A horizontal table to display the amount of employees needed for each hour of a selected day
-        /// </summary>
-        public DataTable AssignmentTable;
+        public string selectedEmployeeId { get; set; }
+        public string selectedEmployeeName { get; set; }
+        public string[] ExcludedDates { get; set; }
+        public string[] UnassignTimes { get; set; }
+        public string AssignStartTime { get; set; }
+        public string AssignEndTime { get; set; }
 
-        public static List<Employees> EmployeeList { get; set; }
-
-
-        public LaborScheduling()
+        public string[] ExcludeDates(string[] dates)
         {
-            EmployeeList = FakeAPI.CreateEmployees();
+            List<string> updatedSchedule = new List<string>();
+            string s = dates[0];
+
+            // split the single element array into an element for each cell
+            string[] values = s.Split(',');
+
+            // remove whitespace
+            for (int i = 0; i < values.Length; i++)
+            {
+                values[i] = values[i].Trim();
+            }
+
+            return values;
+        }
+
+
+        public LaborScheduling(/*string storeCode*/)
+        {
+            EmployeeListAll = FakeAPI.GetAllEmployees();
+
+            //EmployeeListStore = FakeAPI.GetEmployeesForStore(storeCode);
+
+            ManagerMessageList = FakeAPI.GetManagerMessages();
 
             ThisWeek = new WorkWeek();
 
-            //AssignmentTable = new DataTable();
-
-            //string[] dateColumns = new string[8];
-
-            //if (ThisWeek.LaborSchedule.Columns.Count > 0)
-            //{
-            //    for (int i = 0; i < 8; i++)
-            //    {
-            //        DataColumn c = ThisWeek.LaborSchedule.Columns[i];
-            //        dateColumns[i] = c.Caption;
-            //    }
-
-            //    for (int j = 1; j < ThisWeek.LaborSchedule.Columns.Count; j++)
-            //    {
-            //        //dateColumns[j];
-            //        AssignmentTable.Rows[j - 1][0] = dateColumns[j];
-
-            //        for (int h = 0; h < ThisWeek.LaborSchedule.Rows.Count; h++)
-            //        {
-
-            //            if (j == 0)
-            //            {
-            //                //ThisWeek.LaborSchedule.Rows[h][j];
-            //                AssignmentTable.Rows[h][j] = dateColumns[j];
-
-            //            }
-            //            else
-            //            {
-            //                //ThisWeek.LaborSchedule.Rows[h][j];
-            //                AssignmentTable.Rows[h][j] = dateColumns[j];
-
-            //            }
-            //        }
-            //    }
-            //}
+            /// <summary>
+            /// A horizontal table to display the amount of employees needed for each hour of a selected day
+            /// </summary>
+            DataTable AssignmentTable = new DataTable();
         }
     }
 }

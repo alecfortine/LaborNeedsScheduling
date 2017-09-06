@@ -18,38 +18,91 @@
 }
 
 <head>
+    <style>
+        ::-moz-selection {
+            background-color: Transparent;
+            color: #000;
+        }
 
+        ::selection {
+            background-color: Transparent;
+            color: #000;
+        }
+
+        .mainalt {
+            padding-left: 100px;
+            padding-top: 100px;
+            display: inline-block;
+        }
+    </style>
 </head>
 
 <body>
+    @if (Model.EmployeeStatus == false)
+    {
+        <div class="mainalt">
+            <h2>You don't have permission to view the page.</h2>
+        </div>
+        <br />
+        <br />
+    }
+    else
+    {
+        <br />
+        <br />
+        <h3>Employee Availability</h3>
+        <br />
+        <br />
 
-    <br />
-    <br />
-    <h3>Employee Availability</h3>
-    <br />
-    <br />
+        @Html.DropDownListFor(m => m.EmpAvailabilityTable, new SelectList(Model.empList.Items, "Key", "Value"), new { id = "EmployeeDropdown" })
+
+        <br />
+        <br />
+        <hr />
+        <br />
+        <br />
+
+        @*@using (Html.BeginForm("EmployeeAvailability", "Home", FormMethod.Post))
+            {*@
+        @*@using (Ajax.BeginForm("EmployeeAvailability", "Home",
+                                            new AjaxOptions
+                                            {
+                                                HttpMethod = "post",
+                                                InsertionMode = InsertionMode.Replace,
+                                                UpdateTargetId = "EmployeeAvailability",
+                                            },
+                                            new { id = "AvailabilityForm" }))
+            {*@
+        <div id="EmployeeAvailability"></div>
+        <button type="button" onclick="updateSchedule()" style="float:right">Update</button><br>
+
+        @Html.HiddenFor(m => Model.updatedSchedule, new { id = "hiddenUpdatedSchedule" })
+        @Html.HiddenFor(m => Model.selectedEmployeeId, new { id = "hiddenSelectedEmployeeId" })
 
 
-    @Html.DropDownListFor(m => m.empList, new SelectList(Model.empList.Items, "Key", "Value"), new { @*onchange = "showPartial()" ,*@ id = "EmployeeDropdown" })
-
-    <br />
-    <br />
-    <hr />
-    <br />
-    <br />
-
-    <div id="EmployeeAvailability">
-    </div> 
-
+        @*}*@
+    }
 </body>
 
 @section scripts
 {
-<script>
+    <script>
+        function updateSchedule() {
+            $.post('/Home/EmployeeAvailability/?UpdatedSchedule=' + document.getElementById("hiddenUpdatedSchedule").value, function (data) {
+
+                //load partial to page
+                $('#EmployeeAvailability').html(data);
+            });
+            alert(document.getElementById("hiddenSelectedEmployeeId").value + "'s availability has been updated.")
+        }
+    </script>
+
+    <script>
         $('#EmployeeDropdown').change(function () {
 
-        /* Get the selected value of dropdownlist */
-        var selectedID = $(this).val();
+            /* Get the selected value of dropdownlist */
+            var selectedID = $(this).val();
+            document.getElementById("hiddenSelectedEmployeeId").value = selectedID;
 
             /* Request the partial view with .get request. */
             $.get('/Home/EmployeeAvailabilityTable/?EmployeeId=' + selectedID, function (data) {
@@ -58,8 +111,9 @@
                 $('#EmployeeAvailability').html(data);
                 /* little fade in effect */
                 $('#EmployeeAvailability').fadeIn('fast');
-        });
+            });
 
-    });
-</script>
+        });
+    </script>
+
 }

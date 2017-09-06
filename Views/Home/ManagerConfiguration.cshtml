@@ -29,7 +29,7 @@
             left: 0%;
             width: 100%;
             height: 100%;
-            background-color: black;
+            background-color: #000000;
             z-index: 1001;
             -moz-opacity: 0.8;
             opacity: .80;
@@ -39,14 +39,28 @@
         .white_content {
             position: fixed;
             top: 10%;
-            left: 25%;
+            left: 35%;
             z-index: 1050;
-            width: 80%;
+            width: 25%;
             height: 80%;
-            margin-left: -280px;
             background-color: #ffffff;
-            -webkit-border-radius: 20px;
-            -moz-border-radius: 20px;
+            border-radius: 20px;
+            border: 2px solid #FFFFFF;
+            background-color: #FFFFFF;
+            -webkit-box-shadow: #000000 8px 8px 8px;
+            -moz-box-shadow: #000000 8px 8px 8px;
+            box-shadow: #000000 8px 8px 8px;
+            display: none;
+        }
+
+        .white_content2 {
+            position: fixed;
+            top: 25%;
+            left: 35%;
+            z-index: 1050;
+            width: 25%;
+            height: 40%;
+            background-color: #ffffff;
             border-radius: 20px;
             border: 2px solid #FFFFFF;
             background-color: #FFFFFF;
@@ -86,246 +100,286 @@
             padding: 15px;
             overflow-y: auto;
             display: block;
-        }
-    </style>
-
-    @*table*@
-    <style>
-        table {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-            width: 1100px;
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-            table-layout: fixed;
-            word-break: break-all;
-            /*margin-left: auto;
-        margin-right: auto;*/
-        }
-
-        td, th {
-            border: 1px solid #dddddd;
-            padding: 8px;
-            text-align: center;
-            vertical-align: middle;
-            /*border: 1px solid #000000;*/
-        }
-
-            td.highlight:hover {
-                background-color: white;
-            }
-
-            td:first-child {
-                font-weight: bold;
-                text-align: left;
-            }
-
-        .container {
-            /*position: fixed;*/
-            /*padding-left: 150px;*/
-            align-content: center;
-            margin: 0;
-        }
-
-        .left-element {
-            display: inline;
-            float: left;
-        }
-
-        .right-element {
-            display: inline;
-            float: right;
-            padding-right: 50px;
-        }
-
-        body {
-            padding-left: 200px;
-            padding-top: 70px;
-        }
-
-        .testing-left {
-            display: inline;
-            float: left;
-            padding: 5px;
-            border-style: solid;
-            border-width: 1px;
-            text-align: center;
-            font-size: 70%;
+            padding-left: 30px;
         }
     </style>
 
     @*side by side divs*@
     <style>
         .left-element {
-            display: inline;
+            /*display: inline;*/
             float: left;
             margin-right: 20px;
         }
 
         .right-element {
-            display: inline;
+            /*display: inline;*/
             float: right;
+            margin-right: 20px;
         }
     </style>
 
+    @*main page and alt page positioning*@
     <style>
-        .true {
-            background: #ffffff;
+        .main {
+            padding-left: 30px;
+            display: inline-block;
         }
+        .mainalt {
+            padding-left: 100px;
+            padding-top: 100px;
+            display: inline-block;
+        }
+    </style>
 
-        .false {
-            background: #ff5555;
+    @*employee search table*@
+    <style>
+        table.FoundEmployee {
+            width: 500px;
         }
     </style>
 
 </head>
 
 <body>
-
-
-    @*display variable names, values, edit buttons*@
-    <div>
-        <div class="left-element">
-            Store Hours<br />
-            Min/Max Employees: <br />
-            Power Hours: <br />
-            Historical Weeks:  <br />
+    @if (Model.ThisWeek.employeeStatus == false)
+    {
+        <div class="mainalt">
+            <h2>You don't have permission to view the page.</h2>
         </div>
-
-        <div class="left-element">
             <br />
-            @Html.DisplayTextFor(m => m.ThisWeek.MinEmployeesDefault) / @Html.DisplayTextFor(m => m.ThisWeek.MaxEmployeesDefault)<br />
-            @Html.DisplayTextFor(m => m.ThisWeek.WeekdayPowerHours) / @Html.DisplayTextFor(m => m.ThisWeek.WeekendPowerHours)<br />
-            @Html.DisplayTextFor(m => m.ThisWeek.NumberHistoricalWeeks)<br />
-        </div>
-
-        <div class="left-element">
-            <a onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
-            <a onclick="document.getElementById('light2').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
-            <a onclick="document.getElementById('light2').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
-            <a onclick="document.getElementById('light2').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
-        </div>
-    </div>
-
-
-    @*display lightbox for selection table*@
-    <div id="light" class="white_content">
-        @using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post))
+            <br />
+    }
+    else
+    {
+        if (Model.ThisWeek.AllocatedHours.Rows.Count == 0)
         {
-            <div class="white-header">
-                <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
+            <div class="mainalt">
+                <h2>Schedule must exist before values are set.</h2>
             </div>
-            <div class="white-body">
+            <br />
+            <br />
+        }
+        else
+        {
+            <br />
+            <br />
+            <br />
 
-                Sunday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[0], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[0], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
-                Monday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[1], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[1], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
-                Tuesday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[2], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[2], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
-                Wednesday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[3], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[3], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
-                Thursday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[4], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[4], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
-                Friday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[5], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[5], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
-                Saturday: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHours[6], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHours[6], new SelectList(Model.ThisWeek.ScheduleHours, "Value", "Key")) <br />
+            <h2>Set Defaults</h2>
 
-                @*<table border="1" cellpadding="5" id="weekhours" class="weekhours">
-                        <thead>
-                            <tr>
-                                @foreach (DataColumn col in Model.ThisWeek.TimeSelectionTable.Columns)
+            <br />
+
+            @*display variable names, values, edit buttons*@
+            <div class="main">
+                <div class="left-element">
+                    Store Hours<br />
+                    Min/Max Employees: <br />
+                    Power Hours: <br />
+                    Historical Weeks:  <br />
+                </div>
+
+                <div class="left-element">
+                    <br />
+                    @Html.DisplayTextFor(m => Model.ThisWeek.MinEmployeesDefault) / @Html.DisplayTextFor(m => Model.ThisWeek.MaxEmployeesDefault)<br />
+                    @Html.DisplayTextFor(m => Model.ThisWeek.WeekdayPowerHours) / @Html.DisplayTextFor(m => Model.ThisWeek.WeekendPowerHours)<br />
+                    @Html.DisplayTextFor(m => Model.ThisWeek.NumberHistoricalWeeks)<br />
+                </div>
+
+                <div class="left-element">
+                    <a onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
+                    <a onclick="document.getElementById('light2').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
+                    <a onclick="document.getElementById('light2').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
+                    <a onclick="document.getElementById('light2').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
+                </div>
+            </div>
+
+            using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "DayHoursForm", onsubmit = "return checkTimes()" }))
+            {
+                @*display lightbox for selection table*@
+                <div id="light" class="white_content2">
+                    <div class="white-header">
+                        <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
+                    </div>
+                    <div class="white-body">
+                        <h2>Set Weekday Hours</h2>
+                        <table>
+                            <tbody>
+                                @if (Model.ThisWeek.WeekStartHours == null)
                                 {
-                                    <th>@col.Caption</th>
+                                    <tr><td>Sunday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[0], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "sundayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[0], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "sundayEnd" })</tr>
+                                    <tr><td>Monday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[1], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "mondayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[1], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "mondayEnd" })</tr>
+                                    <tr><td>Tuesday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[2], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "tuesdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[2], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "tuesdayEnd" })</tr>
+                                    <tr><td>Wednesday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[3], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "wednesdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[3], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "wednesdayEnd" })</tr>
+                                    <tr><td>Thursday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[4], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "thursdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[4], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "thursdayEnd" })</tr>
+                                    <tr><td>Friday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[5], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "fridayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[5], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "fridayEnd" })</tr>
+                                    <tr><td>Saturday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[6], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "saturdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[6], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "saturdayEnd" })</tr>
                                 }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (DataRow row in Model.ThisWeek.TimeSelectionTable.Rows)
-                            {
-                                <tr>
-                                    @foreach (var cell in row.ItemArray)
-                                    {
-                                        <td>@cell.ToString()</td>
-                                    }
-                                </tr>
-                            }
-                        </tbody>
-                    </table>*@
-            </div>
-            <button type="submit">Update</button><br>
-        }
-    </div>
-    <div id="fade" class="black_overlay"></div>
+                                else
+                                {
+                                    <tr><td>Sunday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[0], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[0]), "--", new { id = "sundayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[0], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[0]), "--", new { id = "sundayEnd" })</tr>
+                                    <tr><td>Monday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[1], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[1]), "--", new { id = "mondayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[1], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[1]), "--", new { id = "mondayEnd" })</tr>
+                                    <tr><td>Tuesday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[2], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[2]), "--", new { id = "tuesdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[2], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[2]), "--", new { id = "tuesdayEnd" })</tr>
+                                    <tr><td>Wednesday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[3], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[3]), "--", new { id = "wednesdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[3], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[3]), "--", new { id = "wednesdayEnd" })</tr>
+                                    <tr><td>Thursday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[4], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[4]), "--", new { id = "thursdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[4], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[4]), "--", new { id = "thursdayEnd" })</tr>
+                                    <tr><td>Friday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[5], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[5]), "--", new { id = "fridayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[5], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[5]), "--", new { id = "fridayEnd" })</tr>
+                                    <tr><td>Saturday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[6], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[6]), "--", new { id = "saturdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[6], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[6]), "--", new { id = "saturdayEnd" })</tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="submit" class="right-element">Update</button><br>
+                </div>
+                <div id="fade" class="black_overlay"></div>
+            }
+            using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "ManagerVariablesForm" }))
+            {
+                @*display lightbox for variables*@
+                <div id="light2" class="white_content">
+                    <div class="white-header">
+                        <a class="close" href="javascript:void(0)" onclick="document.getElementById('light2').style.display='none';document.getElementById('fade').style.display='none'">x</a>
+                    </div>
 
+                    <div class="white-body">
+                        <h2>Employee Coverage</h2>
+                        <label>Minimum Exployees:</label><br />
+                        @Html.TextBoxFor(m => Model.ThisWeek.MinEmployeesDefault)<br />
+                        <label>Maximum Exployees:</label><br />
+                        @Html.TextBoxFor(m => Model.ThisWeek.MaxEmployeesDefault)<br />
+                        <br />
+                        <h2>Power Hours</h2>
+                        <label>Weekday:</label><br />
+                        @Html.TextBoxFor(m => Model.ThisWeek.WeekdayPowerHours)<br />
+                        <label>Weekend:</label><br />
+                        @Html.TextBoxFor(m => Model.ThisWeek.WeekendPowerHours)<br />
+                        <br />
+                        <h2>Calculations</h2>
+                        <label>Historical Weeks:</label><br />
+                        @Html.TextBoxFor(m => Model.ThisWeek.NumberHistoricalWeeks)<br />
 
-    @*display lightbox for variables*@
-    <div id="light2" class="white_content">
-        <div class="white-header">
-            <a class="close" href="javascript:void(0)" onclick="document.getElementById('light2').style.display='none';document.getElementById('fade').style.display='none'">x</a>
-        </div>
+                    </div>
+                    <button type="submit" class="right-element">Update</button><br>
 
-        @using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post))
-        {
-            <div class="white-body">
-                <h2>Employee Coverage</h2>
-                <label>Minimum Exployees:</label><br />
-                @Html.TextBoxFor(m => m.ThisWeek.MinEmployeesDefault)<br />
-                <label>Maximum Exployees:</label><br />
-                @Html.TextBoxFor(m => m.ThisWeek.MaxEmployeesDefault)<br />
+                </div>
+                <div id="fade" class="black_overlay"></div>
+                //}
+            }
+            <br />
+            <br />
+
+            using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "BorrowEmployeeForm" }))
+            {
+                <h2>Borrow employee from another store</h2>
                 <br />
-                <h2>Power Hours</h2>
-                <label>Weekday:</label><br />
-                @Html.TextBoxFor(m => m.ThisWeek.WeekdayPowerHours)<br />
-                <label>Weekend:</label><br />
-                @Html.TextBoxFor(m => m.ThisWeek.WeekendPowerHours)<br />
-                <br />
-                <h2>Calculations</h2>
-                <label>Historical Weeks:</label><br />
-                @Html.TextBoxFor(m => m.ThisWeek.NumberHistoricalWeeks)<br />
+                <div class="main">
+                    @*<text>Search by </text>
+                        <select>
+                            <option>--</option>
+                            <option value="empid">Employee ID</option>
+                            <option value="lastname">Last Name</option>
+                        </select>*@
 
-            </div>
-            <button type="submit">Update</button><br>
+                    <div>
+                        Enter employee ID <strike>or last name</strike>: <br />
+                        @Html.TextBoxFor(m => Model.ThisWeek.EmployeeSearch, new { id = "EmployeeSearch" })
+                        <button type="button" onclick="findEmployee(document.getElementById('EmployeeSearch').value)" id="SearchButton">Search</button>
+                    </div>
+
+                    <br />
+
+                    <div id="FoundEmployee"></div>
+
+                </div>
+
+            }
+
         }
-    </div>
-    <div id="fade" class="black_overlay"></div>
+    }
+</body>
 
 
-    @*color cells on click*@
+
+@section scripts{
+
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+
     <script>
-        var cells = document.querySelectorAll("td");
-
-        for (var i = 0; i < cells.length; i++) {
-            cells[i].addEventListener("click", function () {
-                this.className = this.className == "false" ? "true" : "false";
+        function findEmployee(emp) {
+            $.get('/Home/_ManagerConfigFindEmployee/?EmployeeInfo=' + emp, function (data) {
+                //load partial to page
+                $('#FoundEmployee').html(data);
             });
         }
     </script>
 
+    <script>
+        function addEmployee() {
+            $.post('/Home/_ManagerConfigFindEmployee',
+                {
+                    AddEmployee: 'true'
+                },
+                function (data) {
+                    $('#FoundEmployee').html(data);
+                }
+                );
+            alert('Employee added');
+        }
+    </script>
 
-    @*<script>
-            var table = document.getElementById("weekhours");
-            if (table != null) {
-                for (var i = 1; i < table.rows.length; i++) {
-                    for (var j = 1; j < table.rows[i].cells.length; j++)
-                        table.rows[i].cells[j].onclick = function () {
-                            //var clickedCell = j + (i * (table.rows.cells.length - 1));
+    <script>
+        document.getElementById("EmployeeSearch")
+    .addEventListener("keyup", function (event) {
+        event.preventDefault();
+        if (event.keyCode == 13) {
+            document.getElementById("SearchButton").click();
+        }
+    });
+    </script>
 
-                            if (this.style.backgroundColor = '#66ff89') {
-                                this.style.backgroundColor = '#ff6666'
-                            } else if (this.style.backgroundColor = '#ff6666') {
-                                this.style.backgroundColor = '#66ff89'
-                            }
 
-                            //if (Model.ThisWeek.HoursOfWeek[clickedCell] == false) {
-                            //    Model.ThisWeek.HoursOfWeek[clickedCell] = true;
-                            //} else {
-                            //    Model.ThisWeek.HoursOfWeek[clickedCell] = false;
-                            //}
+    @*validate that times are selected for each dropdown*@
+    <script>
+        function checkTimes() {
+            var dropdownHours = [document.forms["DayHoursForm"]["sundayStart"].value, document.forms["DayHoursForm"]["mondayStart"].value,
+                                 document.forms["DayHoursForm"]["tuesdayStart"].value, document.forms["DayHoursForm"]["wednesdayStart"].value,
+                                 document.forms["DayHoursForm"]["thursdayStart"].value, document.forms["DayHoursForm"]["fridayStart"].value,
+                                 document.forms["DayHoursForm"]["saturdayStart"].value, document.forms["DayHoursForm"]["sundayEnd"].value,
+                                 document.forms["DayHoursForm"]["mondayEnd"].value, document.forms["DayHoursForm"]["tuesdayEnd"].value,
+                                 document.forms["DayHoursForm"]["wednesdayEnd"].value, document.forms["DayHoursForm"]["thursdayEnd"].value,
+                                 document.forms["DayHoursForm"]["fridayEnd"].value, document.forms["DayHoursForm"]["saturdayEnd"].value];
 
-                        };
+            var hours = ["6AM-7AM", "7AM-8AM", "8AM-9AM", "9AM-10AM", "10AM-11AM", "11AM-12PM", "12PM-1PM", "1PM-2PM", "2PM-3PM", "3PM-4PM",
+                         "4PM-5PM", "5PM-6PM", "6PM-7PM", "7PM-8PM", "8PM-9PM", "9PM-10PM", "10PM-11PM", "11PM-12AM", "12AM-1AM"];
+
+            for (i = 0; i < dropdownHours.length; i++) {
+                if (dropdownHours[i] == "") {
+                    alert('A start and end hour must be selected for each day');
+                    return false;
                 }
             }
 
-            function tableText(tableCell) {
-                alert(tableCell.innerHTML);
+            for (n = 0; n < 7; n++) {
+                var start = dropdownHours[n];
+                var end = dropdownHours[n + 7];
+
+                var open;
+                var close;
+
+                for (j = 0; j < hours.length; j++) {
+                    if (start == hours[j]) {
+                        open = j;
+                    }
+                    if (end == hours[j]) {
+                        close = j;
+                    }
+                }
+
+                if (open >= close) {
+                    alert('Selected open hours must be before close hours');
+                    return false;
+                }
             }
-        </script>*@
+        }
+    </script>
 
-
-</body>
+}

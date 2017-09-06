@@ -1,0 +1,60 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Diagnostics;
+@using System.Web.UI.HtmlControls;
+@using LaborNeedsScheduling.Models
+@model DataTable
+
+<head>
+    <style>
+        .AddButton {
+            width: 80px;
+            height: 40px;
+            display: block;
+            vertical-align: middle;
+            margin: 0 auto;
+            margin-left: 30px;
+            background-color: #73ff78; /* Green */
+            color: #000000;
+            border-color: #53fe59;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div style="display:table">
+        <div style="display:inline-block; float:left">
+            <table class="FoundEmployee" id="FoundEmployee" border="1" cellpadding="5">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Id</th>
+                        <th>Store Code</th>
+                        <th>Role</th>
+                        <th>Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Model.Rows[0][0]</td>
+                        <td>@Model.Rows[0][1]</td>
+                        <td>@Model.Rows[0][2]</td>
+                        <td>@Model.Rows[0][3]</td>
+                        <td>@Model.Rows[0][4]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display:table-cell; vertical-align:middle;">
+            <button type="button" onclick="addEmployee()" class="AddButton">Add</button>
+        </div>
+    </div>
+</body>

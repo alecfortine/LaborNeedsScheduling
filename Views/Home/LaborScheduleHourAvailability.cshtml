@@ -1,0 +1,118 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Diagnostics;
+@using System.Web.UI.HtmlControls;
+@using LaborNeedsScheduling.Models
+@model LaborScheduling
+
+
+<head>
+
+    <style>
+        table.HourView {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            border: 1px solid #000000;
+            text-align: left;
+            padding: 8px;
+            table-layout: fixed;
+            word-break: break-all;
+            empty-cells: show;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .noSelect {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            cursor: default;
+        }
+    </style>
+
+</head>
+
+
+<body>
+    @if (Model.ThisWeek.EmployeesScheduledPartial.Rows.Count > 0)
+    {
+        <div class="noSelect" style="padding-top:20px;">
+            <div style="text-align:center"><b>Scheduled from @Model.ThisWeek.selectedHour:</b></div>
+            <table class="HourView" id="HourView" border="1" cellpadding="5">
+                <tbody>
+                    <tr>
+                        @for (int i = 0; i < Model.ThisWeek.EmployeesScheduledPartial.Rows.Count; i++)
+                        {
+                            <td class="HourAvailability">
+                                @Model.ThisWeek.EmployeesScheduledPartial.Rows[i][0]
+                            </td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="noSelect" style="padding-top:20px;">
+            <div style="text-align:center"><b>Scheduled from @Model.ThisWeek.selectedHour:</b></div>
+            <table class="HourView" id="HourView" border="1" cellpadding="5">
+                <tbody>
+                    <tr>
+                        <td>
+                            No employees scheduled from @Model.ThisWeek.selectedHour
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (Model.ThisWeek.EmployeesAvailablePartial.Rows.Count > 0)
+    {
+        <div class="noSelect" style="padding-top:20px;">
+            <div style="text-align:center"><b>Available from @Model.ThisWeek.selectedHour:</b></div>
+            <table class="HourView" id="HourView" border="1" cellpadding="5">
+                <tbody>
+                    <tr>
+                        @for (int i = 0; i < Model.ThisWeek.EmployeesAvailablePartial.Rows.Count; i++)
+                        {
+                            <td class="HourAvailability">
+                                @Model.ThisWeek.EmployeesAvailablePartial.Rows[i][0]
+                            </td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="noSelect" style="padding-top:20px;">
+            <div style="text-align:center"><b>Available from @Model.ThisWeek.selectedHour:</b></div>
+            <table class="HourView" id="HourView" border="1" cellpadding="5">
+                <tbody>
+                    <tr>
+                        <td>
+                            No employees available from @Model.ThisWeek.selectedHour
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+</body>
+
+@section scripts{  
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    }

@@ -28,7 +28,7 @@
             left: 0%;
             width: 100%;
             height: 100%;
-            background-color: black;
+            background-color: #ff0000;
             z-index: 1001;
             -moz-opacity: 0.8;
             opacity: .80;
@@ -79,13 +79,13 @@
             line-height: 20px;
         }
 
-        .white-body {
+        /*.white-body {
             position: relative;
             max-height: 850px;
             padding: 15px;
             overflow-y: auto;
             display: block;
-        }
+        }*/
     </style>
 
     @*messages*@
@@ -119,12 +119,73 @@
     </style>
 
     <style>
-        div {
-        }
-
         .inline {
             display: inline-block;
             margin-right: 15px;
+        }
+
+        .hidden {
+            display: inline-block;
+            margin-right: 15px;
+            visibility: hidden;
+        }
+
+        .visible {
+            display: inline-block;
+            margin-right: 15px;
+            visibility: visible;
+        }
+    </style>
+
+    @*messages dropdown*@
+    <style>
+        input.messages {
+            display: none;
+            visibility: hidden;
+        }
+
+        label.messages {
+            display: block;
+            padding: 0.5em;
+            text-align: center;
+            border-bottom: 1px solid #CCC;
+            color: #666;
+        }
+
+            label.messages:hover {
+                color: #000;
+            }
+
+            label.messages::after {
+                font-family: Consolas, monaco, monospace;
+                font-weight: bold;
+                font-size: 15px;
+                content: "▼";
+                vertical-align: text-top;
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                margin-left: 3.5px;
+                background: radial-gradient(ellipse at center, #CCC 50%, transparent 50%);
+            }
+
+        #expandMessages {
+            height: 0px;
+            overflow: auto;
+            transition: height 0.5s;
+            color: #FFF;
+        }
+
+        section {
+            padding: 0 20px;
+        }
+
+        #messagesToggle:checked ~ #expandMessages {
+            height: auto;
+        }
+
+        #messagesToggle:checked ~ label::after {
+            content: "-";
         }
     </style>
 
@@ -139,8 +200,10 @@
             padding: 8px;
             table-layout: fixed;
             word-break: break-all;
-            /*margin-left: auto;
-        margin-right: auto;*/
+            margin-left: auto;
+            margin-right: auto;
+            empty-cells: show;
+            /*overflow-y: no-display;*/
         }
 
         td, th {
@@ -151,10 +214,6 @@
             border: 1px solid #000000;
         }
 
-            td.highlight:hover {
-                background-color: white;
-            }
-
             td:first-child {
                 font-weight: bold;
                 text-align: left;
@@ -164,12 +223,10 @@
                 font-size: 11px;
             }
 
-        .container {
-            /*position: fixed;*/
-            /*padding-left: 150px;*/
+        /*.container {
             align-content: center;
             margin: 0;
-        }
+        }*/
 
         .left-element {
             display: inline;
@@ -183,8 +240,7 @@
         }
 
         body {
-            padding-left: 200px;
-            padding-top: 70px;
+            vertical-align: middle;
         }
 
         .testing-left {
@@ -202,15 +258,108 @@
         }
     </style>
 
-    @*<style>
-            .true {
-                background: #51ff62;
+    @*multiple days request*@
+    <style>
+        input.requestMultiple {
+            display: none;
+            visibility: hidden;
+        }
+
+        label.requestMultiple {
+            display: block;
+            padding: 0.5em;
+            text-align: left;
+            border-bottom: 1px solid #CCC;
+            color: #666;
+        }
+
+            label.requestMultiple:hover {
+                color: #000;
             }
 
-            .false {
-                background: #ff5555;
+            label.requestMultiple::after {
+                font-family: Consolas, monaco, monospace;
+                font-weight: bold;
+                font-size: 15px;
+                content: "▼";
+                vertical-align: text-top;
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                margin-left: 3px;
             }
-        </style>*@
+
+        #expandMultiple {
+            height: 0px;
+            overflow: auto;
+            transition: height 0.5s;
+            color: #000000;
+        }
+
+        section {
+            padding: 0 20px;
+        }
+
+        #requestToggleMultiple:checked ~ #expandMultiple {
+            height: auto;
+        }
+
+        #requestToggleMultiple:checked ~ label::after {
+            content: "▼";
+        }
+    </style>
+
+    @*single day request*@
+    <style>
+        input.requestSingle {
+            display: none;
+            visibility: hidden;
+        }
+
+        label.requestSingle {
+            display: block;
+            padding: 0.5em;
+            text-align: left;
+            border-bottom: 1px solid #CCC;
+            color: #666;
+        }
+
+            label.requestSingle:hover {
+                color: #000;
+            }
+
+            label.requestSingle::after {
+                font-family: Consolas, monaco, monospace;
+                font-weight: bold;
+                font-size: 15px;
+                content: "▼";
+                vertical-align: text-top;
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                margin-left: 3px;
+            }
+
+        #expandSingle {
+            height: 0px;
+            overflow: auto;
+            transition: height 0.5s;
+            color: #000000;
+        }
+
+        section {
+            padding: 0 20px;
+        }
+
+        #requestToggleSingle:checked ~ #expandSingle {
+            height: auto;
+        }
+
+        #requestToggleSingle:checked ~ label::after {
+            content: "▼";
+        }
+    </style>
+
 </head>
 
 <body>
@@ -225,22 +374,49 @@
             <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
         </div>*@
 
-    <div class="white-body">
-        @foreach (EmployeeNotification e in Model.EmployeeNotifications)
-        {
-            if (e.accepted == true)
+    <input id="messagesToggle" type="checkbox" class="messages">
+    <label for="messagesToggle" class="messages">@Model.EmployeeNotifications.Count New Messages</label>
+    <div id="expandMessages">
+        <section>
+            @foreach (EmployeeNotification e in Model.EmployeeNotifications)
             {
-                <div class="approved">
-                    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-                    @e.message
-                </div>
+                if (e.approved == true)
+                {
+                    <div class="approved">
+                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                        @e.message
+                    </div>
+                }
+                else if (e.approved == false)
+                {
+                    <div class="denied">
+                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                        @e.message
+                    </div>
+                }
             }
-            else if (e.accepted == false)
+        </section>
+    </div>
+
+    <div class="white-body">
+        @if (Model.EmployeeNotifications != null)
+        {
+            foreach (EmployeeNotification e in Model.EmployeeNotifications)
             {
-                <div class="denied">
-                    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-                    @e.message
-                </div>
+                if (e.approved == true)
+                {
+                    <div class="approved">
+                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                        @e.message
+                    </div>
+                }
+                else if (e.approved == false)
+                {
+                    <div class="denied">
+                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                        @e.message
+                    </div>
+                }
             }
         }
     </div>
@@ -251,8 +427,7 @@
     <hr />
     <br />
 
-    @*display lightbox for employee schedule table*@
-
+    @*display employee schedule table*@
     <div class="white-body">
         <table border="1" cellpadding="5" id="weekhours" class="weekhours">
             <thead>
@@ -265,12 +440,11 @@
             </thead>
             <tbody>
 
-                @for (int n = 0; n < EmployeeModel.EmployeeSchedule.Rows.Count; n++)
+                @for (int n = 0; n < EmployeeModel.EmployeeSchedule.Rows.Count - 1; n++)
                 {
                     <tr>
                         @for (int h = 0; h < EmployeeModel.EmployeeSchedule.Columns.Count; h++)
                         {
-
                             if (EmployeeModel.EmployeeSchedule.Rows[n][h].ToString() == "True")
                             {
                                 <td id="scheduleCell" class="scheduleCell">♦</td>
@@ -281,12 +455,11 @@
                             }
                             else
                             {
-
                                 string[] ScheduleHourSlots = { "6AM-7AM", "7AM-8AM","8AM-9AM","9AM-10AM","10AM-11AM","11AM-12PM","12PM-1PM", "1PM-2PM", "2PM-3PM",
-                                                           "3PM-4PM","4PM-5PM", "5PM-6PM", "6PM-7PM", "7PM-8PM", "8PM-9PM", "9PM-10PM", "10PM-11PM", "11PM-12AM", "12AM-1AM"};
+                                                           "3PM-4PM","4PM-5PM", "5PM-6PM", "6PM-7PM", "7PM-8PM", "8PM-9PM", "9PM-10PM", "10PM-11PM", "11PM-12AM"};
 
                                 string[] replaceRows = {"6:00AM", "7:00AM","8:00AM","9:00AM","10:00AM","11:00AM","12:00PM", "1:00PM", "2:00PM", "3:00PM",
-                                                    "4:00PM", "5:00PM", "6:00PM", "7:00PM", "8:00PM", "9:00PM", "10:00PM", "11:00PM", "12:00AM", "1:00AM"};
+                                                    "4:00PM", "5:00PM", "6:00PM", "7:00PM", "8:00PM", "9:00PM", "10:00PM", "11:00PM", "12:00AM"};
 
                                 for (int i = 0; i < ScheduleHourSlots.Length; i++)
                                 {
@@ -310,120 +483,127 @@
 
     <br />
     <br />
-
     <hr />
-
     <br />
 
-    <h3>Submit Time Off Request:</h3>
+    <h3>Time Off Request:</h3>
 
-    <br />
-    <br />
 
-    @using (Html.BeginForm("EmployeeHome", "Home", FormMethod.Post))
-    {
-        <div class="inline">
-            <select id="dropdown">
-                @for (int i = 1; i < 15; i++)
-                {
-                    string day = DateTime.Now.AddDays(i).ToString("M/d/yyyy");
-                    <option>@day</option>
-                }
-            </select>
-        </div>
+    <input id="requestToggleMultiple" type="checkbox" class="requestMultiple">
+    <label for="requestToggleMultiple" class="requestMultiple">Multiple Days</label>
+    <div id="expandMultiple">
+        <section>
+            @using (Html.BeginForm("EmployeeHome", "Home", FormMethod.Post))
+            {
+                <div style="display:inline-block">
+                    <div style="border:solid; border-width:1px; display: inline; float:left; padding:20px;">
+                        <div class="inline">
+                            @Html.DropDownListFor(m => Model.startDate, new SelectList(Model.startDates), new { id = "startDate" })
+                        </div>
+                        <label>-</label>
+                        <div class="inline" style="margin-left:15px;">
+                            @Html.DropDownListFor(m => Model.endDate, new SelectList(Model.startDates), new { id = "endDate" })
+                        </div>
 
-        <div class="inline">
-            <label>Start: </label>
-            @*@Html.TextBoxFor(m => m.ListOfEmployees.)*@
-            <input type="text">
-        </div>
-
-        <div class="inline">
-            <label>End: </label>
-            @*@Html.TextBoxFor(m => EmployeeTimeOffRequest.EndHourID)*@
-            @*@Html.DropDownListFor(m => EmployeeTimeOffRequest.EndHourID, new SelectList(EmployeeModel.ScheduleHours))*@
-        </div>
-
-        <div class="inline">
-            @*@Html.CheckBoxFor(m => EmployeeTimeOffRequest.IsAllDay)*@
-            <input type="checkbox">
-            <label>All day </label>
-        </div>
-
-        <div class="inline">
-            <label></label>
-        </div>
-
-        <div class="inline">
-            <label></label>
-        </div>
-
-        <div class="inline">
-            <label></label>
-        </div>
-
-        //if (Model.ThisWeek.AllDay == true)
-        //{
-        //    Model.ThisWeek.StartTimeOff = "12AM";
-        //    Model.ThisWeek.EndTimeOff = "12PM";
-        //}
-
-        <div class="inline">
-            <button type="submit">Submit</button><br>
-        </div>
-    }
-    <br />
-    <br />
-
-    @*<script>
-            var cells = document.querySelectorAll("td");
-
-            for (var i = 0; i < cells.length; i++) {
-                cells[i].addEventListener("click", function () {
-                    this.className = this.className == "false" ? "true" : "false";
-                });
+                        <div class="inline">
+                            <button type="submit">Submit</button><br>
+                        </div>
+                    </div>
+                </div>
             }
-        </script>*@
+        </section>
+    </div>
 
+    <br />
+    <br />
+
+    <input id="requestToggleSingle" type="checkbox" class="requestSingle">
+    <label for="requestToggleSingle" class="requestSingle">Specific Day</label>
+    <div id="expandSingle">
+        <section>
+            @using (Html.BeginForm("EmployeeHome", "Home", FormMethod.Post))
+            {
+                <div style="display:inline-block">
+                    <div style="border:solid; border-width:1px; display: inline; float:left; padding:20px;">
+                        <div class="inline">
+                            @Html.DropDownListFor(m => Model.startDate, new SelectList(Model.startDates), new { id = "startDate" })
+                        </div>
+
+                        <div class="inline" id="dayCheck">
+                            @Html.CheckBoxFor(m => Model.allDayCheck, new { id = "dayCheck", onchange = "change_checkbox(this)" })
+                            <label>All Day</label>
+                        </div>
+
+                        <div class="visible" id="startTime">
+                            <label>Start:</label>
+                            @Html.DropDownListFor(m => Model.startTime, new SelectList(Model.startTimes), new { id = "startTime" })
+                        </div>
+
+                        <div class="visible" id="endTime">
+                            <label>End: </label>
+                            @Html.DropDownListFor(m => Model.endTime, new SelectList(Model.endTimes), new { id = "endTime" })
+                        </div>
+
+                        <div class="inline">
+                            <button type="submit">Submit</button><br>
+                        </div>
+                    </div>
+                </div>
+            }
+        </section>
+    </div>
+
+    <br />
+    <br />
+    <br />
+
+
+</body>
+
+@section scripts
+{
     <script>
         var cells = document.querySelectorAll("td");
 
         for (var i = 0; i < cells.length; i++) {
 
             $('.scheduleCell:contains("♦")').css('background-color', '#8fff9a');
-            $('.scheduleCell:contains("False")').css('background-color', '#ff5555');
+            $('.scheduleCell:contains("False")').css('background-color', '#ffffff');
 
+        }
+    </script>
 
-            cells[i].addEventListener("click", function () {
-                //this.className = this.className == "NotAvailable" ? "Available" : "NotAvailable";
+    @*validate that all inputs are numbers*@
+    <script>
+        function checkInp() {
+            var hours = document.forms["ScheduleForm"]["weeklyHours"].value;
+            var min = document.forms["ScheduleForm"]["minEmps"].value;
+            var max = document.forms["ScheduleForm"]["maxEmps"].value;
+            var weeks = document.forms["ScheduleForm"]["weeks"].value;
+            var week1 = document.forms["ScheduleForm"]["week1"].value;
 
-                $(this.className).toggleClass('change_me Available');
-            });
+            if (isNaN(hours) || isNaN(min) || isNaN(max) || isNaN(weeks)) {
+                alert("Input must be numbers");
+                return false;
+            }
         }
     </script>
 
     <script>
-        var str = document.getElementById("scheduleCell").innerHTML;
-        var res = str.replace("#", "Environment.NewLine");
-        document.getElementById("scheduleCell").innerHTML = res;
+        function change_checkbox(dayCheck) {
+            if (dayCheck.checked) {
+                document.getElementById("startTime").classList.remove('visible');
+                document.getElementById("endTime").classList.remove('visible');
+
+                document.getElementById("startTime").classList.add('hidden');
+                document.getElementById("endTime").classList.add('hidden');
+            } else {
+                document.getElementById("startTime").classList.remove('hidden');
+                document.getElementById("endTime").classList.remove('hidden');
+
+                document.getElementById("startTime").classList.add('visible');
+                document.getElementById("endTime").classList.add('visible');
+            }
+        }
     </script>
-
-    <script>
-        $(function change_cell_content() {
-            $("td").on("click", function () {
-
-                var cell_id_ref = $(this).attr('cellID');
-                var $table = $(this).closest('table');
-                var newValue;
-
-                var currentValue = $(this).html();
-
-                var changeValue = prompt("Enter a new value. (Current " + currentValue + ")");
-                if (changeValue !== null) {
-                    $table.find('[cellID="' + cell_id_ref + '"]').text(changeValue);
-                }
-            });
-        });
-    </script>
-
-</body>
+}

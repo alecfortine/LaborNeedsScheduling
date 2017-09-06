@@ -1,0 +1,120 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Diagnostics;
+@using System.Web.UI.HtmlControls;
+@using System.Data.Entity;
+@using LaborNeedsScheduling.Models
+@model LaborScheduling
+
+<body>
+    @*table*@
+    <div style="display:inline-block; padding-top:30px;">
+            <table class="LaborSchedule" id="LaborSchedule" border="1" cellpadding="5" align="center">
+                <thead>
+                    <tr>
+                        @foreach (DataColumn c in Model.ThisWeek.LaborSchedule.Columns)
+                        {
+                            if (c.ToString() == "HourOfDay")
+                            {
+                                <th class="LaborCell">Hour</th>
+                            }
+                            else
+                            {
+                                <th class="LaborCell">@c.Caption</th>
+                            }
+                        }
+                    </tr>
+
+                </thead>
+                @if (Model.ThisWeek.LaborSchedule.Columns.Count > 0)
+                {
+                    int dayValue = 0;
+                    <tbody>
+
+                        @{int count = 0;}
+
+                        @for (int j = 0; j <= Model.ThisWeek.LaborSchedule.Rows.Count; j++)
+                        {
+                            <tr>
+                                @for (int h = 0; h < 8; h++)
+                                {
+                                    if (j < Model.ThisWeek.LaborSchedule.Rows.Count)
+                                    {
+                                        if (Model.ThisWeek.BlackoutTimes != null && Convert.ToString(Model.ThisWeek.BlackoutTimes.Rows[j][h]) == "True")
+                                        {
+                                            <td class="BlackoutCell" id="cell"></td>
+                                            count++;
+                                        }
+                                        else
+                                        {
+
+                                            if (Model.ThisWeek.LowHourCells[count] == true)
+                                            {
+                                                <td class="LowCell" id="cell">@Model.ThisWeek.LaborSchedule.Rows[j][h]</td>
+                                                count++;
+                                            }
+                                            else if (Model.ThisWeek.PowerHourCells[count] == true)
+                                            {
+                                                <td class="PowerCell" id="cell">@Model.ThisWeek.LaborSchedule.Rows[j][h]</td>
+                                                count++;
+                                            }
+                                            else
+                                            {
+                                                <td class="LaborCell" id="cell">@Model.ThisWeek.LaborSchedule.Rows[j][h]</td>
+                                                count++;
+                                            }
+                                        }
+                                    }
+                                    // adding row for buttons
+                                    else if (h == 0 && j == Model.ThisWeek.LaborSchedule.Rows.Count)
+                                    {
+                                        <td></td>
+                                    }
+                                    else if (h > 0 && j == Model.ThisWeek.LaborSchedule.Rows.Count)
+                                    {
+                                        string currentDay;
+                                        {
+                                            string[] weekdays = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+                                            currentDay = weekdays[dayValue];
+                                        }
+                                        var days = Html.Raw(Json.Encode(ViewBag.days));
+                                        <td class="ButtonCell" id="cell">
+                                            <button onclick="getValue(this.value)" id="LaborSchedule" class="DaySelectionButton" type="button" value=@dayValue>
+                                                @*⚇*@@currentDay
+                                            </button>
+                                        </td>
+                                        dayValue++;
+                                    }
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                            }
+            </table>
+
+                                        <br />
+                                        <br />
+                                        <br />
+                        
+    </div>
+
+
+    <div class="EmpListAndHours" style="padding-bottom:50px;">
+        <div id="AssignmentTablePartial"></div>
+    </div>
+
+    @Html.HiddenFor(m => m.ThisWeek.selectedEmployee, new { id = "hiddenEmployeeName" })
+    @Html.HiddenFor(m => Model.ExcludedDates, new { id = "hiddenExcludedDates" })
+    @Html.HiddenFor(m => Model.ThisWeek.ExcludedDates, new { id = "hiddenExcludedDatesData" })
+ 
+
+    <br />
+    <br />
+</body>
