@@ -10,12 +10,8 @@ namespace LaborNeedsScheduling.Models
 {
     public class AvailabilityViewModel
     {
-        //public List<JakoEmployee> ListOfEmployees { get; set; }
-
-        //public DataTable Availability { get; set; }
-
         public Dictionary<string, string> EmpsForStore; //<empid, empName>
-        //public List<string> EmpsForStore;
+
         public Dictionary<string, DataTable> EmpAvailabilityTable; //<empid, empAvail>
 
         // list of employees for the dropdown
@@ -26,15 +22,15 @@ namespace LaborNeedsScheduling.Models
         public string selectedEmployeeId { get; set; }
         public bool EmployeeStatus { get; set; }
 
+        public Dictionary<string, Dictionary<DateTime, string[]>> EmployeeTimeOffRequests = new Dictionary<string, Dictionary<DateTime, string[]>>();
+
         public AvailabilityViewModel(string LocationCode)
         {
-
             //get the employees for the store
             EmployeeList = FakeAPI.GetAllEmployees();
 
             // set of employee ids and names
             EmpsForStore = new Dictionary<string, string>();
-            //EmpsForStore = new List<string>();
 
             // set of employee ids and their schedules
             EmpAvailabilityTable = new Dictionary<string, DataTable>();
@@ -42,23 +38,12 @@ namespace LaborNeedsScheduling.Models
             EmpsForStore.Add("--", "--");
             for (int i = 0; i < EmployeeList.Count; i++)
             {
-                EmpsForStore.Add(EmployeeList[i].id, EmployeeList[i].firstName);
+                EmpsForStore.Add(EmployeeList[i].id, EmployeeList[i].firstName + " " + EmployeeList[i].lastName);
 
                 EmpAvailabilityTable.Add(EmployeeList[i].id, FakeAPI.GetEmployeeAvailability(EmployeeList[i].id));
             }
 
-
-            //empList = new SelectList(EmpAvailabilityTable, "name", "table");
             empList = new SelectList(EmpsForStore, "Name", "Id");
-
-            //foreach (SelectListItem item in empList.Items)
-            //{
-            //    Debug.WriteLine(item);
-            //    if (Convert.ToString(item) == "[--, --]")
-            //    {
-            //        item.Disabled = true;
-            //    }
-            //}
         }
 
         public AvailabilityViewModel()
@@ -88,11 +73,8 @@ namespace LaborNeedsScheduling.Models
                     updatedSchedule.Add(values[i]);
                 }
             }
-
             FakeAPI.UpdateEmployeeAvailability(avm, updatedSchedule, employeeId);
-
         }
-
     }
 
     public class JakoEmployee

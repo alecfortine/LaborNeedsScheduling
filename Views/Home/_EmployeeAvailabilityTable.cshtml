@@ -10,13 +10,7 @@
 @using System.Diagnostics;
 @using System.Web.UI.HtmlControls;
 @using LaborNeedsScheduling.Models
-@model DataTable
-
-
-
-@{
-    ViewBag.Title = "EmployeeAvailabilityTable";
-}
+@model AvailabilityViewModel
 
 <head>
 
@@ -110,16 +104,63 @@
 </head>
 
 <body>
+        <div>
+            @for (int i = 0; i < Model.EmployeeTimeOffRequests.Count; i++)
+            {
+                List<string> employeeIds = new List<string>(Model.EmployeeTimeOffRequests.Keys);
+                if (employeeIds[i] == Model.selectedEmployeeId)
+                {
+                    <h3>Approved Time Off Requests</h3>
 
+                    Dictionary<DateTime, string[]> employeeWeek = Model.EmployeeTimeOffRequests[Model.selectedEmployeeId];
+                    List<DateTime> weekDates = new List<DateTime>(employeeWeek.Keys);
+                    for (int n = 0; n < 7; n++)
+                    {
+                        string[] employeeHoursOff = employeeWeek[weekDates[n]];
+                        if (employeeHoursOff.Length > 0)
+                        {
+                            string date = weekDates[n].ToString("M'/'dd'/'yyyy");
+                            <div style="border-width:1px; border-style:solid; background-color:#c8d6fc; padding: 10px; font-size: 15px; display:inline-block">
+                                <text>
+                                    <b>@date</b>
+                                    <br />
+                                    @if (employeeHoursOff.Length == Model.EmpAvailabilityTable[Model.selectedEmployeeId].Rows.Count)
+                                {
+                                        <text>Full day off</text>
+                                    }
+                                    else
+                                    {
+                                        for (int h = 0; h < employeeHoursOff.Length; h++)
+                                        {
+                                            if (h != employeeHoursOff.Length - 1)
+                                            {
+                                                @employeeHoursOff[h]
+                                                <text>, </text>
+                                            }
+                                            else
+                                            {
+                                                @employeeHoursOff[h]
+                                            }
+                                        }
+                                    }
+                                </text>
+                            </div>
+                        }
+                    }
+                }
+            }
+        </div>
 
-    <h3></h3>
-    @*@using (Html.BeginForm("EmployeeAvailability", "Home", FormMethod.Post))
-        {*@
+    <br />
+
+    @{ string employeeName = Model.EmpsForStore[Model.selectedEmployeeId];}
+    <h2>@employeeName's Availability</h2>
+
     <div class="white-body">
         <table border="1" cellpadding="5" id="weekhours" class="weekhours">
             <thead>
                 <tr>
-                    @foreach (DataColumn col in Model.Columns)
+                    @foreach (DataColumn col in Model.EmpAvailabilityTable[Model.selectedEmployeeId].Columns)
                     {
                         <th>@col.Caption</th>
                     }
@@ -127,7 +168,7 @@
             </thead>
             <tbody>
                 @{ List<string> cellValues = new List<string>();}
-                @foreach (DataRow row in Model.Rows)
+                @foreach (DataRow row in Model.EmpAvailabilityTable[Model.selectedEmployeeId].Rows)
                 {
                     <tr>
                         @foreach (var cell in row.ItemArray)
@@ -150,7 +191,6 @@
                                     @cell.ToString()
                                 </td>
                             }
-
                         }
                     </tr>
                 }
@@ -161,7 +201,16 @@
 
     <br />
 
+    <button type="button" onclick="updateSchedule()" style="float:right">Update</button><br>
+
 </body>
+
+
+
+
+
+
+
 
 <script>
     function changeCell(cell) {

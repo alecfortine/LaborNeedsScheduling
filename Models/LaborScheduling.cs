@@ -59,7 +59,7 @@ namespace LaborNeedsScheduling.Models
 
             //EmployeeListStore = FakeAPI.GetEmployeesForStore(storeCode);
 
-            ManagerMessageList = FakeAPI.GetManagerMessages();
+            ManagerMessageList = FakeAPI.GetMessagesForManager();
 
             ThisWeek = new WorkWeek();
 

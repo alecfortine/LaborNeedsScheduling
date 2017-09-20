@@ -216,13 +216,13 @@
         .left-element {
             display: inline;
             float: left;
-            margin-left:30px;
+            margin-left: 30px;
         }
 
         .right-element {
             /*display: inline;*/
             float: right;
-            margin-right:30px;
+            margin-right: 30px;
         }
 
         .left-align {
@@ -327,7 +327,7 @@
             transition: 0.3s;
         }
 
-        .decline {
+        .deny {
             margin-left: 15px;
             color: #ff3d3d;
             font-weight: bold;
@@ -342,7 +342,7 @@
             color: black;
         }
 
-        .decline:hover {
+        .deny:hover {
             color: black;
         }
     </style>
@@ -441,17 +441,18 @@
         <br>
 
         <input id="toggle" type="checkbox" class="messages">
-        <label for="toggle" class="messages">@Model.ManagerMessageList.Count New Messages</label>
+        @Html.HiddenFor(m => m.ManagerMessageList.Count, new { id = "hiddenMessageCount" })
+        <input type="hidden" id="hiddenMessageCounter" value=0>
+        <label for="toggle" class="messages" id="messages">@Model.ManagerMessageList.Count Messages</label>
         <div id="expand">
             <section>
                 @foreach (ManagerNotification notification in Model.ManagerMessageList)
                 {
-                    string empId = notification.id;
-                    string message = notification.message;
+                    int messageId = notification.messageId;
 
                     <div class="messagebox">
-                        <span class="approve" onclick="approveRequest(@empId)">&#10003;</span>
-                        <span class="decline" onclick=FakeAPI.denyRequest()>&times;</span>
+                        <span class="approve" onclick="approveRequest(@messageId)">&#10003;</span>
+                        <span class="deny" onclick="denyRequest(@messageId)">&times;</span>
                         <text style="font-size: 14px;">@notification.message</text>
                     </div>
                 }
@@ -617,7 +618,7 @@ new List<Object> { 6, 5, 4, 3, 2, 1 }, Model.ThisWeek.NumberHistoricalWeeks))
                             @Html.TextBoxFor(m => Model.ThisWeek.weekWeighting[i], new { id = "week" + weekCounter, style = "width:25px;text-align:center;" })
                             <text>%</text>
                         </div>
-                            <br>
+                        <br>
                                 }
                     <br />
                     <br />
@@ -628,11 +629,8 @@ new List<Object> { 6, 5, 4, 3, 2, 1 }, Model.ThisWeek.NumberHistoricalWeeks))
             </div>
         </div>
 
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
+        <br />
+        <br />
 
             <div id="LaborScheduleTable"></div>
             <div id="AssignmentTablePartial"></div>
@@ -640,16 +638,83 @@ new List<Object> { 6, 5, 4, 3, 2, 1 }, Model.ThisWeek.NumberHistoricalWeeks))
             @Html.HiddenFor(m => m.ThisWeek.selectedEmployee, new { id = "hiddenEmployeeName" })
                                 @Html.HiddenFor(m => Model.ExcludedDates, new { id = "hiddenExcludedDates" })
                                 @Html.HiddenFor(m => Model.ThisWeek.ExcludedDates, new { id = "hiddenExcludedDatesData" })
+                                <input type="hidden" id="hdnParam" runat="server" clientidmode="Static" />
+
                                 }
 
                                 <br />
-                                    <br />
+                                <br />
                                 }
 </body>
+
+
 
 @section scripts
 {
     <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+
+
+    <script>
+        function approveRequest(messageId)
+        {
+            $.ajax({
+                url: '/Home/approveRequest',
+                data: { messageId: messageId},
+                done: function() {
+                    alert('success');
+                },
+                fail: function(){
+                    alert('failure');
+                }
+            })
+            alert('Request approved.');
+            var messageCount = document.getElementById("hiddenMessageCount").value;
+            var messageCountUpdate = messageCount - 1;
+            document.getElementById("hiddenMessageCount").value = messageCountUpdate;
+
+            document.getElementById("messages").innerHTML = messageCountUpdate + ' Messages';
+        }
+    </script>
+
+    <script>
+        function denyRequest(messageId)
+        {
+            $.ajax({
+                url: '/Home/denyRequest',
+                data: { messageId: messageId},
+                done: function() {
+                    alert('success');
+                },
+                fail: function(){
+                    alert('failure');
+                }
+            })
+            alert('Request denied.');
+            var messageCount = document.getElementById("hiddenMessageCount").value;
+            var messageCountUpdate = messageCount - 1;
+            document.getElementById("hiddenMessageCount").value = messageCountUpdate;
+
+            document.getElementById("messages").innerHTML = messageCountUpdate + ' Messages';
+        }
+    </script>
+
+    <script>
+        $(document).ready(function(c) {
+            $('.approve').on('click', function(c){
+                $(this).parent().fadeOut('slow', function(c){
+                });
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function(c) {
+            $('.deny').on('click', function(c){
+                $(this).parent().fadeOut('slow', function(c){
+                });
+            });
+        });
+    </script>
 
     @*assignment partial by clicking table buttons*@
     <script>
@@ -664,7 +729,6 @@ new List<Object> { 6, 5, 4, 3, 2, 1 }, Model.ThisWeek.NumberHistoricalWeeks))
 
     <script>
         function updateAssignmentView(value){
-            //value is the value of the button clicked
 
             var selectedEmployeeId = document.getElementById("hiddenEmployeeId").value;
             var startHour = document.getElementById("startHour");
@@ -762,7 +826,7 @@ new List<Object> { 6, 5, 4, 3, 2, 1 }, Model.ThisWeek.NumberHistoricalWeeks))
         }
     </script>
 
-    @*highlight the selected employee on the employee list*@
+    @*highlight the selected employee on the employee list and display the partial*@
     <script>
         //get the name/id of the selected employee and highlight their row on the selection table
         function getEmployee(emp) {
@@ -777,7 +841,7 @@ new List<Object> { 6, 5, 4, 3, 2, 1 }, Model.ThisWeek.NumberHistoricalWeeks))
             for(i = 0; i < EmployeeList.length; i++){
                 //alert(employee + " / " + EmployeeList[i].id);
                 if (employee == EmployeeList[i].id){
-                    selectedEmployeeName = EmployeeList[i].firstName;
+                    selectedEmployeeName = EmployeeList[i].firstName + " " + EmployeeList[i].lastName;
                     selectedEmployeeId = EmployeeList[i].id;
 
                     document.getElementById("employeeName").innerHTML = 'Schedule ' + selectedEmployeeName;
@@ -814,7 +878,6 @@ new List<Object> { 6, 5, 4, 3, 2, 1 }, Model.ThisWeek.NumberHistoricalWeeks))
             document.getElementById("hiddenEmployeeId").value = selectedEmployeeId;
             document.getElementById("hiddenEmployeeName").value = selectedEmployeeName;
         }
-
     </script>
 
     @*display the hour availability partial*@
@@ -824,7 +887,6 @@ new List<Object> { 6, 5, 4, 3, 2, 1 }, Model.ThisWeek.NumberHistoricalWeeks))
                 $('#HourAvailability').html(data);
             });
         }
-
     </script>
 
     @*change the assignment cell if employees are filled*@
@@ -953,7 +1015,8 @@ new List<Object> { 6, 5, 4, 3, 2, 1 }, Model.ThisWeek.NumberHistoricalWeeks))
             }
         }
     </script>
-    @*validate that an employee is selected and assignment times make sense*@
+
+    @*validate that an employee is selected and assignment times are in order*@
     <script>
         function checkTimes()
         {

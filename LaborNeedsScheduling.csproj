@@ -204,6 +204,7 @@
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Connection.cs" />
+    <Compile Include="Models\Dashboard.cs" />
     <Compile Include="Models\DataManagement.cs" />
     <Compile Include="Models\AvailabilityViewModel.cs" />
     <Compile Include="Models\EmployeeModel.cs" />
@@ -279,12 +280,13 @@
     <Content Include="Views\Home\EmployeeAvailability.cshtml" />
     <Content Include="Views\Home\ManagerConfiguration.cshtml" />
     <Content Include="Views\Home\Grading.cshtml" />
-    <Content Include="Views\Home\EmployeeAvailabilityTable.cshtml" />
+    <Content Include="Views\Home\_EmployeeAvailabilityTable.cshtml" />
     <Content Include="Views\Home\_LaborScheduleAssignmentView.cshtml" />
     <Content Include="Views\Home\_LaborScheduleEmployeeAvailability.cshtml" />
     <Content Include="Views\Home\LaborScheduleHourAvailability.cshtml" />
     <Content Include="Views\Home\_LaborScheduleTable.cshtml" />
     <Content Include="Views\Home\_ManagerConfigFindEmployee.cshtml" />
+    <Content Include="Views\Home\Dashboard.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

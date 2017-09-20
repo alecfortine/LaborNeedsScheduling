@@ -1,0 +1,146 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Diagnostics;
+@using System.Web.UI.HtmlControls;
+@using System.Data.Entity;
+@using LaborNeedsScheduling.Models
+@model Dashboard
+
+<head>
+
+    <style>
+        .approved {
+            padding: 20px;
+            background-color: #8fff9a;
+            color: black;
+            border-style: solid;
+            border-color: black;
+            border-width: .5px;
+            border-radius: 25px;
+            width: 230px;
+        }
+
+        .denied {
+            padding: 20px;
+            background-color: #ff6868;
+            color: black;
+            border-style: solid;
+            border-color: black;
+            border-width: .5px;
+        }
+    </style>
+
+    @*<style>
+            .container {
+                display: flex;
+            }
+
+            .left, .right {
+                flex: 1;
+            }
+
+            .right {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+        </style>*@
+
+</head>
+
+<body>
+
+    <br />
+    <br />
+    <br />
+    <h1>Dashboard</h1>
+    <br />
+    <br />
+
+    <div style="display:inline-block">
+        <div>
+            <div class="approved">
+                <div style="font-size:x-large; text-align:center;">Edit Schedule</div>
+            </div>
+
+            <br />
+
+            <div class="approved">
+                <div style="font-size:x-large; text-align:center;">Create Schedule</div>
+            </div>
+        </div>
+    </div>
+
+    <br />
+    <br />
+    <hr />
+    <br />
+
+    @*display employee schedule table*@
+    <div class="white-body">
+        <table border="1" cellpadding="5" id="weekhours" class="weekhours">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    @for (int i = 0; i < Model.CurrentWeekDates.Length; i++)
+                    {
+                        <th>@Model.CurrentWeekDates[i]</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.ScheduleHalfHourSlots.Length; i++)
+                {
+                    <tr>
+                        <td>@Model.ScheduleHalfHourSlots[i]</td>
+                        @{ List<string> employeesForHour = new List<string>();}
+                        @{ List<string> assignedEmployees = new List<string>();}
+                        @foreach (string employeeId in Model.AssignedEmployeesForWeek.Keys)
+                        {
+                            assignedEmployees.Add(employeeId);
+                        }
+                        @{List<string> dates = new List<string>();}
+                        @foreach (DateTime date in Model.CurrentWeekDates)
+                        {
+                            dates.Add(date.ToString());
+                        }
+                        @for (int m = 0; m < dates.Count; m++)
+                        {
+                            for (int n = 0; n < assignedEmployees.Count; n++)
+                            {
+                                Dictionary<string, List<string>> employeeHours = Model.AssignedEmployeesForWeek[assignedEmployees[n]];
+
+                                string[] hours = employeeHours[dates[m]].ToArray();
+
+                                for (int h = 0; h < hours.Length; h++)
+                                {
+                                    if (hours[h] == Model.ScheduleHalfHourSlots[i])
+                                    {
+                                        employeesForHour.Add(assignedEmployees[n]);
+                                    }
+                                }
+
+                            }
+                            <td>
+                                @foreach (string emp in employeesForHour)
+                                {
+                                    @emp
+                                        <br />
+                                }
+                            </td>
+                        }
+
+                    </tr>
+                            }
+            </tbody>
+        </table>
+    </div>
+
+</body>

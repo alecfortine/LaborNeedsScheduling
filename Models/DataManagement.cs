@@ -1,4 +1,5 @@
-﻿using LSAData;
+﻿using LaborNeedsScheduling.Models;
+using LSAData;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,6 +10,18 @@ using System.Web;
 
 namespace LaborNeedsScheduling.Models
 {
+    public static class DateTimeExtensions
+    {
+        public static DateTime StartOfWeek(this DateTime dt, DayOfWeek startOfWeek)
+        {
+            int diff = dt.DayOfWeek - startOfWeek;
+            if (diff < 0)
+            {
+                diff += 7;
+            }
+            return dt.AddDays(-1 * diff).Date;
+        }
+    }
     public class WorkWeek
     {
         #region Pending Variables
@@ -32,6 +45,7 @@ namespace LaborNeedsScheduling.Models
         public DataTable BlackoutTimes { get; set; }
         public Dictionary<string, Dictionary<string, string[]>> EmployeeAvailableTimes = new Dictionary<string, Dictionary<string, string[]>>();
         public Dictionary<string, Dictionary<string, string[]>> EmployeeScheduledTimes = new Dictionary<string, Dictionary<string, string[]>>();
+        public Dictionary<string, Dictionary<DateTime, string[]>> EmployeeTimeOffRequests = new Dictionary<string, Dictionary<DateTime, string[]>>();
         public List<string> ScheduleConflicts { get; set; }
         #endregion
 
@@ -82,6 +96,11 @@ namespace LaborNeedsScheduling.Models
 
         public string[] replaceRows = { "6:00AM", "7:00AM","8:00AM","9:00AM","10:00AM","11:00AM","12:00PM", "1:00PM", "2:00PM", "3:00PM",
                                         "4:00PM", "5:00PM", "6:00PM", "7:00PM", "8:00PM", "9:00PM", "10:00PM", "11:00PM", "12:00AM"};
+
+        public string[] ScheduleHalfHourSlots = { "6:00AM", "6:30AM", "7:00AM", "7:30AM","8:00AM", "8:30AM","9:00AM", "9:30AM","10:00AM", "10:30AM",
+                                                  "11:00AM", "11:30AM","12:00PM","12:30PM", "1:00PM", "1:30PM", "2:00PM", "2:30PM", "3:00PM", "3:30PM",
+                                                  "4:00PM", "4:30PM", "5:00PM", "5:30PM", "6:00PM", "6:30PM", "7:00PM", "7:30PM", "8:00PM", "8:30PM",
+                                                  "9:00PM", "9:30PM", "10:00PM", "10:30PM", "11:00PM", "11:30PM", "12:00AM"};
 
         /// <summary>
         /// List of times for dropdown lists and start/end times for the week
@@ -231,11 +250,15 @@ namespace LaborNeedsScheduling.Models
         /// The most recent Saturday (the day before the current week)
         /// </summary>
         public static DateTime weekMarker = DateTime.Parse("05/09/2015"); //DateTime.Today.AddDays(-1 * (int)DayOfWeek.Saturday); //change later
+        //public static DateTime currentWeekMarker = DateTime.Today.AddDays(-1 * (int)DayOfWeek.Saturday);
+
+        DateTime currentWeekMarker = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
 
         /// <summary>
         /// Dates for the current week
         /// </summary>
         public DateTime[] CurrentWeekDates = new DateTime[7];
+        public DateTime[] NextWeekDates = new DateTime[7];
 
         /// <summary>
         /// The number of weeks to use for calculations
@@ -298,8 +321,6 @@ namespace LaborNeedsScheduling.Models
         {
             try
             {
-                //FakeAPI.dothething();
-
                 // weighting input
                 for (int i = 0; i < weekWeighting.Length; i++)
                 {
@@ -315,9 +336,9 @@ namespace LaborNeedsScheduling.Models
                     employeeListStore = FakeAPI.GetEmployeesForStore(currentStoreCode);
                 }
 
-                //GetEmployeesForStore();
                 GenerateCurrentWeekDates();
                 FakeAPI.AddNewWeekDates(CurrentWeekDates);
+                //FakeAPI.dothething(CurrentWeekDates);
 
                 GenerateWeeklyTimeSlots();
                 WTGTrafficPercent = FakeAPI.FillWTGTable(weekWeighting, NumberHistoricalWeeks, DateTime.Parse("2015-05-10"));
@@ -327,7 +348,6 @@ namespace LaborNeedsScheduling.Models
                 FillPercentWeeklyTable();
                 FillPercentDailyTable();
                 FillAllocatedHoursTable();
-                //FillCurrentWeekHoursTable();
                 FillPowerHourForecastTable();
                 GenerateAllocatedHoursDisplay();
                 GeneratePowerHourCells();
@@ -337,10 +357,7 @@ namespace LaborNeedsScheduling.Models
                     UpdateEmployees(employeeListStore);
                 }
 
-                //GenerateNumEmployeesNeeded(selectedWeekday, scheduling);
                 FillAssignmentTable(selectedWeekday);
-
-                //CheckSchedulingRules(selectedWeekday, scheduling);
             }
             catch (Exception ex)
             {
@@ -353,9 +370,10 @@ namespace LaborNeedsScheduling.Models
         /// </summary>
         public void GenerateCurrentWeekDates()
         {
-            for (int i = 1; i <= 7; i++)
+            for (int i = 0; i < 7; i++)
             {
-                CurrentWeekDates[i - 1] = weekMarker.AddDays(i);
+                CurrentWeekDates[i] = currentWeekMarker.AddDays(i);
+                NextWeekDates[i] = currentWeekMarker.AddDays(i + 7);
             }
         }
 
@@ -391,7 +409,55 @@ namespace LaborNeedsScheduling.Models
                 employeeIdsStore[i] = employeeListStore[i].id;
             }
 
+            FakeAPI.CheckForCurrentWeek(employeeListStore, CurrentWeekDates);
             EmployeeAvailableTimes = FakeAPI.GetEmployeeAvailableTimes(employeeIdsStore);
+            EmployeeTimeOffRequests = FakeAPI.GetEmployeeTimeOff(employeeIdsStore, CurrentWeekDates);
+            List<string> idList = new List<string>(EmployeeTimeOffRequests.Keys);
+
+            for (int i = 0; i < employeeListStore.Count; i++)
+            {
+                for (int n = 0; n < idList.Count; n++)
+                {
+                    if (employeeListStore[i].id == idList[n])
+                    {
+                        Dictionary<string, string[]> employeeAvailability = EmployeeAvailableTimes[idList[n]];
+                        Dictionary<DateTime, string[]> employeeTimeOff = EmployeeTimeOffRequests[idList[n]];
+
+                        for (int j = 0; j < CurrentWeekDates.Length; j++)
+                        {
+                            string currentDay = weekdays[j];
+                            DateTime currentDate = CurrentWeekDates[j];
+
+                            string[] dayAvailability = employeeAvailability[currentDay];
+                            string[] dayTimeOff = employeeTimeOff[currentDate];
+
+                            for (int h = 0; h < dayAvailability.Length; h++)
+                            {
+                                for (int m = 0; m < dayTimeOff.Length; m++)
+                                {
+                                    if (dayAvailability[h] == dayTimeOff[m])
+                                    {
+                                        dayAvailability[h] = "";
+                                    }
+                                }
+                            }
+
+                            var updatedTimes = new List<string>(dayAvailability);
+
+                            for (int k = dayAvailability.Length-1; k >= 0; k--) {
+                                if (dayAvailability[k] == "")
+                                {
+                                    updatedTimes.RemoveAt(k);
+                                }
+                            }
+
+                            employeeAvailability[currentDay] = updatedTimes.ToArray();
+                        }
+                        EmployeeAvailableTimes[idList[n]] = employeeAvailability;
+                    }
+                }
+            }
+
             EmployeeScheduledTimes = FakeAPI.GetEmployeeScheduledTimes(employeeIdsStore, CurrentWeekDates);
         }
 
@@ -1609,6 +1675,8 @@ namespace LaborNeedsScheduling.Models
             {
                 employeeIds[x] = scheduling[x].id;
             }
+
+            FakeAPI.CheckForCurrentWeek(scheduling, CurrentWeekDates);
             EmployeeScheduledTimes = FakeAPI.GetEmployeeScheduledTimes(employeeIds, CurrentWeekDates);
 
             //loop over each employee's (weekday) and check the hours that are selected - or all of them?
@@ -1915,7 +1983,7 @@ namespace LaborNeedsScheduling.Models
             }
 
             string[] updatedHours = FakeAPI.UpdateEmployeeSchedule(ScheduleStartHours.Keys.Count, employeeHours,
-                                    employeeId, CurrentWeekDates, EmployeeScheduledTimes[employeeId], selectedWeekday);
+                                    employeeId, CurrentWeekDates, NextWeekDates, EmployeeScheduledTimes[employeeId], selectedWeekday);
 
             Dictionary<string, string[]> employeeSchedule = EmployeeScheduledTimes[employeeId];
             employeeSchedule[daysOfWeek[selectedWeekday]] = updatedHours;

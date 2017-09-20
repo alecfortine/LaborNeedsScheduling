@@ -247,8 +247,14 @@
             @*@using (Html.BeginForm("LaborSchedule", "Home", FormMethod.Post))
                 {*@
             <div>
-                @*<p style="display:inline-block"><b>Schedule</b></p>*@ <b style="display:inline-block" id="employeeName">[select an employee]</b>
-
+                @if (Model.selectedEmployeeName == null)
+                {
+                    <b style="display:inline-block" id="employeeName">[select an employee]</b>
+                }
+                else
+                {
+                    <b style="display:inline-block" id="employeeName">Schedule @Model.selectedEmployeeName</b>
+                }
                 <br />
 
                 <div class="EmployeeScheduler">

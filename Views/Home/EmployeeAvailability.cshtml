@@ -13,10 +13,6 @@
 @model AvailabilityViewModel
 
 
-@{
-    ViewBag.Title = "EmployeeAvailability";
-}
-
 <head>
     <style>
         ::-moz-selection {
@@ -60,21 +56,9 @@
         <br />
         <hr />
         <br />
-        <br />
 
-        @*@using (Html.BeginForm("EmployeeAvailability", "Home", FormMethod.Post))
-            {*@
-        @*@using (Ajax.BeginForm("EmployeeAvailability", "Home",
-                                            new AjaxOptions
-                                            {
-                                                HttpMethod = "post",
-                                                InsertionMode = InsertionMode.Replace,
-                                                UpdateTargetId = "EmployeeAvailability",
-                                            },
-                                            new { id = "AvailabilityForm" }))
-            {*@
         <div id="EmployeeAvailability"></div>
-        <button type="button" onclick="updateSchedule()" style="float:right">Update</button><br>
+        @*<button type="button" onclick="updateSchedule()" style="float:right">Update</button><br>*@
 
         @Html.HiddenFor(m => Model.updatedSchedule, new { id = "hiddenUpdatedSchedule" })
         @Html.HiddenFor(m => Model.selectedEmployeeId, new { id = "hiddenSelectedEmployeeId" })
@@ -82,6 +66,7 @@
 
         @*}*@
     }
+
 </body>
 
 @section scripts
@@ -105,13 +90,14 @@
             document.getElementById("hiddenSelectedEmployeeId").value = selectedID;
 
             /* Request the partial view with .get request. */
-            $.get('/Home/EmployeeAvailabilityTable/?EmployeeId=' + selectedID, function (data) {
+            $.get('/Home/_EmployeeAvailabilityTable/?EmployeeId=' + selectedID, function (data) {
 
                 /* data is the pure html returned from action method, load it to your page */
                 $('#EmployeeAvailability').html(data);
                 /* little fade in effect */
                 $('#EmployeeAvailability').fadeIn('fast');
             });
+
 
         });
     </script>

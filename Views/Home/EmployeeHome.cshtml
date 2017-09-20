@@ -94,28 +94,34 @@
             padding: 20px;
             background-color: #8fff9a;
             color: black;
+            border-style: solid;
+            border-color: black;
+            border-width: .5px;
         }
 
         .denied {
             padding: 20px;
             background-color: #ff6868;
             color: black;
+            border-style: solid;
+            border-color: black;
+            border-width: .5px;
+        }
+
+        .closebtn:hover {
+            color: black;
         }
 
         .closebtn {
-            margin-left: 15px;
-            color: white;
+            margin-left: 30px;
+            color: #000000;
             font-weight: bold;
             float: right;
-            font-size: 22px;
+            font-size: 30px;
             line-height: 20px;
             cursor: pointer;
             transition: 0.3s;
         }
-
-            .closebtn:hover {
-                color: black;
-            }
     </style>
 
     <style>
@@ -375,22 +381,25 @@
         </div>*@
 
     <input id="messagesToggle" type="checkbox" class="messages">
-    <label for="messagesToggle" class="messages">@Model.EmployeeNotifications.Count New Messages</label>
+    @Html.HiddenFor(m => m.EmployeeNotifications.Count, new { id = "hiddenMessageCount" })
+    <label for="messagesToggle" class="messages" id="messages">@Model.EmployeeNotifications.Count Messages</label>
     <div id="expandMessages">
         <section>
             @foreach (EmployeeNotification e in Model.EmployeeNotifications)
             {
+                int messageId = e.messageId;
+
                 if (e.approved == true)
                 {
                     <div class="approved">
-                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                        <span class="closebtn" onclick="deleteMessage(@messageId)">&times;</span>
                         @e.message
                     </div>
                 }
                 else if (e.approved == false)
                 {
                     <div class="denied">
-                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                        <span class="closebtn" onclick="deleteMessage(@messageId)">&times;</span>
                         @e.message
                     </div>
                 }
@@ -398,28 +407,29 @@
         </section>
     </div>
 
-    <div class="white-body">
-        @if (Model.EmployeeNotifications != null)
-        {
-            foreach (EmployeeNotification e in Model.EmployeeNotifications)
+    @*<div class="white-body">
+            @if (Model.EmployeeNotifications != null)
             {
-                if (e.approved == true)
+                foreach (EmployeeNotification e in Model.EmployeeNotifications)
                 {
-                    <div class="approved">
-                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-                        @e.message
-                    </div>
-                }
-                else if (e.approved == false)
-                {
-                    <div class="denied">
-                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-                        @e.message
-                    </div>
+                    if (e.approved == true)
+                    {
+                        <div class="approved">
+                            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                            @e.message
+                        </div>
+                    }
+                    else if (e.approved == false)
+                    {
+                        <div class="denied">
+                            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                            @e.message
+                        </div>
+                    }
                 }
             }
-        }
-    </div>
+        </div>*@
+
     @*</div>*@
     <div id="fade" class="black_overlay"></div>
 
@@ -562,6 +572,29 @@
 
 @section scripts
 {
+    <script>
+        function deleteMessage(messageId) {
+            $.ajax({
+                url: '/Home/removeEmployeeMessage',
+                data: { messageId: messageId }
+            })
+            var messageCount = document.getElementById("hiddenMessageCount").value;
+            var messageCountUpdate = messageCount - 1;
+            document.getElementById("hiddenMessageCount").value = messageCountUpdate;
+
+            document.getElementById("messages").innerHTML = messageCountUpdate + ' Messages';
+        }
+    </script>
+
+    <script>
+        $(document).ready(function (c) {
+            $('.closebtn').on('click', function (c) {
+                $(this).parent().fadeOut(300, function (c) {
+                });
+            });
+        });
+    </script>
+
     <script>
         var cells = document.querySelectorAll("td");
 

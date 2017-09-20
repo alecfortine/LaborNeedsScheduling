@@ -22,6 +22,7 @@ namespace LaborNeedsScheduling.Models
                                     "4:00PM", "5:00PM", "6:00PM", "7:00PM", "8:00PM", "9:00PM", "10:00PM", "11:00PM", "12:00AM"};
         public List<string> startDates = new List<string>();
 
+        public string messageId { get; set; }
         public string created { get; set; }
         public int Id { get; set; }
         public string Name { get; set; }
@@ -31,16 +32,15 @@ namespace LaborNeedsScheduling.Models
         public string endTime { get; set; }
         public bool allDayCheck { get; set; }
         public string message { get; set; }
+        public DateTime[] CurrentWeekDates { get; set; }
 
-        public EmployeeModel(string LocationCode, string EmployeeID)
+        public EmployeeModel(string LocationCode, string EmployeeID, DateTime[] NextWeekDates)
         {
             ListOfEmployees = FakeAPI.GetAllEmployees();
 
-            EmployeeNotifications = FakeAPI.GetEmployeeMessages(EmployeeID);
+            EmployeeNotifications = FakeAPI.GetMessagesForEmployee(EmployeeID);
 
-            EmployeeSchedule = FakeAPI.GetEmployeeSchedule(EmployeeID);
-
-
+            EmployeeSchedule = FakeAPI.GetEmployeeSchedule(EmployeeID, NextWeekDates);
         }
 
         public EmployeeModel()
@@ -57,7 +57,7 @@ namespace LaborNeedsScheduling.Models
         /// <param name="endTime"></param>
         /// <param name="allDay"></param>
         /// <returns></returns>
-        public string CreateMessage(string name, string startDate, string endDate, string startTime, string endTime, bool allDay)
+        public string CreateMessage(string name, string startDate, string endDate, string startTime, string endTime)
         {
             string message = "";
             string startDay = Convert.ToDateTime(startDate).ToString("dddd");
@@ -72,7 +72,7 @@ namespace LaborNeedsScheduling.Models
             else
             {
                 // if condition to check if employee wants all day off
-                if (allDay == true)
+                if (startTime == "--" && endTime == "--")
                 {
                     message = name + " has requested the day off on " + startDate + " (" + startDay + ")";
                 }
@@ -108,7 +108,7 @@ namespace LaborNeedsScheduling.Models
         /// <param name="EmployeeID"></param>
         public void getMessages(string EmployeeID)
         {
-            //EmployeeNotifications = FakeAPI.CreateResponses(EmployeeID);
+            EmployeeNotifications = FakeAPI.GetMessagesForEmployee(EmployeeID);
         }
 
     }
@@ -134,8 +134,16 @@ namespace LaborNeedsScheduling.Models
     /// </summary>
     public class ManagerNotification
     {
+        public int messageId { get; set; }
+        public string created { get; set; }
         public string id { get; set; }
+        public string name { get; set; }
+        public string startDate { get; set; }
+        public string endDate { get; set; }
+        public string startTime { get; set; }
+        public string endTime { get; set; }
         public string message { get; set; }
+        //public string date { get; set; }
     }
 
     /// <summary>
@@ -143,6 +151,7 @@ namespace LaborNeedsScheduling.Models
     /// </summary>
     public class EmployeeNotification
     {
+        public int messageId { get; set; }
         public string name { get; set; }
         public string id { get; set; }
         public bool approved { get; set; }
