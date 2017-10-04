@@ -27,120 +27,219 @@
             width: 230px;
         }
 
-        .denied {
-            padding: 20px;
-            background-color: #ff6868;
-            color: black;
-            border-style: solid;
-            border-color: black;
-            border-width: .5px;
+            .approved:hover {
+                background-color: #64ff74;
+                cursor: pointer;
+            }
+    </style>
+
+    <style>
+        table.Schedule {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #dddddd;
+            text-align: left;
+            table-layout: fixed;
+            word-break: break-all;
+            margin-left: auto;
+            margin-right: auto;
+            empty-cells: show;
+            font-size: 12px;
+            user-select: none;
+        }
+
+        td:not(:first-child), th:not(:first-child) {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #000000;
+            user-select: none;
+            cursor: default;
+        }
+
+        td:first-child, th:first-child {
+            border: 1px solid #000000;
+            padding: 8px;
+            user-select: none;
+            cursor: default;
+            max-width: 100%;
+            white-space: nowrap;
         }
     </style>
 
-    @*<style>
-            .container {
-                display: flex;
-            }
-
-            .left, .right {
-                flex: 1;
-            }
-
-            .right {
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-            }
-        </style>*@
+    <style>
+        #WeekChange:hover {
+            color: #3a7575;
+            cursor: pointer;
+        }
+        .WeekChange{
+            user-select: none;
+        }
+    </style>
 
 </head>
 
 <body>
 
     <br />
-    <br />
-    <br />
-    <h1>Dashboard</h1>
-    <br />
+    <h1 style="text-align:center">Schedule</h1>
     <br />
 
-    <div style="display:inline-block">
-        <div>
-            <div class="approved">
-                <div style="font-size:x-large; text-align:center;">Edit Schedule</div>
-            </div>
-
-            <br />
-
-            <div class="approved">
-                <div style="font-size:x-large; text-align:center;">Create Schedule</div>
-            </div>
+        <div id="SelectedWeekDates" style="text-align:center">
+            <h2>Schedule for @Model.RequestedDates[0].ToShortDateString() - @Model.RequestedDates[6].ToShortDateString()</h2>
+            <div id="WeekChange" class="WeekChange" style="font-size: 18px; float:right;" onclick="OneWeekSchedule();CreateSchedule()">Next Week >></div> <br />
         </div>
-    </div>
 
-    <br />
-    <br />
-    <hr />
-    <br />
-
-    @*display employee schedule table*@
-    <div class="white-body">
-        <table border="1" cellpadding="5" id="weekhours" class="weekhours">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    @for (int i = 0; i < Model.CurrentWeekDates.Length; i++)
-                    {
-                        <th>@Model.CurrentWeekDates[i]</th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                @for (int i = 0; i < Model.ScheduleHalfHourSlots.Length; i++)
-                {
+    <div id="WeekSchedule">
+        <div class="white-body">
+            <table border="1" cellpadding="5" id="weekhours" class="Schedule">
+                <thead>
                     <tr>
-                        <td>@Model.ScheduleHalfHourSlots[i]</td>
-                        @{ List<string> employeesForHour = new List<string>();}
-                        @{ List<string> assignedEmployees = new List<string>();}
-                        @foreach (string employeeId in Model.AssignedEmployeesForWeek.Keys)
+                        <th>Time</th>
+                        @for (int i = 0; i < Model.CurrentWeekDates.Length; i++)
                         {
-                            assignedEmployees.Add(employeeId);
+                            <th>
+                                @Model.CurrentWeekDates[i].DayOfWeek
+                                <br />
+                                @Model.CurrentWeekDates[i].ToShortDateString()
+                            </th>
                         }
-                        @{List<string> dates = new List<string>();}
-                        @foreach (DateTime date in Model.CurrentWeekDates)
-                        {
-                            dates.Add(date.ToString());
-                        }
-                        @for (int m = 0; m < dates.Count; m++)
-                        {
-                            for (int n = 0; n < assignedEmployees.Count; n++)
+                        <th>Hours</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (Employees emp in Model.EmployeeListStore)
+                    {
+                        double weekHourAmount = 0;
+                        <tr>
+                            @{string name = emp.firstName + " " + emp.lastName;}
+                            <td>@name</td>
+                            @for (int n = 0; n < 7; n++)
                             {
-                                Dictionary<string, List<string>> employeeHours = Model.AssignedEmployeesForWeek[assignedEmployees[n]];
-
-                                string[] hours = employeeHours[dates[m]].ToArray();
-
-                                for (int h = 0; h < hours.Length; h++)
+                                List<string> startTime = new List<string>();
+                                List<string> endTime = new List<string>();
+                                for (int i = 0; i < Model.AssignedEmployeesRequestedWeek.Rows.Count; i++)
                                 {
-                                    if (hours[h] == Model.ScheduleHalfHourSlots[i])
+                                    if (emp.id == Model.AssignedEmployeesRequestedWeek.Rows[i][1].ToString() && Model.CurrentWeekDates[n] == Convert.ToDateTime(Model.AssignedEmployeesRequestedWeek.Rows[i][3]))
                                     {
-                                        employeesForHour.Add(assignedEmployees[n]);
+                                        bool block = false;
+                                        for (int m = 0; m < Model.ScheduleHalfHourSlots.Length; m++)
+                                        {
+                                            if (Model.AssignedEmployeesRequestedWeek.Rows[i][4].ToString() == Model.SQLHours[m])
+                                            {
+                                                startTime.Add(Model.ScheduleHalfHourSlots[m]);
+                                                block = true;
+                                            }
+                                            if (Model.AssignedEmployeesRequestedWeek.Rows[i][5].ToString() == Model.SQLHours[m])
+                                            {
+                                                endTime.Add(Model.ScheduleHalfHourSlots[m]);
+                                                block = false;
+                                            }
+                                            if (block == true)
+                                            {
+                                                weekHourAmount += .5;
+                                            }
+                                        }
                                     }
                                 }
+                                <td>
 
-                            }
-                            <td>
-                                @foreach (string emp in employeesForHour)
-                                {
-                                    @emp
+                                    @for (int m = 0; m < startTime.Count; m++)
+                                    {
+                                        <text>@startTime[m] - @endTime[m]</text>
                                         <br />
-                                }
-                            </td>
-                        }
-
-                    </tr>
+                                    }
+                                </td>
                             }
-            </tbody>
-        </table>
+                            <td>@weekHourAmount</td>
+                        </tr>
+                                }
+                </tbody>
+            </table>
+        </div>
     </div>
-
+    @Html.HiddenFor(m => Model.startdateRequested, new { id = "hiddenRequestedDate" })
 </body>
+
+@section scripts{
+
+    <script>
+        function CreateSchedule(){
+            var Date = document.getElementById("hiddenRequestedDate").value;
+
+            $.post('/Home/Dashboard',
+    {
+        RequestedDate: Date
+    },
+    function (data){
+        $('#WeekSchedule').html(data);
+    }
+    );
+        }
+    </script>
+
+<script>
+        function CurrentWeekSchedule() {
+            var CurrentWeekStartDate = @Html.Raw(Json.Encode(Model.startdateCurrentWeek));
+            var CurrentWeekEndDate = @Html.Raw(Json.Encode(Model.enddateCurrentWeek));
+
+            document.getElementById("SelectedWeekDates").innerHTML = "<h2>Schedule for " + CurrentWeekStartDate + " - " + CurrentWeekEndDate + "</h2><div id='WeekChange' class='WeekChange' style='font-size: 18px; float:right;' onclick='OneWeekSchedule();CreateSchedule()'>Next Week >></div> <br />";
+
+            document.getElementById("hiddenRequestedDate").value = CurrentWeekStartDate;
+        }
+</script>
+
+    <script>
+        function OneWeekSchedule() {
+            var OneWeekStartDate = @Html.Raw(Json.Encode(Model.startdateOneWeek));
+            var OneWeekEndDate = @Html.Raw(Json.Encode(Model.enddateOneWeek));
+
+            document.getElementById("SelectedWeekDates").innerHTML = "<h2>Schedule for " + OneWeekStartDate + " - " + OneWeekEndDate + "</h2><div id='WeekChange' class='WeekChange' style='font-size: 18px; float:left;' onclick='CurrentWeekSchedule();CreateSchedule()'><< Previous Week</div><div id='WeekChange' class='WeekChange' style='font-size: 18px; float:right;' onclick='TwoWeeksSchedule();CreateSchedule()'>Next Week >></div> <br />";
+           
+            document.getElementById("hiddenRequestedDate").value = OneWeekStartDate;
+        }
+    </script>
+
+    <script>
+        function TwoWeeksSchedule() {
+            var TwoWeeksStartDate = @Html.Raw(Json.Encode(Model.startdateTwoWeeks));
+            var TwoWeeksEndDate = @Html.Raw(Json.Encode(Model.enddateTwoWeeks));
+
+            document.getElementById("SelectedWeekDates").innerHTML = "<h2>Schedule for " + TwoWeeksStartDate + " - " + TwoWeeksEndDate + "</h2><div id='WeekChange' class='WeekChange' style='font-size: 18px; float:left;' onclick='OneWeekSchedule();CreateSchedule()'><< Previous Week</div> <div id='WeekChange' class='WeekChange' style='font-size: 18px; float:right;' onclick='ThreeWeeksSchedule();CreateSchedule()'>Next Week >></div> <br />";
+
+            document.getElementById("hiddenRequestedDate").value = TwoWeeksStartDate;
+        }
+    </script>
+
+    <script>
+        function ThreeWeeksSchedule() {
+            var ThreeWeeksStartDate = @Html.Raw(Json.Encode(Model.startdateThreeWeeks));
+            var ThreeWeeksEndDate = @Html.Raw(Json.Encode(Model.enddateThreeWeeks));
+
+            document.getElementById("SelectedWeekDates").innerHTML = "<h2>Schedule for " + ThreeWeeksStartDate + " - " + ThreeWeeksEndDate + "</h2><div id='WeekChange' class='WeekChange' style='font-size: 18px; float:left;' onclick='TwoWeeksSchedule();CreateSchedule()'><< Previous Week</div> <br />";
+
+            document.getElementById("hiddenRequestedDate").value = ThreeWeeksStartDate;
+        }
+    </script>
+
+    @*<script>
+        function NextWeekSchedule() {
+            $.get('/Home/_DashboardNextWeekSchedule', function (data) {
+
+                //load partial to page
+                $('#WeekSchedule').html(data);
+            });
+        }
+    </script>
+
+    <script>
+        function CurrentWeekSchedule() {
+            $.get('/Home/_DashboardCurrentWeekSchedule', function (data) {
+
+                //load partial to page
+                $('#WeekSchedule').html(data);
+            });
+        }
+    </script>*@
+
+}

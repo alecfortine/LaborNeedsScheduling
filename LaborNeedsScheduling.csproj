@@ -213,6 +213,7 @@
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\LaborScheduling.cs" />
     <Compile Include="Models\Configuration.cs" />
+    <Compile Include="Models\ManagerFunctionality.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
@@ -283,10 +284,16 @@
     <Content Include="Views\Home\_EmployeeAvailabilityTable.cshtml" />
     <Content Include="Views\Home\_LaborScheduleAssignmentView.cshtml" />
     <Content Include="Views\Home\_LaborScheduleEmployeeAvailability.cshtml" />
-    <Content Include="Views\Home\LaborScheduleHourAvailability.cshtml" />
+    <Content Include="Views\Home\_LaborScheduleHourAvailability.cshtml" />
     <Content Include="Views\Home\_LaborScheduleTable.cshtml" />
     <Content Include="Views\Home\_ManagerConfigFindEmployee.cshtml" />
     <Content Include="Views\Home\Dashboard.cshtml" />
+    <Content Include="Views\Home\LaborScheduleCurrentWeek.cshtml" />
+    <Content Include="Views\Home\_LaborScheduleTableCurrentWeek.cshtml" />
+    <Content Include="Views\Home\_DashboardCurrentWeekSchedule.cshtml" />
+    <Content Include="Views\Home\_DashboardTable.cshtml" />
+    <Content Include="Views\Home\ManagerFunctionality.cshtml" />
+    <Content Include="Views\Home\TimeOffRequest.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

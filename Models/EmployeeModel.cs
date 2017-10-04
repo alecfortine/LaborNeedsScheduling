@@ -16,6 +16,8 @@ namespace LaborNeedsScheduling.Models
         public static DataTable EmployeeSchedule { get; set; }
         public List<EmployeeTimeOffRequest> Requests { get; set; }
 
+        public string employeeId { get; set; }
+
         public string[] startTimes = {"--", "6:00AM", "7:00AM","8:00AM","9:00AM","10:00AM","11:00AM","12:00PM", "1:00PM", "2:00PM",
                                       "3:00PM", "4:00PM", "5:00PM", "6:00PM", "7:00PM", "8:00PM", "9:00PM", "10:00PM", "11:00PM"};
         public string[] endTimes = {"--", "7:00AM","8:00AM","9:00AM","10:00AM","11:00AM","12:00PM", "1:00PM", "2:00PM", "3:00PM",
@@ -180,7 +182,7 @@ namespace LaborNeedsScheduling.Models
         public string role { get; set; }
         public int rank { get; set; }
         public int hours { get; set; }
-        public int hoursRemaining { get; set; }
+        public double hoursRemaining { get; set; }
         public bool[] availableHours { get; set; }
         public bool[] scheduledHours { get; set; }
         public DataTable weeklySchedule { get; set; }

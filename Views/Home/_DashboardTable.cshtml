@@ -1,0 +1,88 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Diagnostics;
+@using System.Web.UI.HtmlControls;
+@using System.Data.Entity;
+@using LaborNeedsScheduling.Models
+@model Dashboard
+
+<body>
+
+    @*display employee schedule table*@
+    <div class="white-body">
+        <table border="1" cellpadding="5" id="weekhours" class="Schedule">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    @for (int i = 0; i < Model.RequestedDates.Length; i++)
+                    {
+                        <th>
+                            @Model.RequestedDates[i].DayOfWeek
+                            <br />
+                            @Model.RequestedDates[i].ToShortDateString()
+                        </th>
+                    }
+                    <th>Hours</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Employees emp in Model.EmployeeListStore)
+                {
+                    double weekHourAmount = 0;
+                    <tr>
+                        @{string name = emp.firstName + " " + emp.lastName;}
+                        <td>@name</td>
+                        @for (int n = 0; n < 7; n++)
+                        {
+                            List<string> startTime = new List<string>();
+                            List<string> endTime = new List<string>();
+                            for (int i = 0; i < Model.AssignedEmployeesRequestedWeek.Rows.Count; i++)
+                            {
+                                if (emp.id == Model.AssignedEmployeesRequestedWeek.Rows[i][1].ToString() && Model.RequestedDates[n] == Convert.ToDateTime(Model.AssignedEmployeesRequestedWeek.Rows[i][3]))
+                                {
+                                    bool block = false;
+                                    for (int m = 0; m < Model.ScheduleHalfHourSlots.Length; m++)
+                                    {
+                                        if (Model.AssignedEmployeesRequestedWeek.Rows[i][4].ToString() == Model.SQLHours[m])
+                                        {
+                                            startTime.Add(Model.ScheduleHalfHourSlots[m]);
+                                            block = true;
+                                        }
+                                        if (Model.AssignedEmployeesRequestedWeek.Rows[i][5].ToString() == Model.SQLHours[m])
+                                        {
+                                            endTime.Add(Model.ScheduleHalfHourSlots[m]);
+                                            block = false;
+                                        }
+                                        if (block == true)
+                                        {
+                                            weekHourAmount += .5;
+                                        }
+                                    }
+                                }
+                            }
+                            <td>
+
+                                @for (int m = 0; m < startTime.Count; m++)
+                                {
+                                    <text>@startTime[m] - @endTime[m]</text>
+                                    <br />
+                                }
+                            </td>
+
+                        }
+                        <td>@weekHourAmount</td>
+                    </tr>
+                            }
+            </tbody>
+        </table>
+
+    </div>
+
+</body>

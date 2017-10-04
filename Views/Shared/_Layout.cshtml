@@ -23,11 +23,12 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Employee Availability", "EmployeeAvailability", "Home")</li>
+                    <li>@Html.ActionLink("Home", "Dashboard", "Home")</li>
+                    <li>@Html.ActionLink("Time-Off Request", "TimeOffRequest", "Home")</li>
+                    <li>@Html.ActionLink("Manager Functions", "ManagerFunctionality", "Home")</li>
+                    @*<li>@Html.ActionLink("Employee Availability", "EmployeeAvailability", "Home")</li>
                     <li>@Html.ActionLink("Employee Home", "EmployeeHome", "Home")</li>
-                    @*<li>@Html.ActionLink("Grading", "Grading", "Home")</li>*@
-                    <li>@Html.ActionLink("Labor Schedule", "LaborSchedule", "Home")</li>
-                    <li>@Html.ActionLink("Manager Configuration", "ManagerConfiguration", "Home")</li>
+                    <li>@Html.ActionLink("Manager Configuration", "ManagerConfiguration", "Home")</li>*@
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>

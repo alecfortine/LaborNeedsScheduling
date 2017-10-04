@@ -12,24 +12,172 @@ namespace LaborNeedsScheduling.Controllers
 {
     public class HomeController : Controller
     {
+        public string StoreCode = "0001";
+
+        [HttpGet]
+        public ActionResult ManagerFunctionality()
+        {
+
+            return View();
+        }
         [HttpGet]
         public ActionResult Dashboard()
         {
             Dashboard Dash = new Dashboard();
 
+            string storecode = "0001";
+
             DateTime currentWeekMarker = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
             DateTime[] CurrentWeekDates = new DateTime[7];
-            DateTime[] NextWeekDates = new DateTime[7];
+            DateTime[] OneWeekFromNowDates = new DateTime[7];
+            DateTime[] TwoWeeksFromNowDates = new DateTime[7];
+            DateTime[] ThreeWeeksFromNowDates = new DateTime[7];
+
             for (int i = 0; i < 7; i++)
             {
                 CurrentWeekDates[i] = currentWeekMarker.AddDays(i);
-                NextWeekDates[i] = currentWeekMarker.AddDays(i + 7);
+                OneWeekFromNowDates[i] = currentWeekMarker.AddDays(i + 7);
+                TwoWeeksFromNowDates[i] = currentWeekMarker.AddDays(i + 14);
+                ThreeWeeksFromNowDates[i] = currentWeekMarker.AddDays(i + 21);
             }
 
             Dash.CurrentWeekDates = CurrentWeekDates;
-            Dash.AssignedEmployeesForWeek = FakeAPI.CreateConsolidatedSchedule(CurrentWeekDates);
+            Dash.OneWeekFromNowDates = OneWeekFromNowDates;
+            Dash.TwoWeeksFromNowDates = TwoWeeksFromNowDates;
+            Dash.ThreeWeeksFromNowDates = ThreeWeeksFromNowDates;
+
+            Dash.RequestedDates = CurrentWeekDates;
+            Dash.startdateCurrentWeek = Dash.CurrentWeekDates[0].ToShortDateString();
+            Dash.enddateCurrentWeek = Dash.CurrentWeekDates[6].ToShortDateString();
+            Dash.startdateOneWeek = Dash.OneWeekFromNowDates[0].ToShortDateString();
+            Dash.enddateOneWeek = Dash.OneWeekFromNowDates[6].ToShortDateString();
+            Dash.startdateTwoWeeks = Dash.TwoWeeksFromNowDates[0].ToShortDateString();
+            Dash.enddateTwoWeeks = Dash.TwoWeeksFromNowDates[6].ToShortDateString();
+            Dash.startdateThreeWeeks = Dash.ThreeWeeksFromNowDates[0].ToShortDateString();
+            Dash.enddateThreeWeeks = Dash.ThreeWeeksFromNowDates[6].ToShortDateString();
+
+
+            Dash.EmployeeListStore = FakeAPI.GetEmployeesForStore(storecode);
+            Dash.AssignedEmployeesRequestedWeek = FakeAPI.CreateConsolidatedSchedule(Dash.RequestedDates);
+
+            Session["Dashboard"] = Dash;
 
             return View(Dash);
+        }
+
+        [HttpPost]
+        public ActionResult Dashboard(Dashboard Dash, string RequestedDate)
+        {
+            Dash = (Dashboard)Session["DashBoard"];
+            Dash.startdateRequested = RequestedDate;
+
+            if (Dash.startdateRequested == Dash.startdateCurrentWeek)
+            {
+                Dash.RequestedDates = Dash.CurrentWeekDates;
+            }
+            else if (Dash.startdateRequested == Dash.startdateOneWeek)
+            {
+                Dash.RequestedDates = Dash.OneWeekFromNowDates;
+            }
+            else if (Dash.startdateRequested == Dash.startdateTwoWeeks)
+            {
+                Dash.RequestedDates = Dash.TwoWeeksFromNowDates;
+            }
+            else if (Dash.startdateRequested == Dash.startdateThreeWeeks)
+            {
+                Dash.RequestedDates = Dash.ThreeWeeksFromNowDates;
+            }
+            else
+            {
+                Dash.RequestedDates = Dash.OneWeekFromNowDates;
+            }
+
+            Dash.AssignedEmployeesRequestedWeek = FakeAPI.CreateConsolidatedSchedule(Dash.RequestedDates);
+
+            return PartialView("_DashboardTable", Dash);
+        }
+
+        [HttpGet]
+        public ActionResult _DashboardCurrentWeekSchedule()
+        {
+            Dashboard Dash = (Dashboard)Session["Dashboard"];
+
+            return PartialView("_DashboardCurrentWeekSchedule", Dash);
+        }
+        [HttpGet]
+        public ActionResult _DashboardNextWeekSchedule()
+        {
+            Dashboard Dash = (Dashboard)Session["Dashboard"];
+
+            return PartialView("_DashboardNextWeekSchedule", Dash);
+        }
+
+        [HttpGet]
+        public ActionResult TimeOffRequest()
+        {
+            EmployeeModel TimeOff = new EmployeeModel();
+            for (int i = 0; i < 14; i++)
+            {
+                TimeOff.startDates.Add(DateTime.Now.AddDays(i + 1).ToString("M/d/yyyy"));
+            }
+            TimeOff.ListOfEmployees = FakeAPI.GetAllEmployees();
+
+            return View("TimeOffRequest", TimeOff);
+        }
+
+        [HttpPost]
+        public ActionResult TimeOffRequest(EmployeeModel TimeOff, string employeeId)
+        {
+            EmployeeTimeOffRequest TimeOffRequest = new EmployeeTimeOffRequest();
+            List<Employees> ListOfEmployees = FakeAPI.GetAllEmployees();
+            
+            //string employeeId = (string)Session["EmployeeId"];
+            string employeeName = "";
+
+            // fill the dropdown with dates from the next two weeks
+            for (int i = 0; i < 14; i++)
+            {
+                TimeOff.startDates.Add(DateTime.Now.AddDays(i + 1).ToString("M/d/yyyy"));
+            }
+
+            // get employee name
+            foreach (var emp in ListOfEmployees)
+            {
+                if (emp.id == employeeId)
+                {
+                    employeeName = emp.firstName + " " + emp.lastName;
+                }
+            }
+
+            // set the time off request variables
+            TimeOffRequest.Id = employeeId;
+            TimeOffRequest.Name = employeeName;
+            TimeOffRequest.startDate = TimeOff.startDate;
+            TimeOffRequest.endDate = TimeOff.endDate;
+            TimeOffRequest.allDayCheck = TimeOff.allDayCheck;
+
+            if (TimeOff.allDayCheck == true)
+            {
+                TimeOffRequest.startTime = "--";
+                TimeOffRequest.endTime = "--";
+            }
+            else
+            {
+                TimeOffRequest.startTime = TimeOff.startTime;
+                TimeOffRequest.endTime = TimeOff.endTime;
+            }
+            TimeOffRequest.created = Convert.ToString(DateTime.Now);
+            TimeOffRequest.message = TimeOff.CreateMessage(TimeOffRequest.Name, TimeOffRequest.startDate, TimeOffRequest.endDate, TimeOffRequest.startTime, TimeOffRequest.endTime);
+
+            // submit the time off request to the database
+            TimeOff.submitTimeOffRequest(TimeOffRequest.created, TimeOffRequest.startDate, TimeOffRequest.endDate,
+                                                  TimeOffRequest.Name, TimeOffRequest.Id, TimeOffRequest.startTime, TimeOffRequest.endTime,
+                                                  TimeOffRequest.message);
+
+            //TimeOff = (EmployeeModel)Session["TimeOff"];
+            //TimeOff.getMessages(TimeOffRequest.Id);
+
+            return View("TimeOffRequest", TimeOff);
         }
 
         public ActionResult approveRequest(int messageId)
@@ -102,33 +250,33 @@ namespace LaborNeedsScheduling.Controllers
                 {
                     LaborSchedulingViewModel.ThisWeek.excludedDates = (string[])Session["UpdatedSchedule"];
                 }
-                if (ls.ThisWeek.MinEmployeesDefault == 0)
-                {
-                    ls.ThisWeek.MinEmployees = ls.ThisWeek.MinEmployeesDefault;
-                    Session["MinEmployeesDefault"] = ls.ThisWeek.MinEmployeesDefault;
-                }
-                else
-                {
-                    ls.ThisWeek.MinEmployees = (int)Session["MinEmployees"];
-                }
+                //if (ls.ThisWeek.MinEmployeesDefault == 0)
+                //{
+                //    ls.ThisWeek.MinEmployees = ls.ThisWeek.MinEmployeesDefault;
+                //    Session["MinEmployeesDefault"] = ls.ThisWeek.MinEmployeesDefault;
+                //}
+                //else
+                //{
+                //    ls.ThisWeek.MinEmployees = (int)Session["MinEmployees"];
+                //}
 
-                if (ls.ThisWeek.MaxEmployeesDefault == 0)
-                {
-                    ls.ThisWeek.MaxEmployees = ls.ThisWeek.MaxEmployeesDefault;
-                    Session["MaxEmployeesDefault"] = ls.ThisWeek.MaxEmployeesDefault;
-                }
-                else
-                {
-                    ls.ThisWeek.MaxEmployees = (int)Session["MaxEmployees"];
-                }
+                //if (ls.ThisWeek.MaxEmployeesDefault == 0)
+                //{
+                //    ls.ThisWeek.MaxEmployees = ls.ThisWeek.MaxEmployeesDefault;
+                //    Session["MaxEmployeesDefault"] = ls.ThisWeek.MaxEmployeesDefault;
+                //}
+                //else
+                //{
+                //    ls.ThisWeek.MaxEmployees = (int)Session["MaxEmployees"];
+                //}
 
                 ls.ThisWeek.excludedDates = ExcludedDates;
-                ls.ThisWeek.WeekStartHours = (string[])Session["WeekStartHours"];
-                ls.ThisWeek.WeekStartHours = (string[])Session["WeekEndHours"];
-                ls.ThisWeek.MinEmployeesDefault = (int)Session["MinEmployeesDefault"];
-                ls.ThisWeek.MaxEmployeesDefault = (int)Session["MaxEmployeesDefault"];
-                ls.ThisWeek.WeekdayPowerHours = (int)Session["WeekdayPowerHours"];
-                ls.ThisWeek.WeekendPowerHours = (int)Session["WeekendPowerHours"];
+                //ls.ThisWeek.WeekStartHours = (string[])Session["WeekStartHours"];
+                //ls.ThisWeek.WeekEndHours = (string[])Session["WeekEndHours"];
+                //ls.ThisWeek.MinEmployeesDefault = (int)Session["MinEmployeesDefault"];
+                //ls.ThisWeek.MaxEmployeesDefault = (int)Session["MaxEmployeesDefault"];
+                ls.ThisWeek.WeekdayPowerHours = FakeAPI.GetWeekdayPowerHours(StoreCode);
+                ls.ThisWeek.WeekendPowerHours = FakeAPI.GetWeekendPowerHours(StoreCode);
                 //ls.ThisWeek.NumberHistoricalWeeks = (int)Session["NumberHistoricalWeeks"];
                 ls.ThisWeek.WeekStartHours = (string[])Session["WeekStartHours"];
                 ls.ThisWeek.WeekEndHours = (string[])Session["WeekEndHours"];
@@ -163,7 +311,7 @@ namespace LaborNeedsScheduling.Controllers
                 }
                 if ((int)Session["MinEmployees"] == 0)
                 {
-                    ls.ThisWeek.MinEmployees = ls.ThisWeek.MinEmployeesDefault;
+                    ls.ThisWeek.MinEmployees = FakeAPI.GetMinEmployees(StoreCode);
                 }
                 else
                 {
@@ -172,7 +320,7 @@ namespace LaborNeedsScheduling.Controllers
 
                 if ((int)Session["MaxEmployees"] == 0)
                 {
-                    ls.ThisWeek.MaxEmployees = ls.ThisWeek.MaxEmployeesDefault;
+                    ls.ThisWeek.MaxEmployees = FakeAPI.GetMaxEmployees(StoreCode);
                 }
                 else
                 {
@@ -188,7 +336,7 @@ namespace LaborNeedsScheduling.Controllers
             }
             else
             {
-                LaborSchedulingViewModel.ThisWeek.weekWeighting = new double[6];
+                LaborSchedulingViewModel.ThisWeek.weekWeighting = new int[6];
                 LaborSchedulingViewModel.ThisWeek.currentStoreCode = StoreCode;
                 LaborSchedulingViewModel.ThisWeek.employeeStatus = isManager;
                 LaborSchedulingViewModel.ThisWeek.employeeListAll = FakeAPI.GetAllEmployees();
@@ -213,10 +361,10 @@ namespace LaborNeedsScheduling.Controllers
                     Session["WeekWeighting"] = LaborSchedulingViewModel.ThisWeek.weekWeighting;
                 }
 
-                if (LaborSchedulingViewModel.ThisWeek.MinEmployees == 0 && LaborSchedulingViewModel.ThisWeek.MinEmployeesDefault == 0)
+                if (LaborSchedulingViewModel.ThisWeek.MinEmployees == 0/* && LaborSchedulingViewModel.ThisWeek.MinEmployeesDefault == 0*/)
                 {
-                    LaborSchedulingViewModel.ThisWeek.MinEmployeesDefault = 3;
-                    LaborSchedulingViewModel.ThisWeek.MinEmployees = LaborSchedulingViewModel.ThisWeek.MinEmployeesDefault;
+                    //LaborSchedulingViewModel.ThisWeek.MinEmployeesDefault = 3;
+                    LaborSchedulingViewModel.ThisWeek.MinEmployees = FakeAPI.GetMinEmployees(StoreCode);
                     Session["MinEmployees"] = LaborSchedulingViewModel.ThisWeek.MinEmployees;
 
                 }
@@ -225,10 +373,10 @@ namespace LaborNeedsScheduling.Controllers
                     Session["MinEmployees"] = LaborSchedulingViewModel.ThisWeek.MinEmployees;
                 }
 
-                if (LaborSchedulingViewModel.ThisWeek.MaxEmployees == 0 && LaborSchedulingViewModel.ThisWeek.MaxEmployeesDefault == 0)
+                if (LaborSchedulingViewModel.ThisWeek.MaxEmployees == 0/* && LaborSchedulingViewModel.ThisWeek.MaxEmployeesDefault == 0*/)
                 {
-                    LaborSchedulingViewModel.ThisWeek.MaxEmployeesDefault = 20;
-                    LaborSchedulingViewModel.ThisWeek.MaxEmployees = LaborSchedulingViewModel.ThisWeek.MaxEmployeesDefault;
+                    //LaborSchedulingViewModel.ThisWeek.MaxEmployeesDefault = 20;
+                    LaborSchedulingViewModel.ThisWeek.MaxEmployees = FakeAPI.GetMaxEmployees(StoreCode);
                     Session["MaxEmployees"] = LaborSchedulingViewModel.ThisWeek.MaxEmployees;
                 }
                 else
@@ -238,37 +386,85 @@ namespace LaborNeedsScheduling.Controllers
 
                 LaborSchedulingViewModel.ThisWeek.CreateEmpAvailabilityText();
 
+
+                DateTime currentWeekMarker = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
+                DateTime[] OneWeekFromNowDates = new DateTime[7];
+                DateTime[] TwoWeeksFromNowDates = new DateTime[7];
+                DateTime[] ThreeWeeksFromNowDates = new DateTime[7];
+
+                for (int i = 0; i < 7; i++)
+                {
+                    OneWeekFromNowDates[i] = currentWeekMarker.AddDays(i + 7);
+                    TwoWeeksFromNowDates[i] = currentWeekMarker.AddDays(i + 14);
+                    ThreeWeeksFromNowDates[i] = currentWeekMarker.AddDays(i + 21);
+                }
+
+                LaborSchedulingViewModel.ThisWeek.OneWeekFromNowDates = OneWeekFromNowDates;
+                LaborSchedulingViewModel.ThisWeek.TwoWeeksFromNowDates = TwoWeeksFromNowDates;
+                LaborSchedulingViewModel.ThisWeek.ThreeWeeksFromNowDates = ThreeWeeksFromNowDates;
+
+                LaborSchedulingViewModel.ThisWeek.RequestedDates = OneWeekFromNowDates;
+                LaborSchedulingViewModel.ThisWeek.startdateOneWeek = LaborSchedulingViewModel.ThisWeek.OneWeekFromNowDates[0].ToShortDateString();
+                LaborSchedulingViewModel.ThisWeek.enddateOneWeek = LaborSchedulingViewModel.ThisWeek.OneWeekFromNowDates[6].ToShortDateString();
+                LaborSchedulingViewModel.ThisWeek.startdateTwoWeeks = LaborSchedulingViewModel.ThisWeek.TwoWeeksFromNowDates[0].ToShortDateString();
+                LaborSchedulingViewModel.ThisWeek.enddateTwoWeeks = LaborSchedulingViewModel.ThisWeek.TwoWeeksFromNowDates[6].ToShortDateString();
+                LaborSchedulingViewModel.ThisWeek.startdateThreeWeeks = LaborSchedulingViewModel.ThisWeek.ThreeWeeksFromNowDates[0].ToShortDateString();
+                LaborSchedulingViewModel.ThisWeek.enddateThreeWeeks = LaborSchedulingViewModel.ThisWeek.ThreeWeeksFromNowDates[6].ToShortDateString();
+
                 Session["lsView"] = LaborSchedulingViewModel;
 
                 return View(LaborSchedulingViewModel);
             }
         }
         [HttpPost]
-        public ActionResult LaborSchedule(LaborScheduling lsView)
+        public ActionResult LaborSchedule(LaborScheduling lsView, string RequestedDate)
         {
-            string starthour = lsView.ThisWeek.WeekStartHour;
-            string endhour = lsView.ThisWeek.WeekEndHour;
+            string requesteddate = lsView.ThisWeek.startdateRequested;
+            //string starthour = lsView.ThisWeek.WeekStartHour;
+            //string endhour = lsView.ThisWeek.WeekEndHour;
             string[] excludedDates = lsView.ExcludedDates;
             double payrollHours = lsView.ThisWeek.PayrollWeeklyHours;
-            int minEmps = lsView.ThisWeek.MinEmployees;
-            int maxEmps = lsView.ThisWeek.MaxEmployees;
+            //int minEmps = lsView.ThisWeek.MinEmployees;
+            //int maxEmps = lsView.ThisWeek.MaxEmployees;
+            int minEmps = FakeAPI.GetMinEmployees(StoreCode);
+            int maxEmps = FakeAPI.GetMaxEmployees(StoreCode);
+            //bool[] PowerHourCells = lsView.ThisWeek.PowerHourCells;
 
             lsView = (LaborScheduling)Session["lsView"];
 
-            lsView.ThisWeek.WeekStartHour = starthour;
-            lsView.ThisWeek.WeekEndHour = endhour;
+            if (requesteddate == lsView.ThisWeek.startdateOneWeek)
+            {
+                lsView.ThisWeek.RequestedDates = lsView.ThisWeek.OneWeekFromNowDates;
+            }
+            else if(requesteddate == lsView.ThisWeek.startdateTwoWeeks)
+            {
+                lsView.ThisWeek.RequestedDates = lsView.ThisWeek.TwoWeeksFromNowDates;
+            }
+            else if (requesteddate == lsView.ThisWeek.startdateThreeWeeks)
+            {
+                lsView.ThisWeek.RequestedDates = lsView.ThisWeek.ThreeWeeksFromNowDates;
+            }
+            else
+            {
+                lsView.ThisWeek.RequestedDates = lsView.ThisWeek.OneWeekFromNowDates;
+            }
+
+            //lsView.ThisWeek.WeekStartHour = starthour;
+            //lsView.ThisWeek.WeekEndHour = endhour;
             lsView.ThisWeek.excludedDates = excludedDates;
             lsView.ThisWeek.PayrollWeeklyHours = payrollHours;
             lsView.ThisWeek.MinEmployees = minEmps;
             lsView.ThisWeek.MaxEmployees = maxEmps;
+
+            //lsView.ThisWeek.PowerHourCells = PowerHourCells;
             lsView.ExcludedDates = excludedDates;
-            double[] oldWeighting = (double[])Session["WeekWeighting"];
+            int[] oldWeighting = (int[])Session["WeekWeighting"];
             lsView.ThisWeek.currentStoreCode = (string)Session["StoreCode"];
             lsView.ThisWeek.employeeStatus = (bool)Session["EmployeeStatus"];
 
             if (lsView.ThisWeek.weekWeighting.Length < 6)
             {
-                double[] weights = new double[6];
+                int[] weights = new int[6];
                 for (int i = 0; i < 6; i++)
                 {
                     if (i < lsView.ThisWeek.weekWeighting.Length)
@@ -314,7 +510,13 @@ namespace LaborNeedsScheduling.Controllers
                 lsView.ThisWeek.WeekendPowerHours = (int)Session["WeekendPowerHours"];
             }
 
-
+            //DateTime currentWeekMarker = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
+            //DateTime[] NextWeekDates = new DateTime[7];
+            //for (int i = 0; i < 7; i++)
+            //{
+            //    NextWeekDates[i] = currentWeekMarker.AddDays(i + 7);
+            //}
+            //lsView.ThisWeek.RequestedDates = NextWeekDates;
             lsView.ThisWeek.FillDatatables();
             lsView.ThisWeek.LaborSchedule = lsView.ThisWeek.AllocatedHoursDisplay;
             lsView.ThisWeek.HourSchedule = lsView.ThisWeek.CurrentWeekHours;
@@ -325,40 +527,41 @@ namespace LaborNeedsScheduling.Controllers
                 lsView.ThisWeek.GetBlackoutCells(lsView.ThisWeek.AllocatedHours);
             }
 
-            if (Session["MinEmployeesDefault"] != null && Session["MaxEmployeesDefault"] != null)
-            {
-                lsView.ThisWeek.MinEmployeesDefault = (int)Session["MinEmployeesDefault"];
-                lsView.ThisWeek.MaxEmployeesDefault = (int)Session["MaxEmployeesDefault"];
-            }
-            else
-            {
-                lsView.ThisWeek.MinEmployeesDefault = 3;
-                lsView.ThisWeek.MaxEmployeesDefault = 20;
-                Session["MinEmployeesDefault"] = lsView.ThisWeek.MinEmployeesDefault;
-                Session["MaxEmployeesDefault"] = lsView.ThisWeek.MaxEmployeesDefault;
-                lsView.ThisWeek.WeekdayPowerHours = 3;
-                lsView.ThisWeek.WeekendPowerHours = 4;
-                Session["WeekdayPowerHours"] = lsView.ThisWeek.WeekdayPowerHours;
-                Session["WeekendPowerHours"] = lsView.ThisWeek.WeekendPowerHours;
-            }
+            //if (Session["MinEmployeesDefault"] != null && Session["MaxEmployeesDefault"] != null)
+            //{
+            //    lsView.ThisWeek.MinEmployeesDefault = (int)Session["MinEmployeesDefault"];
+            //    lsView.ThisWeek.MaxEmployeesDefault = (int)Session["MaxEmployeesDefault"];
+            //}
+            //else
+            //{
+            //    lsView.ThisWeek.MinEmployeesDefault = 3;
+            //    lsView.ThisWeek.MaxEmployeesDefault = 20;
+            //    Session["MinEmployeesDefault"] = lsView.ThisWeek.MinEmployeesDefault;
+            //    Session["MaxEmployeesDefault"] = lsView.ThisWeek.MaxEmployeesDefault;
+            //    lsView.ThisWeek.WeekdayPowerHours = 3;
+            //    lsView.ThisWeek.WeekendPowerHours = 4;
+            //    Session["WeekdayPowerHours"] = lsView.ThisWeek.WeekdayPowerHours;
+            //    Session["WeekendPowerHours"] = lsView.ThisWeek.WeekendPowerHours;
+            //}
 
             //Session["MinEmployees"] = lsView.ThisWeek.MinEmployees;
             //Session["MaxEmployees"] = lsView.ThisWeek.MaxEmployees;
             Session["AssignmentTable"] = lsView.ThisWeek.AssignmentTable;
             Session["AllocatedHoursDisplay"] = lsView.ThisWeek.AllocatedHoursDisplay;
             Session["WeekWeighting"] = lsView.ThisWeek.weekWeighting;
+            lsView.ThisWeek.GetBlackoutCells(lsView.ThisWeek.AllocatedHoursDisplay);
 
-            if (lsView.ThisWeek.MinEmployeesDefault != 0 && lsView.ThisWeek.MaxEmployeesDefault != 0)
-            {
-                if (lsView.ThisWeek.MinEmployees > lsView.ThisWeek.MinEmployeesDefault)
-                {
-                    lsView.ThisWeek.MinEmployees = lsView.ThisWeek.MinEmployeesDefault;
-                }
-                if (lsView.ThisWeek.MaxEmployees < lsView.ThisWeek.MaxEmployeesDefault)
-                {
-                    lsView.ThisWeek.MaxEmployees = lsView.ThisWeek.MaxEmployeesDefault;
-                }
-            }
+            //if (lsView.ThisWeek.MinEmployeesDefault != 0 && lsView.ThisWeek.MaxEmployeesDefault != 0)
+            //{
+            //    if (lsView.ThisWeek.MinEmployees > lsView.ThisWeek.MinEmployeesDefault)
+            //    {
+            //        lsView.ThisWeek.MinEmployees = lsView.ThisWeek.MinEmployeesDefault;
+            //    }
+            //    if (lsView.ThisWeek.MaxEmployees < lsView.ThisWeek.MaxEmployeesDefault)
+            //    {
+            //        lsView.ThisWeek.MaxEmployees = lsView.ThisWeek.MaxEmployeesDefault;
+            //    }
+            //}
 
             Session["lsView"] = lsView;
 
@@ -381,6 +584,7 @@ namespace LaborNeedsScheduling.Controllers
                 ls.ThisWeek.BlackoutAssignmentView = ls.ThisWeek.GenerateBlackoutAssignmentView(selectedColumn);
             }
             ls.ThisWeek.CheckSchedulingRules(selectedColumn, ls.ThisWeek.employeeListStore);
+            ls.ThisWeek.AssignedEmployeesRequestedWeek = FakeAPI.CreateConsolidatedSchedule(ls.ThisWeek.RequestedDates);
 
             Session["LaborSchedulingPartial"] = ls;
 
@@ -389,7 +593,7 @@ namespace LaborNeedsScheduling.Controllers
             return PartialView("_LaborScheduleAssignmentView", ls);
         }
         [HttpPost]
-        public ActionResult _LaborScheduleAssignmentView(LaborScheduling ls, string employeeId, string startHour, string endHour)
+        public ActionResult _LaborScheduleAssignmentView(LaborScheduling ls, string employeeId, string startHour/*, string endHour*/)
         {
             //string selectedEmployeeId = ls.selectedEmployeeId;
             //string startHour = ls.ThisWeek.startHour;
@@ -399,9 +603,52 @@ namespace LaborNeedsScheduling.Controllers
 
             ls = (LaborScheduling)Session["LaborSchedulingPartial"];
 
+            ls.ThisWeek.employeeListStore = FakeAPI.GetEmployeesForStore(ls.ThisWeek.currentStoreCode);
             ls.ThisWeek.selectedEmployeeId = employeeId;
             ls.ThisWeek.startHour = startHour;
-            ls.ThisWeek.endHour = endHour;
+
+            foreach (Employees emp in ls.ThisWeek.employeeListStore)
+            {
+                if (emp.id == ls.ThisWeek.selectedEmployeeId)
+                {
+                    if (emp.rank < 50)
+                    {
+                        for (int i = 0; i < ls.ThisWeek.ScheduleHalfHourSlots.Length; i++)
+                        {
+                            if (ls.ThisWeek.ScheduleHalfHourSlots[i] == startHour)
+                            {
+                                if ((i + 8) > ls.ThisWeek.ScheduleHalfHourSlots.Length - 1)
+                                {
+                                    ls.ThisWeek.endHour = ls.ThisWeek.ScheduleHalfHourSlots[ls.ThisWeek.ScheduleHalfHourSlots.Length - 1];
+                                }
+                                else
+                                {
+                                    ls.ThisWeek.endHour = ls.ThisWeek.ScheduleHalfHourSlots[i + 7];
+                                }
+                            }
+                        }
+                    }
+                    else if (emp.rank >= 50)
+                    {
+                        for (int i = 0; i < ls.ThisWeek.ScheduleHalfHourSlots.Length; i++)
+                        {
+                            if (ls.ThisWeek.ScheduleHalfHourSlots[i] == startHour)
+                            {
+                                if ((i + 16) > ls.ThisWeek.ScheduleHalfHourSlots.Length - 1)
+                                {
+                                    ls.ThisWeek.endHour = ls.ThisWeek.ScheduleHalfHourSlots[ls.ThisWeek.ScheduleHalfHourSlots.Length - 1];
+                                }
+                                else
+                                {
+                                    ls.ThisWeek.endHour = ls.ThisWeek.ScheduleHalfHourSlots[i + 15];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //ls.ThisWeek.endHour = endHour;
             ls.UnassignTimes = unassignTimes;
 
             if (ls.ThisWeek.selectedEmployeeId != null)
@@ -409,6 +656,7 @@ namespace LaborNeedsScheduling.Controllers
                 LaborScheduling lsView = (LaborScheduling)Session["lsView"];
                 lsView.ThisWeek.EmployeeScheduledTimes = ls.ThisWeek.UpdateEmployees(ls.ThisWeek.employeeListStore);
                 ls.ThisWeek.CheckSchedulingRules(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
+                ls.ThisWeek.GenerateNumEmployeesNeeded(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
                 Session["lsView"] = lsView;
             }
 
@@ -426,6 +674,7 @@ namespace LaborNeedsScheduling.Controllers
             }
             //ls.ThisWeek.GenerateNumEmployeesNeeded(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
             ls.ThisWeek.AssignmentView = ls.ThisWeek.GenerateAssignmentView(ls.ThisWeek.selectedWeekday);
+            ls.ThisWeek.AssignedEmployeesRequestedWeek = FakeAPI.CreateConsolidatedSchedule(ls.ThisWeek.RequestedDates);
 
             return PartialView("_LaborScheduleAssignmentView", ls);
         }
@@ -456,7 +705,7 @@ namespace LaborNeedsScheduling.Controllers
             //ls.UnassignTimes = unassignTimes;
             int selectedWeekday = ls.ThisWeek.selectedWeekday;
 
-            FakeAPI.UnassignEmployee(unassignTimes, employeeId, ls.ThisWeek.selectedWeekday, ls.ThisWeek.EmployeeScheduledTimes, ls.ThisWeek.CurrentWeekDates);
+            FakeAPI.UnassignEmployee(unassignTimes, employeeId, ls.ThisWeek.selectedWeekday, ls.ThisWeek.EmployeeScheduledTimes, ls.ThisWeek.RequestedDates);
 
             string[] employeeIdsAll = new string[LaborScheduling.EmployeeListAll.Count];
             string[] employeeIdsStore = new string[LaborScheduling.EmployeeListStore.Count];
@@ -466,7 +715,7 @@ namespace LaborNeedsScheduling.Controllers
                 employeeIdsStore[i] = LaborScheduling.EmployeeListStore[i].id;
             }
 
-            ls.ThisWeek.EmployeeScheduledTimes = FakeAPI.GetEmployeeScheduledTimes(employeeIdsAll, ls.ThisWeek.NextWeekDates);
+            //ls.ThisWeek.EmployeeScheduledTimes = FakeAPI.GetEmployeeScheduledTimes(employeeIdsAll, ls.ThisWeek.NextWeekDates);
             ls.ThisWeek.GenerateNumEmployeesNeeded(selectedWeekday, ls.ThisWeek.employeeListStore);
             ls.selectedEmployeeId = employeeId;
             foreach (Employees emp in ls.ThisWeek.employeeListStore)
@@ -478,11 +727,13 @@ namespace LaborNeedsScheduling.Controllers
             }
             ls.ThisWeek.GenerateNumEmployeesNeeded(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
             ls.ThisWeek.AssignmentView = ls.ThisWeek.GenerateAssignmentView(ls.ThisWeek.selectedWeekday);
+            ls.ThisWeek.CheckSchedulingRules(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
+            ls.ThisWeek.AssignedEmployeesRequestedWeek = FakeAPI.CreateConsolidatedSchedule(ls.ThisWeek.RequestedDates);
 
             return PartialView("_LaborScheduleAssignmentView", ls);
         }
         [HttpGet]
-        public ActionResult LaborScheduleHourAvailability(LaborScheduling ls, int selectedHour)
+        public ActionResult _LaborScheduleHourAvailability(LaborScheduling ls, int selectedHour)
         {
             ls = (LaborScheduling)Session["lsView"];
 
@@ -491,7 +742,7 @@ namespace LaborNeedsScheduling.Controllers
 
             ls.ThisWeek.GetEmployeesForHour(ls.ThisWeek.employeeListStore, weekday, hour);
 
-            return PartialView("LaborScheduleHourAvailability", ls);
+            return PartialView("_LaborScheduleHourAvailability", ls);
         }
 
 
@@ -662,120 +913,162 @@ namespace LaborNeedsScheduling.Controllers
             string StoreCode = "0001"; // change to be set by the login
             string EmployeeId = "9999"; // change to be set by the login
 
-            bool scheduleExists = false;
+            //bool scheduleExists = false;
             LaborScheduling ManagerConfig = (LaborScheduling)Session["ManagerConfig"];
             LaborScheduling ls = new LaborScheduling();
-            bool EmployeeStatus = false;
+            //bool EmployeeStatus = false;
             List<Employees> storeEmployees = FakeAPI.GetEmployeesForStore(StoreCode);
-            foreach (Employees emp in storeEmployees)
+            //foreach (Employees emp in storeEmployees)
+            //{
+            //    if (emp.id == EmployeeId)
+            //    {
+            //        if (emp.rank == 50 || emp.rank == 60)
+            //        {
+            //            EmployeeStatus = true;
+            //        }
+            //    }
+            //}
+            //Session["EmployeeStatus"] = EmployeeStatus;
+
+            //ls = (LaborScheduling)Session["lsView"];
+            ls.ThisWeek.WeekStartEndHours = FakeAPI.GetStoreHours(StoreCode);
+            List<string> OpenHours = new List<string>();
+            List<string> CloseHours = new List<string>();
+
+            for (int n = 0; n < 7; n++)
             {
-                if (emp.id == EmployeeId)
+                for (int j = 0; j < ls.ThisWeek.ScheduleHalfHourSlots.Length; j++)
                 {
-                    if (emp.rank == 50 || emp.rank == 60)
+                    if (ls.ThisWeek.WeekStartEndHours.Rows[0][n].ToString() == ls.ThisWeek.ScheduleHalfHourSlots[j])
                     {
-                        EmployeeStatus = true;
+                        OpenHours.Add(ls.ThisWeek.ScheduleHalfHourSlots[j]);
+                    }
+                    if (ls.ThisWeek.WeekStartEndHours.Rows[1][n].ToString() == ls.ThisWeek.ScheduleHalfHourSlots[j])
+                    {
+                        CloseHours.Add(ls.ThisWeek.ScheduleHalfHourSlots[j]);
                     }
                 }
             }
-            Session["EmployeeStatus"] = EmployeeStatus;
+            ls.ThisWeek.WeekStartHours = OpenHours.ToArray();
+            ls.ThisWeek.WeekEndHours = CloseHours.ToArray();
 
-            ls = (LaborScheduling)Session["lsView"];
-            if (ls.ThisWeek.AllocatedHours.Rows.Count > 0)
-            {
-                scheduleExists = true;
-            }
-            if (EmployeeStatus == false)
-            {
-                LaborScheduling employee = new LaborScheduling();
-                employee.ThisWeek.employeeStatus = EmployeeStatus;
-                return View(employee);
-            }
-            else
-            {
-                if (ManagerConfig != null)
-                {
-                    StoreCode = (string)Session["StoreCode"];
-                    EmployeeStatus = (bool)Session["EmployeeStatus"];
+            ls.ThisWeek.MinEmployees = FakeAPI.GetMinEmployees(StoreCode);
+            ls.ThisWeek.MaxEmployees = FakeAPI.GetMaxEmployees(StoreCode);
 
-                    ls.ThisWeek.WeekStartHours = ManagerConfig.ThisWeek.WeekStartHours;
-                    ls.ThisWeek.WeekEndHours = ManagerConfig.ThisWeek.WeekEndHours;
-                    ls.ThisWeek.MinEmployeesDefault = ManagerConfig.ThisWeek.MinEmployeesDefault;
-                    ls.ThisWeek.MaxEmployeesDefault = ManagerConfig.ThisWeek.MaxEmployeesDefault;
-                    ls.ThisWeek.WeekdayPowerHours = ManagerConfig.ThisWeek.WeekdayPowerHours;
-                    ls.ThisWeek.WeekendPowerHours = ManagerConfig.ThisWeek.WeekendPowerHours;
-                    ls.ThisWeek.NumberHistoricalWeeks = ManagerConfig.ThisWeek.NumberHistoricalWeeks;
-                    ls.ThisWeek.employeeListStore = FakeAPI.GetEmployeesForStore(StoreCode);
-                    ls.ThisWeek.employeeStatus = EmployeeStatus;
+            ls.ThisWeek.WeekdayPowerHours = FakeAPI.GetWeekdayPowerHours(StoreCode);
+            ls.ThisWeek.WeekendPowerHours = FakeAPI.GetWeekendPowerHours(StoreCode);
 
-                    Session["lsView"] = ls;
+            //if (ls.ThisWeek.AllocatedHours.Rows.Count > 0)
+            //{
+            //    scheduleExists = true;
+            //}
+            //if (EmployeeStatus == false)
+            //{
+            //    LaborScheduling employee = new LaborScheduling();
+            //    employee.ThisWeek.employeeStatus = EmployeeStatus;
+            //    return View(employee);
+            //}
+            //else
+            //{
+            //if (ManagerConfig != null)
+            //{
+            //    StoreCode = (string)Session["StoreCode"];
+            //    EmployeeStatus = (bool)Session["EmployeeStatus"];
 
-                    return View(ls);
-                }
-                else if (scheduleExists == true)
-                {
-                    StoreCode = (string)Session["StoreCode"];
-                    EmployeeStatus = (bool)Session["EmployeeStatus"];
+            //    ls.ThisWeek.WeekStartHours = ManagerConfig.ThisWeek.WeekStartHours;
+            //    ls.ThisWeek.WeekEndHours = ManagerConfig.ThisWeek.WeekEndHours;
+            //    //ls.ThisWeek.MinEmployeesDefault = ManagerConfig.ThisWeek.MinEmployeesDefault;
+            //    //ls.ThisWeek.MaxEmployeesDefault = ManagerConfig.ThisWeek.MaxEmployeesDefault;
+            //    ls.ThisWeek.WeekdayPowerHours = ManagerConfig.ThisWeek.WeekdayPowerHours;
+            //    ls.ThisWeek.WeekendPowerHours = ManagerConfig.ThisWeek.WeekendPowerHours;
+            //    ls.ThisWeek.NumberHistoricalWeeks = ManagerConfig.ThisWeek.NumberHistoricalWeeks;
+            //    ls.ThisWeek.employeeListStore = FakeAPI.GetEmployeesForStore(StoreCode);
+            //    ls.ThisWeek.employeeStatus = EmployeeStatus;
 
-                    if (ls.ThisWeek.MinEmployeesDefault == 0)
-                    {
-                        ls.ThisWeek.MinEmployeesDefault = 3;
-                    }
-                    if (ls.ThisWeek.MaxEmployeesDefault == 0)
-                    {
-                        ls.ThisWeek.MaxEmployeesDefault = 20;
-                    }
-                    if (ls.ThisWeek.WeekdayPowerHours == 0)
-                    {
-                        ls.ThisWeek.WeekdayPowerHours = 3;
-                    }
-                    if (ls.ThisWeek.WeekendPowerHours == 0)
-                    {
-                        ls.ThisWeek.WeekendPowerHours = 4;
-                    }
-                    //ls.ThisWeek.employeeListStore = FakeAPI.GetEmployeesForStore(StoreCode);
-                    ls.ThisWeek.employeeStatus = EmployeeStatus;
+            //    Session["lsView"] = ls;
 
-                    return View(ls);
-                }
-                else
-                {
-                    return View(ls);
-                }
-            }
+            //    return View(ls);
+            //}
+            //else if (scheduleExists == true)
+            //{
+            //    StoreCode = (string)Session["StoreCode"];
+            //    EmployeeStatus = (bool)Session["EmployeeStatus"];
+
+            //    //if (ls.ThisWeek.MinEmployeesDefault == 0)
+            //    //{
+            //    //    ls.ThisWeek.MinEmployeesDefault = 3;
+            //    //}
+            //    //if (ls.ThisWeek.MaxEmployeesDefault == 0)
+            //    //{
+            //    //    ls.ThisWeek.MaxEmployeesDefault = 20;
+            //    //}
+            //    if (ls.ThisWeek.WeekdayPowerHours == 0)
+            //    {
+            //        ls.ThisWeek.WeekdayPowerHours = 3;
+            //    }
+            //    if (ls.ThisWeek.WeekendPowerHours == 0)
+            //    {
+            //        ls.ThisWeek.WeekendPowerHours = 4;
+            //    }
+            //    //ls.ThisWeek.employeeListStore = FakeAPI.GetEmployeesForStore(StoreCode);
+            //    ls.ThisWeek.employeeStatus = EmployeeStatus;
+
+            //    return View(ls);
+            //}
+            //else
+            //{
+            return View(ls);
+            //}
+            //}
         }
         [HttpPost]
         public ActionResult ManagerConfiguration(LaborScheduling ls)
         {
             DataTable AllocatedHours = (DataTable)Session["AllocatedHoursDisplay"];
 
-            ls.ThisWeek.weekWeighting = (double[])Session["WeekWeighting"];
+            ls.ThisWeek.weekWeighting = FakeAPI.GetWeekWeighting(ls.ThisWeek.NumberHistoricalWeeks, StoreCode);
+            //ls.ThisWeek.weekWeighting = (int[])Session["WeekWeighting"];
 
+            //if (ls.ThisWeek.AllocatedHours != null)
+            //{
+            //    ls.ThisWeek.GetBlackoutCells(AllocatedHours);
+            //    Session["BlackoutCells"] = ls.ThisWeek.BlackoutTimes;
             if (ls.ThisWeek.WeekStartHours != null)
             {
-                ls.ThisWeek.GetBlackoutCells(AllocatedHours);
-                Session["BlackoutCells"] = ls.ThisWeek.BlackoutTimes;
                 Session["WeekStartHours"] = ls.ThisWeek.WeekStartHours;
                 Session["WeekEndHours"] = ls.ThisWeek.WeekEndHours;
+                ls.ThisWeek.WeekStartHours = (string[])Session["WeekStartHours"];
+                ls.ThisWeek.WeekEndHours = (string[])Session["WeekEndHours"];
+                FakeAPI.UpdateStoreHours("0001", ls.ThisWeek.WeekStartHours, ls.ThisWeek.WeekEndHours);
             }
-
-            if (ls.ThisWeek.MinEmployeesDefault != 0 && ls.ThisWeek.MaxEmployeesDefault != 0)
+            if (ls.ThisWeek.WeekdayPowerHours != 0)
             {
-                Session["MinEmployeesDefault"] = ls.ThisWeek.MinEmployeesDefault;
-                Session["MaxEmployeesDefault"] = ls.ThisWeek.MaxEmployeesDefault;
                 Session["WeekdayPowerHours"] = ls.ThisWeek.WeekdayPowerHours;
                 Session["WeekendPowerHours"] = ls.ThisWeek.WeekendPowerHours;
+                FakeAPI.UpdateWeekdayPowerHours(ls.ThisWeek.WeekdayPowerHours, StoreCode);
+                FakeAPI.UpdateWeekendPowerHours(ls.ThisWeek.WeekendPowerHours, StoreCode);
+                FakeAPI.UpdateMinEmployees(ls.ThisWeek.MinEmployees, StoreCode);
+                FakeAPI.UpdateMaxEmployees(ls.ThisWeek.MaxEmployees, StoreCode);
                 Session["NumberHistoricalWeeks"] = ls.ThisWeek.NumberHistoricalWeeks;
             }
+            //}
 
-            ls = (LaborScheduling)Session["lsView"];
-            ls.ThisWeek.WeekStartHours = (string[])Session["WeekStartHours"];
-            ls.ThisWeek.WeekEndHours = (string[])Session["WeekEndHours"];
-            ls.ThisWeek.weekWeighting = (double[])Session["WeekWeighting"];
-            ls.ThisWeek.MinEmployeesDefault = (int)Session["MinEmployeesDefault"];
-            ls.ThisWeek.MaxEmployeesDefault = (int)Session["MaxEmployeesDefault"];
-            ls.ThisWeek.WeekdayPowerHours = (int)Session["WeekdayPowerHours"];
-            ls.ThisWeek.WeekendPowerHours = (int)Session["WeekendPowerHours"];
-            ls.ThisWeek.BlackoutTimes = (DataTable)Session["BlackoutCells"];
+            //if (ls.ThisWeek.WeekdayPowerHours != 0 && ls.ThisWeek.WeekendPowerHours != 0)
+            //{
+            //    //Session["MinEmployeesDefault"] = ls.ThisWeek.MinEmployeesDefault;
+            //    //Session["MaxEmployeesDefault"] = ls.ThisWeek.MaxEmployeesDefault;
+            //    Session["WeekdayPowerHours"] = ls.ThisWeek.WeekdayPowerHours;
+            //    Session["WeekendPowerHours"] = ls.ThisWeek.WeekendPowerHours;
+            //    Session["NumberHistoricalWeeks"] = ls.ThisWeek.NumberHistoricalWeeks;
+            //}
+
+            //ls = (LaborScheduling)Session["lsView"];
+            //ls.ThisWeek.weekWeighting = (int[])Session["WeekWeighting"];
+            //ls.ThisWeek.MinEmployeesDefault = (int)Session["MinEmployeesDefault"];
+            //ls.ThisWeek.MaxEmployeesDefault = (int)Session["MaxEmployeesDefault"];
+            //ls.ThisWeek.WeekdayPowerHours = FakeAPI.GetWeekdayPowerHours(StoreCode);
+            //ls.ThisWeek.WeekendPowerHours = FakeAPI.GetWeekendPowerHours(StoreCode);
+            //ls.ThisWeek.BlackoutTimes = (DataTable)Session["BlackoutCells"];
             Session["ManagerConfig"] = ls;
             //session for ls ?
 
@@ -784,7 +1077,7 @@ namespace LaborNeedsScheduling.Controllers
         [HttpGet]
         public ActionResult _ManagerConfigFindEmployee(LaborScheduling ls, string EmployeeInfo)
         {
-            ls = (LaborScheduling)Session["lsView"];
+            //ls = (LaborScheduling)Session["lsView"];
 
             DataTable foundEmployee = ls.ThisWeek.FindEmployee(EmployeeInfo);
 
@@ -802,7 +1095,7 @@ namespace LaborNeedsScheduling.Controllers
         [HttpPost]
         public ActionResult _ManagerConfigFindEmployee(LaborScheduling ls, bool AddEmployee)
         {
-            ls = (LaborScheduling)Session["lsView"];
+            //ls = (LaborScheduling)Session["lsView"];
 
             string employeeId = (string)Session["FoundEmployee"];
             ls.ThisWeek.AddEmployeeToList(employeeId);
@@ -812,7 +1105,319 @@ namespace LaborNeedsScheduling.Controllers
         }
 
 
+        [HttpGet]
+        public ActionResult LaborScheduleCurrentWeek()
+        {
+            //FakeAPI.dothething();
 
+            string StoreCode = "0001"; // change to be set by the login
+            string EmployeeId = "9999"; // change to be set by the login
+            bool isManager = false;
+            List<Employees> storeEmployees = new List<Employees>();
+            if ((List<Employees>)Session["UpdatedEmployeeListStore"] != null)
+            {
+                storeEmployees = (List<Employees>)Session["UpdatedEmployeeListStore"];
+            }
+            else
+            {
+                storeEmployees = FakeAPI.GetEmployeesForStore(StoreCode);
+            }
+            foreach (Employees emp in storeEmployees)
+            {
+                if (emp.id == EmployeeId)
+                {
+                    if (emp.rank == 50 || emp.rank == 60)
+                    {
+                        isManager = true;
+                    }
+                }
+            }
+
+            Session["StoreCode"] = StoreCode;
+            Session["EmployeeId"] = EmployeeId;
+            Session["EmployeeStatus"] = isManager;
+
+            LaborScheduling LaborSchedulingViewModel = new LaborScheduling();
+            Session["LaborSchedulingViewModel"] = LaborSchedulingViewModel;
+
+            LaborScheduling ls = (LaborScheduling)Session["lsView"];
+            string[] ExcludedDates = (string[])Session["UpdatedSchedule"];
+
+            if (ls != null && Session["ManagerConfig"] != null)
+            {
+                if (Session["UpdatedExclusions"] == null)
+                {
+                    LaborSchedulingViewModel.ThisWeek.excludedDates = (string[])Session["UpdatedSchedule"];
+                }
+                //if (ls.ThisWeek.MinEmployeesDefault == 0)
+                //{
+                //    ls.ThisWeek.MinEmployees = ls.ThisWeek.MinEmployeesDefault;
+                //    Session["MinEmployeesDefault"] = ls.ThisWeek.MinEmployeesDefault;
+                //}
+                //else
+                //{
+                //    ls.ThisWeek.MinEmployees = (int)Session["MinEmployees"];
+                //}
+
+                //if (ls.ThisWeek.MaxEmployeesDefault == 0)
+                //{
+                //    ls.ThisWeek.MaxEmployees = ls.ThisWeek.MaxEmployeesDefault;
+                //    Session["MaxEmployeesDefault"] = ls.ThisWeek.MaxEmployeesDefault;
+                //}
+                //else
+                //{
+                //    ls.ThisWeek.MaxEmployees = (int)Session["MaxEmployees"];
+                //}
+
+                ls.ThisWeek.excludedDates = ExcludedDates;
+                ls.ThisWeek.WeekStartHours = (string[])Session["WeekStartHours"];
+                ls.ThisWeek.WeekStartHours = (string[])Session["WeekEndHours"];
+                //ls.ThisWeek.MinEmployeesDefault = (int)Session["MinEmployeesDefault"];
+                //ls.ThisWeek.MaxEmployeesDefault = (int)Session["MaxEmployeesDefault"];
+                ls.ThisWeek.WeekdayPowerHours = (int)Session["WeekdayPowerHours"];
+                ls.ThisWeek.WeekendPowerHours = (int)Session["WeekendPowerHours"];
+                //ls.ThisWeek.NumberHistoricalWeeks = (int)Session["NumberHistoricalWeeks"];
+                ls.ThisWeek.WeekStartHours = (string[])Session["WeekStartHours"];
+                ls.ThisWeek.WeekEndHours = (string[])Session["WeekEndHours"];
+                ls.ThisWeek.BlackoutTimes = (DataTable)Session["BlackoutCells"];
+
+                if (ls.ThisWeek.weekWeighting[0] == 0)
+                {
+                    for (int i = 0; i < ls.ThisWeek.NumberHistoricalWeeks; i++)
+                    {
+                        ls.ThisWeek.weekWeighting[i] = ls.ThisWeek.getDefaultWeights(ls.ThisWeek.NumberHistoricalWeeks)[i];
+                    }
+                }
+
+                Session["WeekWeighting"] = ls.ThisWeek.weekWeighting;
+
+                ls = (LaborScheduling)Session["lsView"];
+
+                //ls.ThisWeek.GetBlackoutCells();
+                ls.ThisWeek.GeneratePowerHourCells();
+
+                return View(ls);
+            }
+            else if (ls != null)
+            {
+                ls.ThisWeek.currentStoreCode = StoreCode;
+                ls.ThisWeek.employeeStatus = isManager;
+                ls.ThisWeek.employeeListStore = storeEmployees;
+
+                if (Session["UpdatedExclusions"] == null)
+                {
+                    LaborSchedulingViewModel.ThisWeek.excludedDates = (string[])Session["UpdatedExclusions"];
+                }
+                if ((int)Session["MinEmployees"] == 0)
+                {
+                    ls.ThisWeek.MinEmployees = FakeAPI.GetMinEmployees(StoreCode);
+                }
+                else
+                {
+                    ls.ThisWeek.MinEmployees = (int)Session["MinEmployees"];
+                }
+
+                if ((int)Session["MaxEmployees"] == 0)
+                {
+                    ls.ThisWeek.MaxEmployees = FakeAPI.GetMaxEmployees(StoreCode);
+                }
+                else
+                {
+                    ls.ThisWeek.MaxEmployees = (int)Session["MaxEmployees"];
+                }
+
+                ls.ThisWeek.excludedDates = ExcludedDates;
+                ls.ManagerMessageList = LaborSchedulingViewModel.ManagerMessageList;
+                //ls = (LaborScheduling)Session["lsView"];
+                Session["lsView"] = ls;
+
+                return View(ls);
+            }
+            else
+            {
+                LaborSchedulingViewModel.ThisWeek.weekWeighting = new int[6];
+                LaborSchedulingViewModel.ThisWeek.currentStoreCode = StoreCode;
+                LaborSchedulingViewModel.ThisWeek.employeeStatus = isManager;
+                LaborSchedulingViewModel.ThisWeek.employeeListAll = FakeAPI.GetAllEmployees();
+                LaborSchedulingViewModel.ThisWeek.employeeListStore = storeEmployees;
+
+                if (Session["UpdatedExclusions"] == null)
+                {
+                    LaborSchedulingViewModel.ThisWeek.excludedDates = (string[])Session["UpdatedExclusions"];
+                }
+
+                if (LaborSchedulingViewModel.ThisWeek.NumberHistoricalWeeks == 0)
+                {
+                    LaborSchedulingViewModel.ThisWeek.NumberHistoricalWeeks = LaborSchedulingViewModel.ThisWeek.DefaultHistoricalWeeks;
+                }
+
+                if (LaborSchedulingViewModel.ThisWeek.weekWeighting[0] == 0)
+                {
+                    for (int i = 0; i < LaborSchedulingViewModel.ThisWeek.NumberHistoricalWeeks; i++)
+                    {
+                        LaborSchedulingViewModel.ThisWeek.weekWeighting[i] = LaborSchedulingViewModel.ThisWeek.getDefaultWeights(LaborSchedulingViewModel.ThisWeek.NumberHistoricalWeeks)[i];
+                    }
+                    Session["WeekWeighting"] = LaborSchedulingViewModel.ThisWeek.weekWeighting;
+                }
+
+                if (LaborSchedulingViewModel.ThisWeek.MinEmployees == 0/* && LaborSchedulingViewModel.ThisWeek.MinEmployeesDefault == 0*/)
+                {
+                    //LaborSchedulingViewModel.ThisWeek.MinEmployeesDefault = 3;
+                    LaborSchedulingViewModel.ThisWeek.MinEmployees = FakeAPI.GetMinEmployees(StoreCode);
+                    Session["MinEmployees"] = LaborSchedulingViewModel.ThisWeek.MinEmployees;
+
+                }
+                else
+                {
+                    Session["MinEmployees"] = LaborSchedulingViewModel.ThisWeek.MinEmployees;
+                }
+
+                if (LaborSchedulingViewModel.ThisWeek.MaxEmployees == 0/* && LaborSchedulingViewModel.ThisWeek.MaxEmployeesDefault == 0*/)
+                {
+                    //LaborSchedulingViewModel.ThisWeek.MaxEmployeesDefault = 20;
+                    LaborSchedulingViewModel.ThisWeek.MaxEmployees = FakeAPI.GetMaxEmployees(StoreCode);
+                    Session["MaxEmployees"] = LaborSchedulingViewModel.ThisWeek.MaxEmployees;
+                }
+                else
+                {
+                    Session["MaxEmployees"] = LaborSchedulingViewModel.ThisWeek.MaxEmployees;
+                }
+
+                LaborSchedulingViewModel.ThisWeek.CreateEmpAvailabilityText();
+
+                Session["lsView"] = LaborSchedulingViewModel;
+
+                return View(LaborSchedulingViewModel);
+            }
+        }
+        [HttpPost]
+        public ActionResult LaborScheduleCurrentWeek(LaborScheduling lsView)
+        {
+            string starthour = lsView.ThisWeek.WeekStartHour;
+            string endhour = lsView.ThisWeek.WeekEndHour;
+            string[] excludedDates = lsView.ExcludedDates;
+            double payrollHours = lsView.ThisWeek.PayrollWeeklyHours;
+            int minEmps = lsView.ThisWeek.MinEmployees;
+            int maxEmps = lsView.ThisWeek.MaxEmployees;
+
+            lsView = (LaborScheduling)Session["lsView"];
+
+            lsView.ThisWeek.WeekStartHour = starthour;
+            lsView.ThisWeek.WeekEndHour = endhour;
+            lsView.ThisWeek.excludedDates = excludedDates;
+            lsView.ThisWeek.PayrollWeeklyHours = payrollHours;
+            lsView.ThisWeek.MinEmployees = minEmps;
+            lsView.ThisWeek.MaxEmployees = maxEmps;
+            lsView.ExcludedDates = excludedDates;
+            int[] oldWeighting = (int[])Session["WeekWeighting"];
+            lsView.ThisWeek.currentStoreCode = (string)Session["StoreCode"];
+            lsView.ThisWeek.employeeStatus = (bool)Session["EmployeeStatus"];
+
+            if (lsView.ThisWeek.weekWeighting.Length < 6)
+            {
+                int[] weights = new int[6];
+                for (int i = 0; i < 6; i++)
+                {
+                    if (i < lsView.ThisWeek.weekWeighting.Length)
+                    {
+                        weights[i] = (lsView.ThisWeek.weekWeighting[i]);
+                    }
+                    else
+                    {
+                        weights[i] = (oldWeighting[i]);
+                    }
+                }
+                lsView.ThisWeek.weekWeighting = weights;
+            }
+
+            //if (lsView.ExcludedDates != null)
+            //{
+            if (lsView.ExcludeDates(lsView.ExcludedDates)[0] == "" || lsView.ExcludeDates(lsView.ExcludedDates)[0] == "System.String[]")
+            {
+                lsView.ExcludedDates = new string[lsView.ThisWeek.ExclusionDates.Count];
+                for (int i = 0; i < lsView.ThisWeek.ExclusionDates.Count; i++)
+                {
+                    lsView.ExcludedDates[i] = "False";
+                }
+
+                lsView.ThisWeek.excludedDates = lsView.ExcludedDates;
+            }
+            else if (Session["UpdatedExclusions"] == null)
+            {
+                Session["UpdatedSchedule"] = lsView.ExcludeDates(lsView.ExcludedDates);
+                lsView.ThisWeek.excludedDates = lsView.ExcludeDates(lsView.ExcludedDates);
+                Session["UpdatedExclusions"] = lsView.ThisWeek.excludedDates;
+            }
+            else
+            {
+                lsView.ThisWeek.excludedDates = lsView.ExcludeDates(lsView.ExcludedDates);
+                Session["UpdatedExclusions"] = lsView.ThisWeek.excludedDates;
+            }
+            //}
+
+            if (Session["WeekdayPowerHours"] != null)
+            {
+                lsView.ThisWeek.WeekdayPowerHours = (int)Session["WeekdayPowerHours"];
+                lsView.ThisWeek.WeekendPowerHours = (int)Session["WeekendPowerHours"];
+            }
+
+            DateTime currentWeekMarker = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
+            DateTime[] CurrentWeekDates = new DateTime[7];
+            for (int i = 0; i < 7; i++)
+            {
+                CurrentWeekDates[i] = currentWeekMarker.AddDays(i);
+            }
+            lsView.ThisWeek.RequestedDates = CurrentWeekDates;
+            lsView.ThisWeek.FillDatatables();
+            lsView.ThisWeek.LaborSchedule = lsView.ThisWeek.AllocatedHoursDisplay;
+            lsView.ThisWeek.HourSchedule = lsView.ThisWeek.CurrentWeekHours;
+            if ((string[])Session["WeekStartHours"] != null && (string[])Session["WeekEndHours"] != null)
+            {
+                lsView.ThisWeek.WeekStartHours = (string[])Session["WeekStartHours"];
+                lsView.ThisWeek.WeekEndHours = (string[])Session["WeekEndHours"];
+                lsView.ThisWeek.GetBlackoutCells(lsView.ThisWeek.AllocatedHours);
+            }
+
+            //if (Session["MinEmployeesDefault"] != null && Session["MaxEmployeesDefault"] != null)
+            //{
+            //    lsView.ThisWeek.MinEmployeesDefault = (int)Session["MinEmployeesDefault"];
+            //    lsView.ThisWeek.MaxEmployeesDefault = (int)Session["MaxEmployeesDefault"];
+            //}
+            //else
+            //{
+            //    lsView.ThisWeek.MinEmployeesDefault = 3;
+            //    lsView.ThisWeek.MaxEmployeesDefault = 20;
+            //    Session["MinEmployeesDefault"] = lsView.ThisWeek.MinEmployeesDefault;
+            //    Session["MaxEmployeesDefault"] = lsView.ThisWeek.MaxEmployeesDefault;
+            //    lsView.ThisWeek.WeekdayPowerHours = 3;
+            //    lsView.ThisWeek.WeekendPowerHours = 4;
+            //    Session["WeekdayPowerHours"] = lsView.ThisWeek.WeekdayPowerHours;
+            //    Session["WeekendPowerHours"] = lsView.ThisWeek.WeekendPowerHours;
+            //}
+
+            //Session["MinEmployees"] = lsView.ThisWeek.MinEmployees;
+            //Session["MaxEmployees"] = lsView.ThisWeek.MaxEmployees;
+            Session["AssignmentTable"] = lsView.ThisWeek.AssignmentTable;
+            Session["AllocatedHoursDisplay"] = lsView.ThisWeek.AllocatedHoursDisplay;
+            Session["WeekWeighting"] = lsView.ThisWeek.weekWeighting;
+
+            //if (lsView.ThisWeek.MinEmployeesDefault != 0 && lsView.ThisWeek.MaxEmployeesDefault != 0)
+            //{
+            //    if (lsView.ThisWeek.MinEmployees > lsView.ThisWeek.MinEmployeesDefault)
+            //    {
+            //        lsView.ThisWeek.MinEmployees = lsView.ThisWeek.MinEmployeesDefault;
+            //    }
+            //    if (lsView.ThisWeek.MaxEmployees < lsView.ThisWeek.MaxEmployeesDefault)
+            //    {
+            //        lsView.ThisWeek.MaxEmployees = lsView.ThisWeek.MaxEmployeesDefault;
+            //    }
+            //}
+
+            Session["lsView"] = lsView;
+
+            //return View(lsView);
+            return PartialView("_LaborScheduleTableCurrentWeek", lsView);
+        }
 
 
         public ActionResult Grading()

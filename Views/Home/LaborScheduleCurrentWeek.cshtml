@@ -239,7 +239,7 @@
         .left-element {
             display: inline;
             float: left;
-            margin-left: 10px;
+            margin-left: 30px;
         }
 
         .right-element {
@@ -476,14 +476,9 @@
             white-space: nowrap;
         }
     </style>
-
-    <style>
-        #WeekChange:hover {
-            color: #3a7575;
-            cursor: pointer;
-        }
-    </style>
 </head>
+
+
 
 <body>
     @if (Model.ThisWeek.employeeStatus == false)
@@ -497,14 +492,10 @@
     else
     {
         <br />
-        <div id="SelectedWeekDates" style="text-align:center; user-select: none;">
-            <h2>Create Schedule (@Model.ThisWeek.RequestedDates[0].ToShortDateString() - @Model.ThisWeek.RequestedDates[6].ToShortDateString())</h2>
-            <div id="WeekChange" style="font-size: 18px; float:right;" onclick="TwoWeeksSchedule()">Next Week >></div> <br />
-        </div>
+
+        <h2>Edit Schedule (@Model.ThisWeek.CurrentWeekDates[0].ToShortDateString() - @Model.ThisWeek.CurrentWeekDates[6].ToShortDateString())</h2>
+
         <br>
-        @*<a href="/Home/LaborSchedule" style="text-decoration: none;">*@
-        @*<div id="WeekChange" style="font-size: 18px; float:right;" onclick="NextWeekSchedule()">Next Week >></div> <br />*@
-        @*</a>*@
         <br>
 
         <input id="toggle" type="checkbox" class="messages">
@@ -529,175 +520,194 @@
         <br />
         <br />
 
-
-        using (Ajax.BeginForm("LaborSchedule", "Home", new AjaxOptions
-        {
-            HttpMethod = "post",
-            InsertionMode = InsertionMode.Replace,
-            UpdateTargetId = "LaborScheduleTable",
-            OnBegin = "return checkInp()"
-        },
-        new { id = "ScheduleForm" }))
-        {
-            <div style="overflow:auto">
-                <div class="left-element" @*style="border-style: solid; border-width: 1px;"*@>
-                    <div style="padding: 20px;">
-                        <div>
-                            <div class="left-element">
-                                <label>Weekly Hours: </label><br />
-                                @*<label>Minimum Employees: </label><br />
-                                    <label>Maximum Employees: </label><br />*@
-                            </div>
-
-                            <div class="left-element">
-                                @Html.TextBoxFor(m => m.ThisWeek.PayrollWeeklyHours, new { id = "weeklyHours", style = "width:50px;" })
-                                @*@if (Model.ThisWeek.MinEmployeesDefault != 0 && Model.ThisWeek.MaxEmployeesDefault != 0)
-                                    {
-                                        if (Model.ThisWeek.MinEmployees > Model.ThisWeek.MinEmployeesDefault)
-                                        {
-                                            Model.ThisWeek.MinEmployees = Model.ThisWeek.MinEmployeesDefault;
-                                        }
-                                        if (Model.ThisWeek.MaxEmployees < Model.ThisWeek.MaxEmployeesDefault)
-                                        {
-                                            Model.ThisWeek.MaxEmployees = Model.ThisWeek.MaxEmployeesDefault;
-                                        }
-
-                                        @Html.TextBoxFor(Model => Model.ThisWeek.MinEmployees, new { id = "minEmps", style = "width:50px;" })<br>
-                                        @Html.TextBoxFor(Model => Model.ThisWeek.MaxEmployees, new { id = "maxEmps", style = "width:50px;" })<br>
-                                    }
-                                    else
-                                    {
-                                        @Html.TextBoxFor(Model => Model.ThisWeek.MinEmployees, new { id = "minEmps", style = "width:50px;" })<br>
-                                        @Html.TextBoxFor(Model => Model.ThisWeek.MaxEmployees, new { id = "maxEmps", style = "width:50px;" })<br>
-                                    }*@
-
-                                <button type="submit" id="LaborScheduleButton" style="display:inline-block; margin-left: 30px;" onclick="CreateSchedule()">Update</button><br>
-                            </div>
+        @*@using (Html.BeginForm("LaborSchedule", "Home", FormMethod.Post, new { name = "ScheduleForm", onsubmit = "return checkInp()" }))
+            {*@
+        @*@using (Ajax.BeginForm(new AjaxOptions
+            {
+                HttpMethod = "post",
+                InsertionMode = InsertionMode.Replace,
+                UpdateTargetId = "LaborScheduleTable",
+                OnBegin = "checkInp()"
+            }
+                    ))*@
+    using (Ajax.BeginForm("LaborScheduleCurrentWeek", "Home", new AjaxOptions
+    {
+        HttpMethod = "post",
+        InsertionMode = InsertionMode.Replace,
+        UpdateTargetId = "LaborScheduleTable",
+        OnBegin = "return checkInp()"
+    },
+                    new { id = "ScheduleForm" }))
+    {
+        <div style="overflow:auto">
+            <div class="left-element" style="border-style: solid; border-width: 1px;">
+                <div style="padding: 20px;">
+                    <div>
+                        <div class="left-element">
+                            <label>Weekly Hours: </label><br />
+                            <label>Minimum Employees: </label><br />
+                            <label>Maximum Employees: </label><br />
                         </div>
 
-                        @*Exclude dates lightbox*@
-                        <div style="display:inline-block; padding-top: 10%;">
-                            @*<button type="button" style="width:200px;" onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Exclude Dates</button>*@
-                            <div id="light" class="white_content">
-                                <div class="white-header">
-                                    <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
-
-                                </div>
-                                <div class="white-body">
-                                    <h4 style="padding-left:15px;">
-                                        Choose dates to exclude from the past
-                                        @Model.ThisWeek.NumberHistoricalWeeks
-                                        weeks:
-                                    </h4>
-                                    @{List<string> dates = new List<string>();}
-                                    @{List<bool> bools = new List<bool>();}
-
-                                    @foreach (KeyValuePair<DateTime, bool> kvp in Model.ThisWeek.ExclusionDates)
-                                    {
-                                        string strDate = kvp.Key.ToString("MM/dd");
-                                        dates.Add(strDate);
-                                        bools.Add(kvp.Value);
-                                    }
-                                    <table class="ExcludedDates" id="ExcludedDates" border="1" cellpadding="5">
-                                        <tbody>
-                                            @{int counter = 0;}
-                                            @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
-                                            {
-                                                <tr>
-                                                    @for (int n = 0; n < 7; n++)
-                                                    {
-                                                        if (bools[n + counter] == true)
-                                                        {
-                                                            <td class="ExcludedTrue" onclick="changeCell(this)">
-                                                                @dates[n + counter]
-                                                                @*<br />
-                                                                    @bools[n + counter]*@
-                                                            </td>
-                                                        }
-                                                        else
-                                                        {
-                                                            <td class="ExcludedFalse" onclick="changeCell(this)">
-                                                                @dates[n + counter]
-                                                                @*<br />
-                                                                    @bools[n + counter]*@
-                                                            </td>
-                                                        }
-                                                    }
-                                                </tr>
-                                                {
-                                                    counter += 7;
-                                                }
-                                            }
-                                        </tbody>
-                                    </table>
-
-                                    <br />
-                                    <br />
-
-                                    <div style="float:right; padding-right: 10%;">
-                                        <button type="submit">Update</button><br>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="fade" class="black_overlay"></div>
-                        </div>
-
-                        <br />
-
-                        @*<div style="display:inline-block; padding-top: 10%">
-                                Week Hours: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHour, new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHour, new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key")) <br />
-                            </div>*@
-                    </div>
-                </div>
-
-                @*<div class="right-element" style="border-style: solid; border-width: 1px; text-align: center;">
-                    <div style="padding: 20px;">
-                        <div style="float:left">
-                            <label>Weeks: </label>
-                                @Html.DropDownListFor(m => Model.ThisWeek.NumberHistoricalWeeks, new SelectList(new List<Object> { 6, 5, 4, 3, 2, 1 }, Model.ThisWeek.NumberHistoricalWeeks))
-                        </div>*@
-
-
-                        @*<label>Week Weighting: </label><br />
-
-                            @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
+                        <div class="left-element" style="padding-left: 15px;">
+                            @Html.TextBoxFor(m => m.ThisWeek.PayrollWeeklyHours, new { id = "weeklyHours", style = "width:50px;" })<br>
+                            @*@if (Model.ThisWeek.MinEmployeesDefault != 0 && Model.ThisWeek.MaxEmployeesDefault != 0)
                             {
-                                <div style="float:left">
-                                    @{int weekCounter = (i + 1);
-                                    }
-                                    <label>@Html.Raw((i + 1).ToString()): &nbsp;</label>
-                                    @Html.TextBoxFor(m => Model.ThisWeek.weekWeighting[i], new { id = "week" + weekCounter, style = "width:25px;text-align:center;" })
-                                    <text>%</text>
-                                </div>
-                                <br>
-                                        }*@
+                                if (Model.ThisWeek.MinEmployees > Model.ThisWeek.MinEmployeesDefault)
+                                {
+                                    Model.ThisWeek.MinEmployees = Model.ThisWeek.MinEmployeesDefault;
+                                }
+                                if (Model.ThisWeek.MaxEmployees < Model.ThisWeek.MaxEmployeesDefault)
+                                {
+                                    Model.ThisWeek.MaxEmployees = Model.ThisWeek.MaxEmployeesDefault;
+                                }
 
-                        @*<button type="submit" name="id" value="" id="LaborScheduleButton" style="margin-top: 30px;" onclick="CreateSchedule()">Update</button><br>
-                        <br />
+                                @Html.TextBoxFor(Model => Model.ThisWeek.MinEmployees, new { id = "minEmps", style = "width:50px;" })<br>
+                                @Html.TextBoxFor(Model => Model.ThisWeek.MaxEmployees, new { id = "maxEmps", style = "width:50px;" })<br>
+                            }
+                            else
+                            {
+                                @Html.TextBoxFor(Model => Model.ThisWeek.MinEmployees, new { id = "minEmps", style = "width:50px;" })<br>
+                                @Html.TextBoxFor(Model => Model.ThisWeek.MaxEmployees, new { id = "maxEmps", style = "width:50px;" })<br>
+                            }*@
+                        </div>
                     </div>
-                </div>*@
+
+                    @*Exclude dates lightbox*@
+                    <div style="display:inline-block; padding-top: 10%;">
+                        <button type="button" style="width:200px;" onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Exclude Dates</button>
+                        <div id="light" class="white_content">
+                            <div class="white-header">
+                                <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
+
+                            </div>
+                            <div class="white-body">
+                                <h4 style="padding-left:15px;">
+                                    Choose dates to exclude from the past
+                                    @Model.ThisWeek.NumberHistoricalWeeks
+                                    weeks:
+                                </h4>
+                                @{List<string> dates = new List<string>();}
+                                @{List<bool> bools = new List<bool>();}
+
+                                @foreach (KeyValuePair<DateTime, bool> kvp in Model.ThisWeek.ExclusionDates)
+                                {
+                                    string strDate = kvp.Key.ToString("MM/dd");
+                                    dates.Add(strDate);
+                                    bools.Add(kvp.Value);
+                                }
+                                <table class="ExcludedDates" id="ExcludedDates" border="1" cellpadding="5">
+                                    <tbody>
+                                        @{int counter = 0;}
+                                        @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
+                                        {
+                                            <tr>
+                                                @for (int n = 0; n < 7; n++)
+                                                {
+                                                    if (bools[n + counter] == true)
+                                                    {
+                                                        <td class="ExcludedTrue" onclick="changeCell(this)">
+                                                            @dates[n + counter]
+                                                            @*<br />
+                                                                @bools[n + counter]*@
+                                                        </td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="ExcludedFalse" onclick="changeCell(this)">
+                                                            @dates[n + counter]
+                                                            @*<br />
+                                                                @bools[n + counter]*@
+                                                        </td>
+                                                    }
+                                                }
+                                            </tr>
+                                            {
+                                                counter += 7;
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+
+                                <br />
+                                <br />
+
+                                <div style="float:right; padding-right: 10%;">
+                                    <button type="submit">Update</button><br>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="fade" class="black_overlay"></div>
+                    </div>
+
+                    <br />
+
+                    @*<div style="display:inline-block; padding-top: 10%">
+                        Week Hours: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHour, new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHour, new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key")) <br />
+                    </div>*@
+                </div>
             </div>
 
-            <br />
-            <br />
+            <div class="right-element" style="border-style: solid; border-width: 1px; text-align: center;">
+                <div style="padding: 20px;">
+                    <div style="float:left">
+                        <label>Weeks: </label>
+                        @*@Html.TextBoxFor(m => Model.ThisWeek.NumberHistoricalWeeks, new { id = "weeks", style = "width:25px;text-align:center;" })<br />*@
+                        @Html.DropDownListFor(m => Model.ThisWeek.NumberHistoricalWeeks, new SelectList(
+new List<Object> { 6, 5, 4, 3, 2, 1 }, Model.ThisWeek.NumberHistoricalWeeks))
+                    </div>
 
-            <div id="LaborScheduleTable"></div>
-            <div id="AssignmentTablePartial"></div>
+                    <br />
+                    <br />
+                    <label>Week Weighting: </label><br />
+
+                    @*<input id="toggle" type="checkbox" class="messages">
+                        <label for="toggle" class="messages">@Model.ManagerMessageList.Count New Messages</label>
+                        <div id="expand">
+                            <section></section>
+                        </div>*@
+
+                    @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
+                    {
+                        <div style="float:left">
+                            @{int weekCounter = (i + 1);
+                            }
+                            <label>@Html.Raw((i + 1).ToString()): &nbsp;</label>
+                            @Html.TextBoxFor(m => Model.ThisWeek.weekWeighting[i], new { id = "week" + weekCounter, style = "width:25px;text-align:center;" })
+                            <text>%</text>
+                        </div>
+                        <br>
+                                }
+                    <br />
+                    <br />
+
+                    <button type="submit" name="id" value="value" id="LaborScheduleButton" style="margin-top: 30px;">Update</button><br>
+                    <br />
+                </div>
+            </div>
+        </div>
+
+        <br />
+        <br />
+
+        <div id="LaborScheduleTable"></div>
+        <div id="AssignmentTablePartial"></div>
 
             @Html.HiddenFor(m => m.ThisWeek.selectedEmployee, new { id = "hiddenEmployeeName" })
-                                                @Html.HiddenFor(m => Model.ExcludedDates, new { id = "hiddenExcludedDates" })
-                                                @Html.HiddenFor(m => Model.ThisWeek.ExcludedDates, new { id = "hiddenExcludedDatesData" })
-                                                @Html.HiddenFor(m => Model.ThisWeek.selectedHour, new { id = "hiddenSelectedHour" })
-                                                @Html.HiddenFor(m => Model.ThisWeek.startdateRequested, new { id = "hiddenRequestedDate" })
+                                @Html.HiddenFor(m => Model.ExcludedDates, new { id = "hiddenExcludedDates" })
+                                @Html.HiddenFor(m => Model.ThisWeek.ExcludedDates, new { id = "hiddenExcludedDatesData" })
+                                <input type="hidden" id="hdnParam" runat="server" clientidmode="Static" />
 
-                                                <input type="hidden" id="hdnParam" runat="server" clientidmode="Static" />
+                                }
 
-                                                }
-
-                                                <br />
-                                                <br />
-                                                }
+                                <br />
+                                <br />
+                                }
 </body>
+
+
+
+
 
 
 
@@ -705,52 +715,6 @@
 {
     <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
 
-    <script>
-        function CreateSchedule(){
-            var Date = document.getElementById("hiddenRequestedDate").value;
-
-            $.post('/Home/_LaborSchedule',
-    {
-    },
-    function (data){
-        $('#LaborSchedule').html(data);
-    }
-    );
-        }
-    </script>
-
-    <script>
-        function OneWeekSchedule() {
-            var OneWeekStartDate = @Html.Raw(Json.Encode(Model.ThisWeek.startdateOneWeek));
-            var OneWeekEndDate = @Html.Raw(Json.Encode(Model.ThisWeek.enddateOneWeek));
-
-            document.getElementById("SelectedWeekDates").innerHTML = "<h2>Create Schedule (" + OneWeekStartDate + " - " + OneWeekEndDate + ")</h2><div id='WeekChange' style='font-size: 18px; float:right;' onclick='TwoWeeksSchedule()'>Next Week >></div> <br />";
-
-            document.getElementById("hiddenRequestedDate").value = OneWeekStartDate;
-        }
-    </script>
-
-    <script>
-        function TwoWeeksSchedule() {
-            var TwoWeeksStartDate = @Html.Raw(Json.Encode(Model.ThisWeek.startdateTwoWeeks));
-            var TwoWeeksEndDate = @Html.Raw(Json.Encode(Model.ThisWeek.enddateTwoWeeks));
-
-            document.getElementById("SelectedWeekDates").innerHTML = "<h2>Create Schedule (" + TwoWeeksStartDate + " - " + TwoWeeksEndDate + ")</h2><div id='WeekChange' style='font-size: 18px; float:left;' onclick='OneWeekSchedule()'><< Previous Week</div> <div id='WeekChange' style='font-size: 18px; float:right;' onclick='ThreeWeeksSchedule()'>Next Week >></div> <br />";
-
-            document.getElementById("hiddenRequestedDate").value = TwoWeeksStartDate;
-        }
-    </script>
-
-    <script>
-        function ThreeWeeksSchedule() {
-            var ThreeWeeksStartDate = @Html.Raw(Json.Encode(Model.ThisWeek.startdateThreeWeeks));
-            var ThreeWeeksEndDate = @Html.Raw(Json.Encode(Model.ThisWeek.enddateThreeWeeks));
-
-            document.getElementById("SelectedWeekDates").innerHTML = "<h2>Create Schedule (" + ThreeWeeksStartDate + " - " + ThreeWeeksEndDate + ")</h2><div id='WeekChange' style='font-size: 18px; float:left;' onclick='TwoWeeksSchedule()'><< Previous Week</div> <br />";
-
-            document.getElementById("hiddenRequestedDate").value = ThreeWeeksStartDate;
-        }
-    </script>
 
     <script>
         function approveRequest(messageId)
@@ -831,12 +795,8 @@
             var selectedEmployeeId = document.getElementById("hiddenEmployeeId").value;
             var startHour = document.getElementById("startHour");
             var startHourValue = startHour.options[startHour.selectedIndex].value;
-
             //var endHour = document.getElementById("endHour");
             //var endHourValue = endHour.options[endHour.selectedIndex].value;
-
-            //var hours = ["6AM-7AM","7AM-8AM","8AM-9AM","9AM-10AM","10AM-11AM","11AM-12PM","12PM-1PM","1PM-2PM","2PM-3PM","3PM-4PM",
-            //             "4PM-5PM","5PM-6PM","6PM-7PM","7PM-8PM","8PM-9PM","9PM-10PM","10PM-11PM","11PM-12AM","12AM-1AM"];
 
             var hours = [ "6:00AM", "6:30AM", "7:00AM", "7:30AM","8:00AM", "8:30AM","9:00AM", "9:30AM","10:00AM", "10:30AM",
                           "11:00AM", "11:30AM","12:00PM","12:30PM", "1:00PM", "1:30PM", "2:00PM", "2:30PM", "3:00PM", "3:30PM",
@@ -985,84 +945,9 @@
         }
     </script>
 
-    @*highlight the selected employee on the availability list and display the buttons*@
-    <script>
-        //get the name/id of the selected employee and highlight their row on the selection table
-        function selectEmployee(emp) {
-            var employee = emp;
-            var EmployeeList = @Html.Raw(Json.Encode(Model.ThisWeek.employeeListStore));
-            var CurrentEmployee = @Html.Raw(Json.Encode(Model.ThisWeek.selectedEmployee));
-            var CurrentEmployeeId = @Html.Raw(Json.Encode(Model.ThisWeek.selectedEmployeeId));
-            var selectedEmployeeName = '';
-            var selectedEmployeeId = '';
-
-            for(i = 0; i < EmployeeList.length; i++){
-                if (employee == EmployeeList[i].id){
-                    selectedEmployeeName = EmployeeList[i].firstName + " " + EmployeeList[i].lastName;
-                    selectedEmployeeId = EmployeeList[i].id;
-                }
-            }
-
-            var availabilityCells = document.querySelectorAll("td.HourAvailabilityCell, td.HiddenCell");
-            var selectedAvailabilityCells = document.querySelectorAll("td.HourAvailabilityCellSelected, td.AssignButtonCell");
-
-            // highlight selected employee row
-            for(i = 0; i < availabilityCells.length; i++){
-                if (availabilityCells[i].innerHTML == selectedEmployeeName){
-                    for(n = 0; n < 5; n++){
-                        if(n < 3){
-                            availabilityCells[i + n].classList.remove('HourAvailabilityCell');
-                            availabilityCells[i + n].classList.add('HourAvailabilityCellSelected');
-                        }
-                        else
-                        {
-                            availabilityCells[i + n].classList.remove('HiddenCell');
-                            availabilityCells[i + n].classList.add('AssignButtonCell');
-                        }
-                    }
-                }
-            }
-
-            for(i = 0; i < selectedAvailabilityCells.length; i++){
-                if (selectedAvailabilityCells[i].innerHTML != selectedEmployeeName){
-                    for(n = 0; n < 5; n++){
-                        if(n < 3){
-                            selectedAvailabilityCells[i + n].classList.remove('HourAvailabilityCellSelected');
-                            selectedAvailabilityCells[i + n].classList.add('HourAvailabilityCell');
-                        }
-                        else
-                        {
-                            selectedAvailabilityCells[i + n].classList.remove('AssignButtonCell');
-                            selectedAvailabilityCells[i + n].classList.add('HiddenCell');
-                        }
-                    }
-                }
-            }
-        }
-
-        document.getElementById("hiddenEmployeeId").value = selectedEmployeeId;
-        document.getElementById("hiddenEmployeeName").value = selectedEmployeeName;
-        //}
-    </script>
-
-    <script>
-        function assignEmployeeBlock(hour){
-            $.post('/Home/_LaborScheduleAssignmentView',
-                {
-                    employeeId: document.getElementById("hiddenEmployeeId").value,
-                    startHour: hour
-                },
-                function (data){
-                    $('#AssignmentTablePartial').html(data);
-                }
-                );
-            alert('Employee assigned');
-        }
-    </script>
     @*display the hour availability partial*@
     <script>
         function getHour(hour) {
-            document.getElementById("hiddenSelectedHour").value = hour;
             $.get('/Home/_LaborScheduleHourAvailability/?selectedHour=' + hour, function (data) {
                 $('#HourAvailability').html(data);
             });

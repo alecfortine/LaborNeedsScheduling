@@ -102,6 +102,47 @@
             display: block;
             padding-left: 30px;
         }
+
+        table.ExcludedDates {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            /*width: 1100px;*/
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+            table-layout: fixed;
+            word-break: break-all;
+            margin-left: auto;
+            margin-right: auto;
+            empty-cells: show;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        td.ExcludedFalse {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            height: 80px;
+            width: 80px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000000;
+        }
+
+        td.ExcludedTrue {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            height: 80px;
+            width: 80px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000000;
+            background-color: #ff9292;
+        }
     </style>
 
     @*side by side divs*@
@@ -125,6 +166,7 @@
             padding-left: 30px;
             display: inline-block;
         }
+
         .mainalt {
             padding-left: 100px;
             padding-top: 100px;
@@ -142,17 +184,17 @@
 </head>
 
 <body>
-    @if (Model.ThisWeek.employeeStatus == false)
-    {
-        <div class="mainalt">
-            <h2>You don't have permission to view the page.</h2>
-        </div>
-            <br />
-            <br />
-    }
-    else
-    {
-        if (Model.ThisWeek.AllocatedHours.Rows.Count == 0)
+    @*@if (Model.ThisWeek.employeeStatus == false)
+        {
+            <div class="mainalt">
+                <h2>You don't have permission to view the page.</h2>
+            </div>
+                <br />
+                <br />
+        }
+        else
+        {*@
+    @*@if (Model.ThisWeek.AllocatedHours.Rows.Count == 0)
         {
             <div class="mainalt">
                 <h2>Schedule must exist before values are set.</h2>
@@ -161,116 +203,189 @@
             <br />
         }
         else
-        {
+        {*@
+    <br />
+    <br />
+    <br />
+
+    <h2>Set Defaults</h2>
+
+    <br />
+
+    @*display variable names, values, edit buttons*@
+    <div class="main">
+        <div class="left-element">
+            Store Hours<br />
+            Min/Max Employees: <br />
+            Power Hours: <br />
+            Historical Weeks:  <br />
+        </div>
+
+        <div class="left-element">
             <br />
-            <br />
-            <br />
+            @Html.DisplayTextFor(m => Model.ThisWeek.MinEmployees) / @Html.DisplayTextFor(m => Model.ThisWeek.MaxEmployees)<br />
+            @Html.DisplayTextFor(m => Model.ThisWeek.WeekdayPowerHours) / @Html.DisplayTextFor(m => Model.ThisWeek.WeekendPowerHours)<br />
+            @Html.DisplayTextFor(m => Model.ThisWeek.NumberHistoricalWeeks)<br />
+        </div>
 
-            <h2>Set Defaults</h2>
+        <div class="left-element">
+            <a onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
+            <a onclick="document.getElementById('light2').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
+            <a onclick="document.getElementById('light2').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
+            <a onclick="document.getElementById('light2').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
+        </div>
+    </div>
 
-            <br />
-
-            @*display variable names, values, edit buttons*@
-            <div class="main">
-                <div class="left-element">
-                    Store Hours<br />
-                    Min/Max Employees: <br />
-                    Power Hours: <br />
-                    Historical Weeks:  <br />
-                </div>
-
-                <div class="left-element">
-                    <br />
-                    @Html.DisplayTextFor(m => Model.ThisWeek.MinEmployeesDefault) / @Html.DisplayTextFor(m => Model.ThisWeek.MaxEmployeesDefault)<br />
-                    @Html.DisplayTextFor(m => Model.ThisWeek.WeekdayPowerHours) / @Html.DisplayTextFor(m => Model.ThisWeek.WeekendPowerHours)<br />
-                    @Html.DisplayTextFor(m => Model.ThisWeek.NumberHistoricalWeeks)<br />
-                </div>
-
-                <div class="left-element">
-                    <a onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
-                    <a onclick="document.getElementById('light2').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
-                    <a onclick="document.getElementById('light2').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
-                    <a onclick="document.getElementById('light2').style.display='block';document.getElementById('fade').style.display='block'">Edit</a><br />
-                </div>
-            </div>
-
-            using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "DayHoursForm", onsubmit = "return checkTimes()" }))
+    @using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "DayHoursForm", onsubmit = "return checkTimes()" }))
             {
-                @*display lightbox for selection table*@
-                <div id="light" class="white_content2">
-                    <div class="white-header">
-                        <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
-                    </div>
-                    <div class="white-body">
-                        <h2>Set Weekday Hours</h2>
-                        <table>
-                            <tbody>
-                                @if (Model.ThisWeek.WeekStartHours == null)
-                                {
-                                    <tr><td>Sunday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[0], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "sundayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[0], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "sundayEnd" })</tr>
-                                    <tr><td>Monday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[1], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "mondayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[1], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "mondayEnd" })</tr>
+        @*display lightbox for selection table*@
+        <div id="light" class="white_content2">
+            <div class="white-header">
+                <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
+            </div>
+            <div class="white-body">
+                <h2>Set Daily Hours</h2>
+                <table>
+                    <tbody>
+                        @if (Model.ThisWeek.WeekStartHours == null)
+                        {
+                            <tr><td>Sunday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[0], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "sundayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[0], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "sundayEnd" })</tr>
+                            <tr><td>Monday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[1], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "mondayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[1], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "mondayEnd" })</tr>
                                     <tr><td>Tuesday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[2], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "tuesdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[2], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "tuesdayEnd" })</tr>
                                     <tr><td>Wednesday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[3], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "wednesdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[3], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "wednesdayEnd" })</tr>
                                     <tr><td>Thursday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[4], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "thursdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[4], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "thursdayEnd" })</tr>
                                     <tr><td>Friday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[5], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "fridayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[5], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "fridayEnd" })</tr>
                                     <tr><td>Saturday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[6], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "saturdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[6], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "saturdayEnd" })</tr>
-                                }
-                                else
-                                {
-                                    <tr><td>Sunday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[0], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[0]), "--", new { id = "sundayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[0], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[0]), "--", new { id = "sundayEnd" })</tr>
-                                    <tr><td>Monday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[1], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[1]), "--", new { id = "mondayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[1], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[1]), "--", new { id = "mondayEnd" })</tr>
+                        }
+                        else
+                        {
+                            <tr><td>Sunday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[0], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[0]), "--", new { id = "sundayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[0], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[0]), "--", new { id = "sundayEnd" })</tr>
+                            <tr><td>Monday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[1], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[1]), "--", new { id = "mondayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[1], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[1]), "--", new { id = "mondayEnd" })</tr>
                                     <tr><td>Tuesday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[2], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[2]), "--", new { id = "tuesdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[2], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[2]), "--", new { id = "tuesdayEnd" })</tr>
                                     <tr><td>Wednesday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[3], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[3]), "--", new { id = "wednesdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[3], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[3]), "--", new { id = "wednesdayEnd" })</tr>
                                     <tr><td>Thursday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[4], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[4]), "--", new { id = "thursdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[4], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[4]), "--", new { id = "thursdayEnd" })</tr>
                                     <tr><td>Friday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[5], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[5]), "--", new { id = "fridayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[5], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[5]), "--", new { id = "fridayEnd" })</tr>
                                     <tr><td>Saturday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[6], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[6]), "--", new { id = "saturdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[6], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[6]), "--", new { id = "saturdayEnd" })</tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                    <button type="submit" class="right-element">Update</button><br>
-                </div>
-                <div id="fade" class="black_overlay"></div>
-            }
-            using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "ManagerVariablesForm" }))
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <button type="submit" class="right-element">Update</button><br>
+        </div>
+        <div id="fade" class="black_overlay"></div>
+    }
+    @using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "ManagerVariablesForm" }))
             {
-                @*display lightbox for variables*@
-                <div id="light2" class="white_content">
-                    <div class="white-header">
-                        <a class="close" href="javascript:void(0)" onclick="document.getElementById('light2').style.display='none';document.getElementById('fade').style.display='none'">x</a>
-                    </div>
+        @*display lightbox for variables*@
+        <div id="light2" class="white_content">
+            <div class="white-header">
+                <a class="close" href="javascript:void(0)" onclick="document.getElementById('light2').style.display='none';document.getElementById('fade').style.display='none'">x</a>
+            </div>
 
-                    <div class="white-body">
-                        <h2>Employee Coverage</h2>
-                        <label>Minimum Exployees:</label><br />
-                        @Html.TextBoxFor(m => Model.ThisWeek.MinEmployeesDefault)<br />
-                        <label>Maximum Exployees:</label><br />
-                        @Html.TextBoxFor(m => Model.ThisWeek.MaxEmployeesDefault)<br />
-                        <br />
-                        <h2>Power Hours</h2>
-                        <label>Weekday:</label><br />
-                        @Html.TextBoxFor(m => Model.ThisWeek.WeekdayPowerHours)<br />
-                        <label>Weekend:</label><br />
-                        @Html.TextBoxFor(m => Model.ThisWeek.WeekendPowerHours)<br />
-                        <br />
-                        <h2>Calculations</h2>
-                        <label>Historical Weeks:</label><br />
-                        @Html.TextBoxFor(m => Model.ThisWeek.NumberHistoricalWeeks)<br />
-
-                    </div>
-                    <button type="submit" class="right-element">Update</button><br>
-
-                </div>
-                <div id="fade" class="black_overlay"></div>
-                //}
-            }
-            <br />
-            <br />
-
-            using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "BorrowEmployeeForm" }))
-            {
-                <h2>Borrow employee</h2>
+            <div class="white-body">
+                <h2>Employee Coverage</h2>
+                <label>Minimum Exployees:</label><br />
+                @Html.TextBoxFor(m => Model.ThisWeek.MinEmployees)<br />
+                <label>Maximum Exployees:</label><br />
+                @Html.TextBoxFor(m => Model.ThisWeek.MaxEmployees)<br />
                 <br />
+                <h2>Power Hours</h2>
+                <label>Weekday:</label><br />
+                @Html.TextBoxFor(m => Model.ThisWeek.WeekdayPowerHours)<br />
+                <label>Weekend:</label><br />
+                @Html.TextBoxFor(m => Model.ThisWeek.WeekendPowerHours)<br />
+                <br />
+                <h2>Calculations</h2>
+                <label>Historical Weeks:</label><br />
+                @Html.TextBoxFor(m => Model.ThisWeek.NumberHistoricalWeeks)<br />
+
+            </div>
+            <button type="submit" class="right-element">Update</button><br>
+
+        </div>
+        <div id="fade" class="black_overlay"></div>
+        //}
+    }
+    <br />
+    <br />
+
+
+@using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "ExcludeDatesForm" }))
+{
+    <div style="display:inline-block; padding-top: 10%;">
+        <button type="button" style="width:200px;" onclick="document.getElementById('ExcludeDatesBox').style.display = 'block'; document.getElementById('fade').style.display = 'block'">Exclude Dates</button>
+        <div id="ExcludeDatesBox" class="white_content">
+            <div class="white-header">
+                <a class="close" href="javascript:void(0)" onclick="document.getElementById('ExcludeDatesBox').style.display = 'none'; document.getElementById('fade').style.display = 'none'">x</a>
+
+            </div>
+            <div class="white-body">
+                <h4 style="padding-left:15px;">
+                    Choose dates to exclude from the past
+                    @Model.ThisWeek.NumberHistoricalWeeks
+                    weeks:
+                </h4>
+                @{List<string> dates = new List<string>();}
+                @{List<bool> bools = new List<bool>();}
+
+                @foreach (KeyValuePair<DateTime, bool> kvp in Model.ThisWeek.ExclusionDates)
+                {
+                    string strDate = kvp.Key.ToString("MM/dd");
+                    dates.Add(strDate);
+                    bools.Add(kvp.Value);
+                }
+                <table class="ExcludedDates" id="ExcludedDates" border="1" cellpadding="5">
+                    <tbody>
+                        @{int counter = 0;}
+                        @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
+                        {
+                            <tr>
+                                @for (int n = 0; n < 7; n++)
+                                {
+                                    if (bools[n + counter] == true)
+                                    {
+                                        <td class="ExcludedTrue" onclick="changeCell(this)">
+                                            @dates[n + counter]
+                                            @*<br />
+                                                @bools[n + counter]*@
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="ExcludedFalse" onclick="changeCell(this)">
+                                            @dates[n + counter]
+                                            @*<br />
+                                                @bools[n + counter]*@
+                                        </td>
+                                    }
+                                }
+                            </tr>
+                            {
+                                counter += 7;
+                            }
+                        }
+                    </tbody>
+                </table>
+
+                <br />
+                <br />
+
+                <div style="float:right; padding-right: 10%;">
+                    <button type="submit">Update</button><br>
+                </div>
+            </div>
+        </div>
+        <div id="fade" class="black_overlay"></div>
+    </div>
+                            }
+
+    <br />
+    <br />
+
+    @using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "BorrowEmployeeForm" }))
+            {
+        <h2>Borrow employee</h2>
+        <br />
                 <div class="main">
                     @*<text>Search by </text>
                         <select>
@@ -280,7 +395,7 @@
                         </select>*@
 
                     <div>
-                        Enter employee ID <strike>or last name</strike>: <br />
+                        Enter employee ID@*<strike>or last name</strike>*@: <br />
                         @Html.TextBoxFor(m => Model.ThisWeek.EmployeeSearch, new { id = "EmployeeSearch" })
                         <button type="button" onclick="findEmployee(document.getElementById('EmployeeSearch').value)" id="SearchButton">Search</button>
                     </div>
@@ -291,10 +406,13 @@
 
                 </div>
 
-            }
-
-        }
     }
+
+    @Html.HiddenFor(m => Model.ExcludedDates, new { id = "hiddenExcludedDates" })
+    @Html.HiddenFor(m => Model.ThisWeek.ExcludedDates, new { id = "hiddenExcludedDatesData" })
+
+    @*}*@
+    @*}*@
 </body>
 
 
@@ -381,5 +499,45 @@
             }
         }
     </script>
+
+@*update the dates to include or exclude from the algorithm*@
+<script>
+        function changeCell(cell) {
+            if (cell.className == "ExcludedFalse") {
+                cell.className = "ExcludedTrue";
+            }
+            else if (cell.className == "ExcludedTrue") {
+                cell.className = "ExcludedFalse";
+            }
+
+            // get all the cells in the table
+            var exlusiontable = document.getElementsByClassName("ExcludedDates")[0];
+            var exclusioncells = exlusiontable.getElementsByTagName("td");
+
+            // set of class values to pass to the model
+            var cellvalues = new Array(exclusioncells.length);
+
+            // iterating over each cell
+            for (var i = 0; i < exclusioncells.length; i++) {
+
+                if (exclusioncells[i].className == "ExcludedFalse")
+                {
+                    cellvalues[i] = 'False';
+                }
+                else if (exclusioncells[i].className == "ExcludedTrue")
+                {
+                    cellvalues[i] = 'True';
+                }
+            }
+
+            //for (var i = 1; i < cellvalues.length; i++) {
+
+            //    alert(cellvalues[i]);
+            //}
+
+            document.getElementById("hiddenExcludedDates").value = cellvalues;
+            document.getElementById("hiddenExcludedDatesData").value = cellvalues;
+        }
+</script>
 
 }

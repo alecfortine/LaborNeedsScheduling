@@ -119,67 +119,87 @@
 <body>
 
     <div id="AssignmentTablePartial">
-        @*@using (Ajax.BeginForm(new AjaxOptions
-            {
-                HttpMethod = "post",
-                InsertionMode = InsertionMode.Replace,
-                UpdateTargetId = "AssignmentTablePartial",
-                OnBegin = "return checkTimes()"
-            }))
-            {*@
-        @*@using (Html.BeginForm("_LaborScheduleAssignmentView", "Home", FormMethod.Post, new { name = "AssignForm", onsubmit = "return checkTimes()" }))
-            {*@
         <div>
-            <div>
+            <div class="AssignmentViewContainer">
                 <table class="AssignmentView" id="AssignmentView" border="1" cellpadding="5">
                     <thead>
                         <tr>
-                            @foreach (DataColumn c in Model.ThisWeek.AssignmentView.Columns)
+                            @for (int i = 0; i < Model.ThisWeek.AssignmentView.Columns.Count; i++)
                             {
-                                @*<th class="AssignmentCell">@c.Caption</th>*@
-
-                            string[] ScheduleHourSlots = {"6AM-7AM", "7AM-8AM","8AM-9AM","9AM-10AM","10AM-11AM","11AM-12PM","12PM-1PM", "1PM-2PM", "2PM-3PM",
+                                string[] ScheduleHourSlots = {"6AM-7AM", "7AM-8AM","8AM-9AM","9AM-10AM","10AM-11AM","11AM-12PM","12PM-1PM", "1PM-2PM", "2PM-3PM",
                                                       "3PM-4PM","4PM-5PM", "5PM-6PM", "6PM-7PM", "7PM-8PM", "8PM-9PM", "9PM-10PM", "10PM-11PM", "11PM-12AM", "12AM-1AM"};
 
-                            string[] replaceRows = {"6AM", "7AM","8AM","9AM","10AM","11AM","12PM", "1PM", "2PM", "3PM",
+                                string[] replaceRows = {"6AM", "7AM","8AM","9AM","10AM","11AM","12PM", "1PM", "2PM", "3PM",
                                                 "4PM", "5PM", "6PM", "7PM", "8PM", "9PM", "10PM", "11PM", "12AM", "1AM"};
 
-                            if (c.ToString() == " ")
-                            {
-                                <th class="AssignmentCell">@c.Caption</th>
-                                }
+                                string[] ScheduleHalfHourSlots = { "6:00AM", "6:30AM", "7:00AM", "7:30AM","8:00AM", "8:30AM","9:00AM", "9:30AM","10:00AM", "10:30AM",
+                                                  "11:00AM", "11:30AM","12:00PM","12:30PM", "1:00PM", "1:30PM", "2:00PM", "2:30PM", "3:00PM", "3:30PM",
+                                                  "4:00PM", "4:30PM", "5:00PM", "5:30PM", "6:00PM", "6:30PM", "7:00PM", "7:30PM", "8:00PM", "8:30PM",
+                                                  "9:00PM", "9:30PM", "10:00PM", "10:30PM", "11:00PM", "11:30PM", "12:00AM"};
 
-                                for (int i = 0; i < ScheduleHourSlots.Length; i++)
+                                DataColumn c = Model.ThisWeek.AssignmentView.Columns[i];
+                                if (Model.ThisWeek.BlackoutAssignmentView.Rows.Count > 0)
                                 {
-                                    if (c.ToString() == ScheduleHourSlots[i])
+                                    if (Model.ThisWeek.BlackoutAssignmentView.Rows[0][i].ToString() != "True")
                                     {
-                                        <th class="AssignmentCell">
-                                            @replaceRows[i]
-                                            -
-                                            <br />
-                                            @replaceRows[i + 1]
-                                            &nbsp
-                                        </th>
+                                        <th class="AssignmentCell">@c.Caption</th>
                                     }
                                 }
+                                else
+                                {
+                                    <th class="AssignmentCell">@c.Caption</th>
+                                }
+
                             }
+                            <th class="AssignmentCell">Total</th>
+
                         </tr>
                     </thead>
                     <tbody>
+                        @{double totalhours = 0; }
                         @for (int n = 0; n < Model.ThisWeek.AssignmentView.Rows.Count; n++)
                         {
                             int columnCount = 0;
+                            double houramount = 0;
                             <tr>
                                 @for (int h = 0; h < Model.ThisWeek.AssignmentView.Columns.Count; h++)
                                 {
-                                    if (Model.ThisWeek.BlackoutAssignmentView.Rows.Count > 0)
+                                    if (Model.ThisWeek.AssignmentView.Rows[n][h].ToString() != "")
                                     {
-                                        string columnValue = Model.ThisWeek.AssignmentView.Columns[h].ToString();
-
-                                        if (Convert.ToString(Model.ThisWeek.BlackoutAssignmentView.Rows[n][h]) == "True")
+                                        if (Model.ThisWeek.BlackoutAssignmentView.Rows.Count > 0)
                                         {
-                                            <td class="BlackoutCell" id="AssignmentCell" onclick="getHour(@columnCount)"></td>
-                                            columnCount++;
+                                            string columnValue = Model.ThisWeek.AssignmentView.Columns[h].ToString();
+
+                                            if (Convert.ToString(Model.ThisWeek.BlackoutAssignmentView.Rows[n][h]) == "True")
+                                            {
+                                                @*<td class="BlackoutCell" id="AssignmentCell" onclick="getHour(@columnCount)"></td>*@
+                                    columnCount++;
+                                }
+                                else
+                                {
+                                    if (Convert.ToInt32(n) == 1 && h > 0 && Convert.ToInt32(Model.ThisWeek.AssignmentView.Rows[n][h]) == 0)
+                                    {
+                                        <td class="AssignmentCellFilled" id="AssignmentCell" onclick="getHour(@columnCount)">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
+                                                    columnCount++;
+                                                }
+
+                                                else if (Convert.ToInt32(n) == 1 && h > 0 && Convert.ToInt32(Model.ThisWeek.AssignmentView.Rows[n][h]) < 0)
+                                                {
+                                                    <td class="AssignmentCellOver" id="AssignmentCell" onclick="getHour(@columnCount)">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
+                                                    columnCount++;
+                                                    houramount += Convert.ToDouble(Model.ThisWeek.AssignmentView.Rows[n][h]);
+                                                }
+
+                                                else
+                                                {
+                                                    <td class="AssignmentCell" id="AssignmentCell" onclick="getHour(@columnCount)">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
+                                                    columnCount++;
+                                                    if (Model.ThisWeek.AssignmentView.Rows[n][h].ToString() != "" && h > 0)
+                                                    {
+                                                        houramount += Convert.ToDouble(Model.ThisWeek.AssignmentView.Rows[n][h]);
+                                                    }
+                                                }
+                                            }
                                         }
                                         else
                                         {
@@ -187,54 +207,177 @@
                                             {
                                                 <td class="AssignmentCellFilled" id="AssignmentCell" onclick="getHour(@columnCount)">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
                                                 columnCount++;
+                                                houramount += Convert.ToDouble(Model.ThisWeek.AssignmentView.Rows[n][h]);
                                             }
 
                                             else if (Convert.ToInt32(n) == 1 && h > 0 && Convert.ToInt32(Model.ThisWeek.AssignmentView.Rows[n][h]) < 0)
                                             {
                                                 <td class="AssignmentCellOver" id="AssignmentCell" onclick="getHour(@columnCount)">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
                                                 columnCount++;
+                                                houramount += Convert.ToDouble(Model.ThisWeek.AssignmentView.Rows[n][h]);
                                             }
 
                                             else
                                             {
-                                                <td class="AssignmentCell" id="AssignmentCell" onclick="getHour(@columnCount)">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
+                                                int j;
+                                                bool isNumeric = int.TryParse(Model.ThisWeek.AssignmentView.Rows[n][h].ToString(), out j);
+                                                if (isNumeric == false)
+                                                {
+                                                    <td class="AssignmentCell" id="AssignmentCell">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
+                                                }
+                                                else
+                                                {
+                                                    <td class="AssignmentCell" id="AssignmentCell" onclick="getHour(@columnCount)">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
+                                                }
                                                 columnCount++;
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (Convert.ToInt32(n) == 1 && h > 0 && Convert.ToInt32(Model.ThisWeek.AssignmentView.Rows[n][h]) == 0)
+                                        if (Model.ThisWeek.BlackoutAssignmentView.Rows.Count > 0 && Convert.ToString(Model.ThisWeek.BlackoutAssignmentView.Rows[n][h]) == "True")
                                         {
-                                            <td class="AssignmentCellFilled" id="AssignmentCell" onclick="getHour(@columnCount)">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
-                                            columnCount++;
-                                        }
-
-                                        else if (Convert.ToInt32(n) == 1 && h > 0 && Convert.ToInt32(Model.ThisWeek.AssignmentView.Rows[n][h]) < 0)
-                                        {
-                                            <td class="AssignmentCellOver" id="AssignmentCell" onclick="getHour(@columnCount)">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
-                                            columnCount++;
-                                        }
-
-                                        else
-                                        {
-                                            int j;
-                                            bool isNumeric = int.TryParse(Model.ThisWeek.AssignmentView.Rows[n][h].ToString(), out j);
-                                            if (isNumeric == false)
-                                            {
-                                                <td class="AssignmentCell" id="AssignmentCell">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
-                                            }
-                                            else
-                                            {
-                                                <td class="AssignmentCell" id="AssignmentCell" onclick="getHour(@columnCount)">@Model.ThisWeek.AssignmentView.Rows[n][h]</td>
-                                            }
+                                            @*<td class="BlackoutCell" id="AssignmentCell" onclick="getHour(@columnCount)"></td>*@
+                                    columnCount++;
+                                }
+                                else
+                                {
+                                    <td class="AssignmentCell" id="AssignmentCell" onclick="getHour(@columnCount)">0</td>
                                             columnCount++;
                                         }
                                     }
                                 }
+                                @if (n == 0)
+                                {
+                                    totalhours = houramount / 2;
+                                    <td class="AssignmentCell">@totalhours</td>
+                                }
+                                @if (n == 1)
+                                {
+                                    double hoursassigned = 0;
+                                    foreach (Employees emp in Model.ThisWeek.employeeListStore)
+                                    {
+                                        for (int m = 0; m < Model.ThisWeek.AssignedEmployeesRequestedWeek.Rows.Count; m++)
+                                        {
+                                            if (emp.id == Model.ThisWeek.AssignedEmployeesRequestedWeek.Rows[m][1].ToString()
+                                                && Model.ThisWeek.RequestedDates[Model.ThisWeek.selectedWeekday] ==
+                                                Convert.ToDateTime(Model.ThisWeek.AssignedEmployeesRequestedWeek.Rows[m][3]))
+                                            {
+                                                string starttime = Model.ThisWeek.AssignedEmployeesRequestedWeek.Rows[m][4].ToString();
+                                                string endtime = Model.ThisWeek.AssignedEmployeesRequestedWeek.Rows[m][5].ToString();
+
+                                                for (int j = 0; j < Model.ThisWeek.SQLHours.Length; j++)
+                                                {
+                                                    if (starttime == Model.ThisWeek.SQLHours[j])
+                                                    {
+                                                        starttime = Model.ThisWeek.ScheduleHalfHourSlots[j];
+                                                    }
+                                                    if (endtime == Model.ThisWeek.SQLHours[j])
+                                                    {
+                                                        endtime = Model.ThisWeek.ScheduleHalfHourSlots[j];
+                                                    }
+                                                }
+
+                                                bool block = false;
+                                                for (int j = 0; j < Model.ThisWeek.ScheduleHalfHourSlots.Length; j++)
+                                                {
+                                                    if (Model.ThisWeek.ScheduleHalfHourSlots[j] == starttime)
+                                                    {
+                                                        block = true;
+                                                    }
+                                                    if (Model.ThisWeek.ScheduleHalfHourSlots[j] == endtime)
+                                                    {
+                                                        block = false;
+                                                    }
+                                                    if (block == true)
+                                                    {
+                                                        hoursassigned++;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    totalhours = totalhours - (hoursassigned / 2);
+                                    <td class="AssignmentCell">@totalhours</td>
+                                }
                             </tr>
                         }
+
+
+
+                        @{ int colorcount = 0;}
+                        @{ string[] colors = { "#bce0ff", "#ffbcc0", "#bcffc4", "#bccaff", "#f8ffbc", "#ffbcbc", "#bcffdc" }; }
+                        @foreach (Employees emp in Model.ThisWeek.employeeListStore)
+                        {
+                            for (int i = 0; i < Model.ThisWeek.AssignedEmployeesRequestedWeek.Rows.Count; i++)
+                            {
+                                if (emp.id == Model.ThisWeek.AssignedEmployeesRequestedWeek.Rows[i][1].ToString()
+                                    && Model.ThisWeek.RequestedDates[Model.ThisWeek.selectedWeekday] ==
+                                    Convert.ToDateTime(Model.ThisWeek.AssignedEmployeesRequestedWeek.Rows[i][3]))
+                                {
+                                    <tr>
+                                        @{string starttime = Model.ThisWeek.AssignedEmployeesRequestedWeek.Rows[i][4].ToString();}
+                                        @{string endtime = Model.ThisWeek.AssignedEmployeesRequestedWeek.Rows[i][5].ToString();}
+
+                                        @for (int n = 0; n < Model.ThisWeek.SQLHours.Length; n++)
+                                        {
+                                            if (starttime == Model.ThisWeek.SQLHours[n])
+                                            {
+                                                starttime = Model.ThisWeek.ScheduleHalfHourSlots[n];
+                                            }
+                                            if (endtime == Model.ThisWeek.SQLHours[n])
+                                            {
+                                                endtime = Model.ThisWeek.ScheduleHalfHourSlots[n];
+                                            }
+                                        }
+                                        @{ bool block = false;}
+                                        @for (int n = 0; n < Model.ThisWeek.AssignmentView.Columns.Count; n++)
+                                        {
+                                            if (starttime == Model.ThisWeek.AssignmentView.Columns[n].Caption)
+                                            {
+                                                block = true;
+                                                @*<td style="font-size:10px; background-color:#d1b4ff; border-color:#d1b4ff">@emp.firstName</td>*@
+                                            }
+                                            if (endtime == Model.ThisWeek.AssignmentView.Columns[n].Caption)
+                                            {
+                                                block = false;
+                                            }
+                                            if (block == true)
+                                            {
+                                                if (starttime == Model.ThisWeek.AssignmentView.Columns[n].Caption)
+                                                {
+                                                    <td style="border-top:0px none; background-color:@colors[colorcount]; border-color:@colors[colorcount];">@emp.firstName</td>
+                                                }
+                                                else
+                                                {
+                                                    <td style="background-color:@colors[colorcount]; border-color:@colors[colorcount]"></td>
+                                                }
+
+                                            }
+                                            else
+                                            {
+                                                <td style="border-top:0px none; border-bottom:0px none;"></td>
+                                            }
+
+                                        }
+
+                                    </tr>
+                                                        colorcount += 1;
+                                                    }
+                                                }
+                                            }
+
+
+
+
+
+
                     </tbody>
+
+
+
+
+
                 </table>
             </div>
             <div id="HourAvailability"></div>
@@ -262,13 +405,12 @@
                     @Html.DropDownListFor(m => m.ThisWeek.startHour, new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), new { id = "startHour" })
                 </div>
 
-                <div class="EmployeeScheduler" style="padding-left: 20px">
-                    End:
-                    @Html.DropDownListFor(m => m.ThisWeek.endHour, new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), new { id = "endHour" })
-                </div>
+                @*<div class="EmployeeScheduler" style="padding-left: 20px">
+                        End:
+                        @Html.DropDownListFor(m => m.ThisWeek.endHour, new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), new { id = "endHour" })
+                    </div>*@
 
                 <div class="EmployeeScheduler" style="padding-left: 20px">
-                    @*<button type="submit" id="AssignButton">Assign</button><br>*@
                     <button type="button" onclick="updateAssignmentView(value)" id="AssignSubmit" value="0">Assign</button><br>
                 </div>
             </div>
@@ -368,6 +510,94 @@
         @*}*@
     </div>
     @Html.HiddenFor(m => m.ThisWeek.excludedDates, new { id = "hiddenExludedDates" })
+
+    <br />
+    <br />
+
+    @*<div id="WeekSchedule">
+            <h4 style="text-align: center;"><b>Schedule for @Model.ThisWeek.RequestedDates[0].ToShortDateString() - @Model.ThisWeek.RequestedDates[6].ToShortDateString()</b></h4>
+            <div class="white-body">
+                <table border="1" cellpadding="5" id="weekhours" class="Schedule">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            @for (int i = 0; i < 1; i++)
+                            {
+                                <th class="ScheduleCell">
+                                    @Model.ThisWeek.RequestedDates[Model.ThisWeek.selectedWeekday].DayOfWeek
+                                    <br />
+                                    @Model.ThisWeek.RequestedDates[Model.ThisWeek.selectedWeekday].ToShortDateString()
+                                </th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.ThisWeek.ScheduleHalfHourSlots.Length; i++)
+                        {
+                            <tr>
+                                <td class="ScheduleCell">@Model.ThisWeek.ScheduleHalfHourSlots[i]</td>
+
+                                @for (int n = 0; n < 1; n++)
+                                {
+                                    <td class="ScheduleCell">
+                                        @for (int m = 0; m < Model.ThisWeek.AssignedEmployeesCurrentWeek.Rows.Count; m++)
+                                        {
+                                            DateTime DateTime = Convert.ToDateTime(Model.ThisWeek.AssignedEmployeesCurrentWeek.Rows[m][3]);
+                                            string Date = DateTime.ToShortDateString();
+                                            string startTime = Model.ThisWeek.AssignedEmployeesCurrentWeek.Rows[m][4].ToString();
+                                            string endTime = Model.ThisWeek.AssignedEmployeesCurrentWeek.Rows[m][5].ToString();
+                                            List<string> assignedHours = new List<string>();
+                                            bool block = false;
+
+                                            for (int j = 0; j < Model.ThisWeek.ScheduleHalfHourSlots.Length; j++)
+                                            {
+                                                if (Model.SQLHours[j] == startTime)
+                                                {
+                                                    block = true;
+                                                }
+                                                if (block == true)
+                                                {
+                                                    assignedHours.Add(Model.ThisWeek.ScheduleHalfHourSlots[j]);
+                                                }
+                                                if (Model.SQLHours[j] == endTime)
+                                                {
+                                                    block = false;
+                                                    break;
+                                                }
+                                            }
+
+                                            bool add = false;
+                                            for (int j = 0; j < assignedHours.Count; j++)
+                                            {
+                                                if (Model.ThisWeek.ScheduleHalfHourSlots[i] == assignedHours[j])
+                                                {
+                                                    add = true;
+                                                    break;
+                                                }
+                                            }
+
+                                            if (Date == Model.ThisWeek.RequestedDates[Model.ThisWeek.selectedWeekday].ToShortDateString() && add == true) //&& the time matches one of the employee's hour blocks)
+                                            {
+                                                string employeeId = Model.ThisWeek.AssignedEmployeesCurrentWeek.Rows[m][1].ToString();
+                                                string employeeName = "";
+                                                foreach (Employees emp in Model.ThisWeek.employeeListStore)
+                                                {
+                                                    if (emp.id == employeeId)
+                                                    {
+                                                        employeeName = emp.firstName + " " + emp.lastName;
+                                                    }
+                                                }
+                                                @employeeName <br />
+                                            }
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>*@
 
     <br />
     <br />

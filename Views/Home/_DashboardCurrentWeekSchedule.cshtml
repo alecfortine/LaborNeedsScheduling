@@ -1,0 +1,80 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Diagnostics;
+@using System.Web.UI.HtmlControls;
+@using System.Data.Entity;
+@using LaborNeedsScheduling.Models
+@model Dashboard
+
+<body>
+    <div id="WeekChange" style="font-size: 18px; float:right;" onclick="NextWeekSchedule()">Next Week >></div> <br />
+    <h4 style="text-align: center;"><b>Schedule for @Model.CurrentWeekDates[0].ToShortDateString() - @Model.CurrentWeekDates[6].ToShortDateString()</b></h4>
+    @*display employee schedule table*@
+    <div class="white-body">
+        <table border="1" cellpadding="5" id="weekhours" class="Schedule">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    @for (int i = 0; i < Model.CurrentWeekDates.Length; i++)
+                    {
+                        <th>
+                            @Model.CurrentWeekDates[i].DayOfWeek
+                            <br />
+                            @Model.CurrentWeekDates[i].ToShortDateString()
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Employees emp in Model.EmployeeListStore)
+                {
+                    <tr>
+                        @{string name = emp.firstName + " " + emp.lastName;}
+                        <td>@name</td>
+                        @for (int n = 0; n < 7; n++)
+                        {
+                            List<string> startTime = new List<string>();
+                            List<string> endTime = new List<string>();
+                            for (int i = 0; i < Model.AssignedEmployeesCurrentWeek.Rows.Count; i++)
+                            {
+                                if (emp.id == Model.AssignedEmployeesCurrentWeek.Rows[i][1].ToString() && Model.CurrentWeekDates[n] == Convert.ToDateTime(Model.AssignedEmployeesCurrentWeek.Rows[i][3]))
+                                {
+                                    for (int m = 0; m < Model.ScheduleHalfHourSlots.Length; m++)
+                                    {
+                                        if (Model.AssignedEmployeesCurrentWeek.Rows[i][4].ToString() == Model.SQLHours[m])
+                                        {
+                                            startTime.Add(Model.ScheduleHalfHourSlots[m]);
+                                        }
+                                        if (Model.AssignedEmployeesCurrentWeek.Rows[i][5].ToString() == Model.SQLHours[m])
+                                        {
+                                            endTime.Add(Model.ScheduleHalfHourSlots[m]);
+                                        }
+                                    }
+                                }
+                            }
+                            <td>
+
+                                @for (int m = 0; m < startTime.Count; m++)
+                                {
+                                    <text>@startTime[m] - @endTime[m]</text>
+                                    <br />
+                                }
+                            </td>
+
+                        }
+                    </tr>
+                            }
+            </tbody>
+        </table>
+
+    </div>
+
+</body>
+
