@@ -85,10 +85,10 @@
     <h1 style="text-align:center">Schedule</h1>
     <br />
 
-        <div id="SelectedWeekDates" style="text-align:center">
-            <h2>Schedule for @Model.RequestedDates[0].ToShortDateString() - @Model.RequestedDates[6].ToShortDateString()</h2>
-            <div id="WeekChange" class="WeekChange" style="font-size: 18px; float:right;" onclick="OneWeekSchedule();CreateSchedule()">Next Week >></div> <br />
-        </div>
+    <div id="SelectedWeekDates" style="text-align:center">
+        <h2>Schedule for @Model.CurrentWeekDates[0].ToShortDateString() - @Model.CurrentWeekDates[6].ToShortDateString()</h2>
+        <div id="WeekChange" class="WeekChange" style="font-size: 18px; float:right;" onclick="OneWeekSchedule();CreateSchedule()">Next Week >></div> <br />
+    </div>
 
     <div id="WeekSchedule">
         <div class="white-body">
@@ -108,9 +108,14 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @{ double weekHourTotal = 0;}
+                    @{ double[] dayTotals = new double[7];}
                     @foreach (Employees emp in Model.EmployeeListStore)
                     {
+                        double[] employeeDayHourCount = new double[7];
                         double weekHourAmount = 0;
+                        double dayHourCount = 0;
+
                         <tr>
                             @{string name = emp.firstName + " " + emp.lastName;}
                             <td>@name</td>
@@ -123,6 +128,7 @@
                                     if (emp.id == Model.AssignedEmployeesRequestedWeek.Rows[i][1].ToString() && Model.CurrentWeekDates[n] == Convert.ToDateTime(Model.AssignedEmployeesRequestedWeek.Rows[i][3]))
                                     {
                                         bool block = false;
+                                        double hourcount = 0;
                                         for (int m = 0; m < Model.ScheduleHalfHourSlots.Length; m++)
                                         {
                                             if (Model.AssignedEmployeesRequestedWeek.Rows[i][4].ToString() == Model.SQLHours[m])
@@ -138,8 +144,17 @@
                                             if (block == true)
                                             {
                                                 weekHourAmount += .5;
+                                                hourcount += .5;
+                                                dayHourCount += .5;
                                             }
                                         }
+
+                                        if (hourcount > 4)
+                                        {
+                                            hourcount = hourcount - .5;
+                                            dayHourCount = dayHourCount - .5;
+                                        }
+                                        dayTotals[n] += hourcount;
                                     }
                                 }
                                 <td>
@@ -151,9 +166,18 @@
                                     }
                                 </td>
                             }
-                            <td>@weekHourAmount</td>
+                            <td>@dayHourCount</td>
                         </tr>
+                                    weekHourTotal += weekHourAmount;
                                 }
+                    <tr>
+                        <td style="font-weight:bold">Total</td>
+                        @for (int i = 0; i < 7; i++)
+                        {
+                            <td>@dayTotals[i]</td>
+                        }
+                        <td style="font-weight:bold">@weekHourTotal</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -178,7 +202,7 @@
         }
     </script>
 
-<script>
+    <script>
         function CurrentWeekSchedule() {
             var CurrentWeekStartDate = @Html.Raw(Json.Encode(Model.startdateCurrentWeek));
             var CurrentWeekEndDate = @Html.Raw(Json.Encode(Model.enddateCurrentWeek));
@@ -187,7 +211,7 @@
 
             document.getElementById("hiddenRequestedDate").value = CurrentWeekStartDate;
         }
-</script>
+    </script>
 
     <script>
         function OneWeekSchedule() {
@@ -195,7 +219,7 @@
             var OneWeekEndDate = @Html.Raw(Json.Encode(Model.enddateOneWeek));
 
             document.getElementById("SelectedWeekDates").innerHTML = "<h2>Schedule for " + OneWeekStartDate + " - " + OneWeekEndDate + "</h2><div id='WeekChange' class='WeekChange' style='font-size: 18px; float:left;' onclick='CurrentWeekSchedule();CreateSchedule()'><< Previous Week</div><div id='WeekChange' class='WeekChange' style='font-size: 18px; float:right;' onclick='TwoWeeksSchedule();CreateSchedule()'>Next Week >></div> <br />";
-           
+
             document.getElementById("hiddenRequestedDate").value = OneWeekStartDate;
         }
     </script>
@@ -223,23 +247,23 @@
     </script>
 
     @*<script>
-        function NextWeekSchedule() {
-            $.get('/Home/_DashboardNextWeekSchedule', function (data) {
+            function NextWeekSchedule() {
+                $.get('/Home/_DashboardNextWeekSchedule', function (data) {
 
-                //load partial to page
-                $('#WeekSchedule').html(data);
-            });
-        }
-    </script>
+                    //load partial to page
+                    $('#WeekSchedule').html(data);
+                });
+            }
+        </script>
 
-    <script>
-        function CurrentWeekSchedule() {
-            $.get('/Home/_DashboardCurrentWeekSchedule', function (data) {
+        <script>
+            function CurrentWeekSchedule() {
+                $.get('/Home/_DashboardCurrentWeekSchedule', function (data) {
 
-                //load partial to page
-                $('#WeekSchedule').html(data);
-            });
-        }
-    </script>*@
+                    //load partial to page
+                    $('#WeekSchedule').html(data);
+                });
+            }
+        </script>*@
 
 }

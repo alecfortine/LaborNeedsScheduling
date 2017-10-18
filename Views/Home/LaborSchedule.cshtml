@@ -658,24 +658,24 @@
                         </div>*@
 
 
-                        @*<label>Week Weighting: </label><br />
+                @*<label>Week Weighting: </label><br />
 
-                            @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
-                            {
-                                <div style="float:left">
-                                    @{int weekCounter = (i + 1);
-                                    }
-                                    <label>@Html.Raw((i + 1).ToString()): &nbsp;</label>
-                                    @Html.TextBoxFor(m => Model.ThisWeek.weekWeighting[i], new { id = "week" + weekCounter, style = "width:25px;text-align:center;" })
-                                    <text>%</text>
-                                </div>
-                                <br>
-                                        }*@
+                    @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
+                    {
+                        <div style="float:left">
+                            @{int weekCounter = (i + 1);
+                            }
+                            <label>@Html.Raw((i + 1).ToString()): &nbsp;</label>
+                            @Html.TextBoxFor(m => Model.ThisWeek.weekWeighting[i], new { id = "week" + weekCounter, style = "width:25px;text-align:center;" })
+                            <text>%</text>
+                        </div>
+                        <br>
+                                }*@
 
-                        @*<button type="submit" name="id" value="" id="LaborScheduleButton" style="margin-top: 30px;" onclick="CreateSchedule()">Update</button><br>
-                        <br />
-                    </div>
-                </div>*@
+                @*<button type="submit" name="id" value="" id="LaborScheduleButton" style="margin-top: 30px;" onclick="CreateSchedule()">Update</button><br>
+                            <br />
+                        </div>
+                    </div>*@
             </div>
 
             <br />
@@ -704,6 +704,96 @@
 @section scripts
 {
     <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+
+
+    @*find employee*@
+    <script>
+        function findEmployee(emp) {
+            $.get('/Home/_ManagerConfigFindEmployee/?EmployeeInfo=' + emp, function (data) {
+                //load partial to page
+                $('#FoundEmployee').html(data);
+            });
+        }
+
+        function addEmployee() {
+            $.post('/Home/_ManagerConfigFindEmployee',
+                {
+                    AddEmployee: 'true'
+                },
+                function (data) {
+                    $('#AssignmentTablePartial').html(data);
+                }
+                );
+        }
+
+        document.getElementById("EmployeeSearch")
+    .addEventListener("keyup", function (event) {
+        event.preventDefault();
+        if (event.keyCode == 13) {
+            document.getElementById("SearchButton").click();
+        }
+    });
+    </script>
+
+    <script>
+        function ToggleStartHour(slots){
+            $.post('/Home/ToggleHourSlots',
+{
+    slots: slots
+},
+function (data){
+    $('#AssignmentTablePartial').html(data);
+}
+);
+        }
+    </script>
+
+    <script>
+        function AddHourStart(employeeId){
+            $.post('/Home/AddHourStart',
+{
+    employeeId: employeeId
+},
+function (data){
+    $('#AssignmentTablePartial').html(data);
+}
+);
+        }
+
+        function SubtractHourStart(employeeId){
+            $.post('/Home/SubtractHourStart',
+{
+    employeeId: employeeId
+},
+function (data){
+    $('#AssignmentTablePartial').html(data);
+}
+);
+        }
+
+        function SubtractHourEnd(employeeId){
+            $.post('/Home/SubtractHourEnd',
+{
+    employeeId: employeeId
+},
+function (data){
+    $('#AssignmentTablePartial').html(data);
+}
+);
+        }
+
+        function AddHourEnd(employeeId) {
+            $.post('/Home/AddHourEnd',
+    {
+        employeeId: employeeId
+    },
+    function (data){
+        $('#AssignmentTablePartial').html(data);
+    }
+    );
+        }
+
+    </script>
 
     <script>
         function CreateSchedule(){
@@ -878,6 +968,46 @@
     </script>
 
     <script>
+        function importSchedule(){
+            var result = confirm("Warning: This will replace the current schedule.");
+            if (result) {
+                $.post('/Home/ImportSchedule',
+                    {
+                    },
+                    function (data){
+                        $('#AssignmentTablePartial').html(data);
+                    }
+                    );
+            }
+        }
+        function clearSchedule(){
+            var result = confirm("Warning: This will clear the current schedule.");
+            if (result) {
+                $.post('/Home/ClearSchedule',
+                    {
+                    },
+                    function (data){
+                        $('#AssignmentTablePartial').html(data);
+                    }
+                    );
+            }
+        }
+    </script>
+
+    <script>
+        function unassignBlock(employeeId, startTime){
+            var start = startTime.value
+            $.post('/Home/UnassignEmployeeBlock',
+                {
+                    employeeId: employeeId,
+                    StartHour: start
+                },
+                function (data){
+                    $('#AssignmentTablePartial').html(data);
+                }
+                );
+        }
+
         function unassignEmployee(value){
             var unassignTimes = document.getElementById("hiddenUnassignTimes").value
             $.post('/Home/_LaborScheduleEmployeeAvailability',
@@ -1003,13 +1133,16 @@
                 }
             }
 
+            document.getElementById("hiddenEmployeeId").value = selectedEmployeeId;
+            document.getElementById("hiddenEmployeeName").value = selectedEmployeeName;
+
             var availabilityCells = document.querySelectorAll("td.HourAvailabilityCell, td.HiddenCell");
             var selectedAvailabilityCells = document.querySelectorAll("td.HourAvailabilityCellSelected, td.AssignButtonCell");
 
             // highlight selected employee row
             for(i = 0; i < availabilityCells.length; i++){
                 if (availabilityCells[i].innerHTML == selectedEmployeeName){
-                    for(n = 0; n < 5; n++){
+                    for(n = 0; n < 4; n++){
                         if(n < 3){
                             availabilityCells[i + n].classList.remove('HourAvailabilityCell');
                             availabilityCells[i + n].classList.add('HourAvailabilityCellSelected');
@@ -1042,21 +1175,20 @@
 
         document.getElementById("hiddenEmployeeId").value = selectedEmployeeId;
         document.getElementById("hiddenEmployeeName").value = selectedEmployeeName;
-        //}
     </script>
 
     <script>
-        function assignEmployeeBlock(hour){
-            $.post('/Home/_LaborScheduleAssignmentView',
+        function assignEmployeeBlock(employeeId){
+            var startHour = document.getElementById("hiddenSelectedHour").value;
+            $.post('/Home/AssignEmployeeBlock',
                 {
-                    employeeId: document.getElementById("hiddenEmployeeId").value,
-                    startHour: hour
+                    employeeId: employeeId,
+                    startHour: startHour
                 },
                 function (data){
                     $('#AssignmentTablePartial').html(data);
                 }
                 );
-            alert('Employee assigned');
         }
     </script>
     @*display the hour availability partial*@

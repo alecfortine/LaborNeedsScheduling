@@ -10,25 +10,16 @@ namespace LaborNeedsScheduling.Models
 {
     public class FakeAPI
     {
-
-        public static string[] ScheduleHourSlots = {"6AM-7AM", "7AM-8AM","8AM-9AM","9AM-10AM","10AM-11AM","11AM-12PM","12PM-1PM", "1PM-2PM", "2PM-3PM",
-                                                    "3PM-4PM","4PM-5PM", "5PM-6PM", "6PM-7PM", "7PM-8PM", "8PM-9PM", "9PM-10PM", "10PM-11PM", "11PM-12AM", "12AM-1AM"};
-
-        public static string[] AlternateHourSlots = {"6:00AM", "7:00AM","8:00AM","9:00AM","10:00AM","11:00AM","12:00PM", "1:00PM", "2:00PM", "3:00PM",
-                                                     "4:00PM", "5:00PM", "6:00PM", "7:00PM", "8:00PM", "9:00PM", "10:00PM", "11:00PM", "12:00AM"};
-
         public static string[] ScheduleHalfHourSlots = { "6:00AM", "6:30AM", "7:00AM", "7:30AM","8:00AM", "8:30AM","9:00AM", "9:30AM","10:00AM", "10:30AM",
                                                          "11:00AM", "11:30AM","12:00PM","12:30PM", "1:00PM", "1:30PM", "2:00PM", "2:30PM", "3:00PM", "3:30PM",
                                                          "4:00PM", "4:30PM", "5:00PM", "5:30PM", "6:00PM", "6:30PM", "7:00PM", "7:30PM", "8:00PM", "8:30PM",
                                                          "9:00PM", "9:30PM", "10:00PM", "10:30PM", "11:00PM", "11:30PM", "12:00AM"};
 
-        //public static string[] SQLHours = {"06:00:00", "07:00:00", "08:00:00", "09:00:00", "10:00:00", "11:00:00", "12:00:00", "13:00:00", "14:00:00",
-        //                                   "15:00:00", "16:00:00", "17:00:00", "18:00:00", "19:00:00", "20:00:00", "21:00:00", "22:00:00", "23:00:00", "00:00:00"};
-
         public static string[] SQLHours = {"06:00:00", "06:30:00", "07:00:00", "07:30:00", "08:00:00", "08:30:00", "09:00:00", "09:30:00", "10:00:00", "10:30:00", "11:00:00", "11:30:00", "12:00:00", "12:30:00", "13:00:00", "13:30:00", "14:00:00", "14:30:00",
                                            "15:00:00", "15:30:00", "16:00:00", "16:30:00", "17:00:00", "17:30:00", "18:00:00", "18:30:00", "19:00:00", "19:30:00", "20:00:00", "20:30:00", "21:00:00", "21:30:00", "22:00:00", "22:30:00", "23:00:00", "23:30:00", "00:00:00"};
 
         public static string[] days = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+
         public static string strSQLCon = @"Data Source=AFORTINE\SQLEXPRESS;Initial Catalog=LaborNeedsScheduling;Integrated Security=True; MultipleActiveResultSets=True;";
 
         public static void dothething()
@@ -80,7 +71,7 @@ namespace LaborNeedsScheduling.Models
             }
         }
 
-        public static int GetMinEmployees(string StoreCode)
+        public static int GetMinEmployeesEarly(string StoreCode)
         {
             int MinEmployees = 0;
 
@@ -94,12 +85,12 @@ namespace LaborNeedsScheduling.Models
                     cmd.Connection = conn;
                     conn.Open();
 
-                    cmd.CommandText = "select MinEmployees from dbo.StoreVariables where StoreCode = '" + StoreCode + "'";
+                    cmd.CommandText = "select MinEmployeesEarly from dbo.StoreVariables where StoreCode = '" + StoreCode + "'";
 
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     da.Fill(min);
 
-                    MinEmployees =Convert.ToInt32(min.Rows[0][0]);
+                    MinEmployees = Convert.ToInt32(min.Rows[0][0]);
                 }
                 catch (Exception ex)
                 {
@@ -113,7 +104,40 @@ namespace LaborNeedsScheduling.Models
             return MinEmployees;
         }
 
-        public static void UpdateMinEmployees(int MinEmployees, string StoreCode)
+        public static int GetMinEmployeesLater(string StoreCode)
+        {
+            int MinEmployees = 0;
+
+            using (SqlConnection conn = new SqlConnection(strSQLCon))
+            {
+                try
+                {
+                    DataTable min = new DataTable();
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Connection = conn;
+                    conn.Open();
+
+                    cmd.CommandText = "select MinEmployeesLater from dbo.StoreVariables where StoreCode = '" + StoreCode + "'";
+
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    da.Fill(min);
+
+                    MinEmployees = Convert.ToInt32(min.Rows[0][0]);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+            return MinEmployees;
+        }
+
+        public static void UpdateMinEmployeesEarly(int MinEmployees, string StoreCode)
         {
             using (SqlConnection conn = new SqlConnection(strSQLCon))
             {
@@ -124,7 +148,33 @@ namespace LaborNeedsScheduling.Models
                     cmd.Connection = conn;
                     conn.Open();
 
-                    cmd.CommandText = "update dbo.StoreVariables set MinEmployees = '" + MinEmployees + "' where StoreCode = '" + StoreCode + "'";
+                    cmd.CommandText = "update dbo.StoreVariables set MinEmployeesEarly = '" + MinEmployees + "' where StoreCode = '" + StoreCode + "'";
+
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+        }
+
+        public static void UpdateMinEmployeesLater(int MinEmployees, string StoreCode)
+        {
+            using (SqlConnection conn = new SqlConnection(strSQLCon))
+            {
+                try
+                {
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Connection = conn;
+                    conn.Open();
+
+                    cmd.CommandText = "update dbo.StoreVariables set MinEmployeesLater = '" + MinEmployees + "' where StoreCode = '" + StoreCode + "'";
 
                     cmd.ExecuteNonQuery();
                 }
@@ -417,11 +467,11 @@ namespace LaborNeedsScheduling.Models
                     cmd.Connection = conn;
                     conn.Open();
 
-                    for(int i = 0; i < 7; i++)
+                    for (int i = 0; i < 7; i++)
                     {
                         for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
                         {
-                            if(OpenHours[i] == ScheduleHalfHourSlots[n])
+                            if (OpenHours[i] == ScheduleHalfHourSlots[n])
                             {
                                 OpenHours[i] = SQLHours[n];
                             }
@@ -432,8 +482,8 @@ namespace LaborNeedsScheduling.Models
                         }
                     }
 
-                    cmd.CommandText = "update dbo.StoreVariables set SundayOpen = '" + OpenHours[0] + "', MondayOpen = '" + OpenHours[1] + 
-                                      "', TuesdayOpen = '" + OpenHours[2] + "', WednesdayOpen = '" + OpenHours[3] + "', ThursdayOpen = '" 
+                    cmd.CommandText = "update dbo.StoreVariables set SundayOpen = '" + OpenHours[0] + "', MondayOpen = '" + OpenHours[1] +
+                                      "', TuesdayOpen = '" + OpenHours[2] + "', WednesdayOpen = '" + OpenHours[3] + "', ThursdayOpen = '"
                                       + OpenHours[4] + "', FridayOpen = '" + OpenHours[5] + "', SaturdayOpen = '" + OpenHours[6] + "' " +
                                       "where StoreCode = '" + StoreCode + "'";
                     cmd.ExecuteNonQuery();
@@ -486,7 +536,7 @@ namespace LaborNeedsScheduling.Models
                     conn.Close();
                 }
             }
-                return WeekWeights.ToArray();
+            return WeekWeights.ToArray();
         }
 
         public static void approveRequest(int messageId, string managerId)
@@ -761,6 +811,7 @@ namespace LaborNeedsScheduling.Models
                 }
             }
         }
+
         public static string GenerateMessageForEmployee(string managerId, string managerName, string startDate, string endDate, string startTime, string endTime, string approved)
         {
             string response = "";
@@ -799,6 +850,108 @@ namespace LaborNeedsScheduling.Models
             return response;
         }
 
+        public static void ImportLastWeekSchedule(string StoreCode, string[] EmployeeIds, DateTime[] RequestedDates, DateTime[] PreviousWeekDates)
+        {
+            using (SqlConnection conn = new SqlConnection(strSQLCon))
+            {
+                try
+                {
+                    DataTable LastWeekSchedule = new DataTable();
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Connection = conn;
+                    conn.Open();
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+                    for (int i = 0; i < RequestedDates.Length; i++)
+                    {
+                        for (int n = 0; n < EmployeeIds.Length; n++)
+                        {
+                            cmd.CommandText = "select * from dbo.EmployeeSchedule where EmployeeId = '" + EmployeeIds[n] + "' and ScheduleDate = '" + PreviousWeekDates[i] + "'";
+                            da.Fill(LastWeekSchedule);
+                        }
+                    }
+
+                    for (int i = 0; i < RequestedDates.Length; i++)
+                    {
+                        for (int n = 0; n < EmployeeIds.Length; n++)
+                        {
+                            cmd.CommandText = "delete from dbo.EmployeeSchedule where EmployeeId = '" + EmployeeIds[n] + "' and ScheduleDate = '" + RequestedDates[i] + "'";
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    for(int i = 0; i < LastWeekSchedule.Rows.Count; i++)
+                    {
+                        for(int n = 0; n < 7; n++)
+                        {
+                            if(Convert.ToDateTime(LastWeekSchedule.Rows[i][3]) == PreviousWeekDates[n])
+                            {
+                                LastWeekSchedule.Rows[i][3] = RequestedDates[n];
+                            }
+                        }
+                    }
+
+                    for (int i = 0; i < LastWeekSchedule.Rows.Count; i++)
+                    {
+                            cmd.CommandText = "insert into dbo.EmployeeSchedule(EmployeeId, StoreCode, ScheduleDate, BeginTime, EndTime, OnSchedule)" +
+                                              "values('" + LastWeekSchedule.Rows[i][1] + "', '" + LastWeekSchedule.Rows[i][2] + "', '" + LastWeekSchedule.Rows[i][3] + "', " +
+                                              "'"+ LastWeekSchedule.Rows[i][4] + "', '"+ LastWeekSchedule.Rows[i][5] + "', '"+ LastWeekSchedule.Rows[i][6] + "')";
+                            cmd.ExecuteNonQuery();
+                                            }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+        }
+        public static void ClearRequestedWeekSchedule(string StoreCode, string[] EmployeeIds, DateTime[] RequestedDates)
+        {
+            using (SqlConnection conn = new SqlConnection(strSQLCon))
+            {
+                try
+                {
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Connection = conn;
+                    conn.Open();
+
+                    for (int i = 0; i < RequestedDates.Length; i++)
+                    {
+                        for (int n = 0; n < EmployeeIds.Length; n++)
+                        {
+                            cmd.CommandText = "delete from dbo.EmployeeSchedule where EmployeeId = '" + EmployeeIds[n] + "' and ScheduleDate = '" + RequestedDates[i] + "'";
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    for (int i = 0; i < RequestedDates.Length; i++)
+                    {
+                        for (int n = 0; n < EmployeeIds.Length; n++)
+                        {
+                            cmd.CommandText = "insert into dbo.EmployeeSchedule(EmployeeId, StoreCode, ScheduleDate, BeginTime, EndTime, OnSchedule)" +
+                                              "values('" + EmployeeIds[n] + "', '" + StoreCode + "', '" + RequestedDates[i] + "', " +
+                                              "'00:00:00', '00:00:00', '0')";
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                finally
+                {
+                    conn.Close();
+                }
+
+            }
+        }
+
         /// <summary>
         /// Get employee availability times in text for the assignment area
         /// </summary>
@@ -824,14 +977,14 @@ namespace LaborNeedsScheduling.Models
                         {
                             DataTable str = new DataTable();
 
-                            //cmd.CommandText = "select Hour from dbo.emp_" + employeeIds[i] + "_Availability"
-                            //                  + " where " + weekdays[n] + " = 'True'";
+                            for (int m = 0; m < ScheduleHalfHourSlots.Length; m++)
+                            {
+                                cmd.CommandText = "select Hour from dbo.EmployeeAvailability where EmployeeId = '" + employeeIds[i] + "'"
+                                                + "and Hour = '"+ ScheduleHalfHourSlots[m] +"' and " + days[n] + " = '1'";
 
-                            cmd.CommandText = "select Hour from dbo.EmployeeAvailability where EmployeeId = '" + employeeIds[i] + "'"
-                                            + " and " + days[n] + " = '1'";
-
-                            SqlDataAdapter da = new SqlDataAdapter(cmd);
-                            da.Fill(str);
+                                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                                da.Fill(str);
+                            }
 
                             string[] hours = new string[str.Rows.Count];
 
@@ -1407,27 +1560,17 @@ namespace LaborNeedsScheduling.Models
                     cmd.Connection = conn;
                     conn.Open();
 
-                    cmd.CommandText = "select Hour, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday"
-                                    + " from dbo.EmployeeAvailability where EmployeeId = '" + EmployeeID + "'";
+                    for (int i = 0; i < ScheduleHalfHourSlots.Length; i++)
+                    {
+                        cmd.CommandText = "select Hour, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday"
+                                        + " from dbo.EmployeeAvailability where EmployeeId = '" + EmployeeID + "'"
+                                        + " and Hour = '"+ScheduleHalfHourSlots[i]+"'";
 
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
 
-                    da.Fill(EmployeeSchedule);
+                        da.Fill(EmployeeSchedule);
+                    }
 
-                    //for(int i = 0; i < EmployeeSchedule.Rows.Count; i++)
-                    //{
-                    //    for (int n = 1; n < EmployeeSchedule.Columns.Count; n++)
-                    //    {
-                    //        if (EmployeeSchedule.Rows[i][n].ToString() == "0")
-                    //        {
-                    //            EmployeeSchedule.Rows[i][n] = "False";
-                    //        }
-                    //        else
-                    //        {
-                    //            EmployeeSchedule.Rows[i][n] = "True";
-                    //        }
-                    //    }
-                    //}
                 }
                 catch (Exception ex)
                 {
@@ -1964,6 +2107,7 @@ namespace LaborNeedsScheduling.Models
                 }
             }
 
+
             for (int i = 0; i < employeeAssignedHours.Length; i++)
             {
                 for (int h = 0; h < unassignHours.Length; h++)
@@ -2052,7 +2196,7 @@ namespace LaborNeedsScheduling.Models
 
                     string[] assignedBlock = new string[2];
                     assignedBlock[0] = ScheduleHalfHourSlots[blockStart];
-                    assignedBlock[1] = ScheduleHalfHourSlots[blockEnd+1];
+                    assignedBlock[1] = ScheduleHalfHourSlots[blockEnd + 1];
 
                     assignedBlocks.Add(assignedBlock);
                 }

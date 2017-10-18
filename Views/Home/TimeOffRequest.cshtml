@@ -372,42 +372,6 @@
 <br />
 <br />
 
-
-<input id="requestToggleMultiple" type="checkbox" class="requestMultiple">
-<label for="requestToggleMultiple" class="requestMultiple">Multiple Days</label>
-<div id="expandMultiple">
-    <section>
-        @using (Html.BeginForm("TimeOffRequest", "Home", FormMethod.Post))
-        {
-            <text>Enter Employee ID Number:</text>
-            <br />
-            @Html.TextBoxFor(m => m.employeeId)
-
-            <br />
-            <br />
-
-            <div style="display:inline-block">
-                <div style="border:solid; border-width:1px; display: inline; float:left; padding:20px;">
-                    <div class="inline">
-                        @Html.DropDownListFor(m => Model.startDate, new SelectList(Model.startDates), new { id = "startDate" })
-                    </div>
-                    <label>-</label>
-                    <div class="inline" style="margin-left:15px;">
-                        @Html.DropDownListFor(m => Model.endDate, new SelectList(Model.startDates), new { id = "endDate" })
-                    </div>
-
-                    <div class="inline">
-                        <button type="submit" @*onclick="SubmitRequest()"*@>Submit</button><br>
-                    </div>
-                </div>
-            </div>
-        }
-    </section>
-</div>
-
-<br />
-<br />
-
 <input id="requestToggleSingle" type="checkbox" class="requestSingle">
 <label for="requestToggleSingle" class="requestSingle">Specific Day</label>
 <div id="expandSingle">
@@ -455,6 +419,40 @@
 </div>
 
 <br />
+<br />
+
+<input id="requestToggleMultiple" type="checkbox" class="requestMultiple">
+<label for="requestToggleMultiple" class="requestMultiple">Multiple Days</label>
+<div id="expandMultiple">
+    <section>
+        @using (Html.BeginForm("TimeOffRequest", "Home", FormMethod.Post))
+        {
+            <text>Enter Employee ID Number:</text>
+            <br />
+            @Html.TextBoxFor(m => m.employeeId)
+
+            <br />
+            <br />
+
+            <div style="display:inline-block">
+                <div style="border:solid; border-width:1px; display: inline; float:left; padding:20px;">
+                    <div class="inline">
+                        @Html.DropDownListFor(m => Model.startDate, new SelectList(Model.startDates), new { id = "startDate" })
+                    </div>
+                    <label>-</label>
+                    <div class="inline" style="margin-left:15px;">
+                        @Html.DropDownListFor(m => Model.endDate, new SelectList(Model.startDates), new { id = "endDate" })
+                    </div>
+
+                    <div class="inline">
+                        <button type="submit" @*onclick="SubmitRequest()"*@>Submit</button><br>
+                    </div>
+                </div>
+            </div>
+        }
+    </section>
+</div>
+
 <br />
 <br />
 

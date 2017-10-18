@@ -18,15 +18,16 @@
     <style>
         table.HourView {
             font-family: arial, sans-serif;
-            border-collapse: collapse;
+            /*border-collapse: collapse;*/
             text-align: left;
             padding: 8px;
             table-layout: fixed;
             word-break: break-all;
             empty-cells: show;
-            border-color: white;
+            /*border-color: white;*/
             /*margin-left: auto;
             margin-right: auto;*/
+            border: none;
         }
 
         .noSelect {
@@ -44,6 +45,7 @@
         }
 
         .HourAvailabilityCell {
+            /*border: 1px solid #000000;*/
             border: 1px solid #000000;
             background-color: #ffffff;
         }
@@ -61,7 +63,19 @@
         }
 
         .AssignButtonCell {
+            border: 0;
             width: 100px;
+        }
+
+        .left {
+            display: inline-block;
+            float: left;
+            padding-top: 20px;
+        }
+
+        .AvailabilityContainer {
+            width: 100%;
+            display: inline-block;
         }
     </style>
 
@@ -69,78 +83,238 @@
 
 
 <body>
-    @if (Model.ThisWeek.EmployeesAvailablePartial.Rows.Count > 0)
-    {
-        <div class="noSelect" style="padding-top:20px;">
-            <div style="text-align:left"><b>Available at @Model.ThisWeek.selectedHour:</b></div>
-            @*<table class="HourView" id="HourView" border="1" cellpadding="5">
+    <div class="AvailabilityContainer">
+        @if (Model.ThisWeek.EmployeesAvailablePartial.Rows.Count > 0)
+        {
+            <div class="left">
+                <div style="text-align:left"><b>Available at @Model.ThisWeek.selectedHour:</b></div>
+                <table class="HourView" id="HourView" border="1" cellpadding="5">
                     <tbody>
                         <tr>
-                            @for (int i = 0; i < Model.ThisWeek.EmployeesAvailablePartial.Rows.Count; i++)
-                            {
-                                <td class="HourAvailability">
-                                    @Model.ThisWeek.EmployeesAvailablePartial.Rows[i][0]
-                                </td>
-                            }
+                            <td class="HourAvailabilityCell" style="text-align:center">Name</td>
+                            <td class="HourAvailabilityCell" style="text-align:center">Hours <br /> Remaining</td>
+                            <td class="HourAvailabilityCell" style="text-align:center">Available</td>
+                            <td class="HourAvailabilityCell" style="text-align:center">Block</td>
                         </tr>
-                    </tbody>
-                </table>*@
-            <table class="HourView" id="HourView" border="1" cellpadding="5">
-                <tbody>
-                    @for (int i = 0; i < Model.ThisWeek.EmployeeAvailableTimes.Keys.Count; i++)
-                    {
-                        string[] employeeIds = Model.ThisWeek.EmployeeAvailableTimes.Keys.ToArray();
-                        <tr>
-                            @{ Dictionary<string, string[]> innerDict = Model.ThisWeek.EmployeeAvailableTimes[employeeIds[i]];}
-                            @{ string[] availableTimes = innerDict[Model.ThisWeek.weekdayNames[Model.ThisWeek.selectedWeekday].ToString()];}
-                            @{ List<string> hourList = new List<string>();}
-                            @{ bool block = false;}
+                        @for (int i = 0; i < Model.ThisWeek.EmployeeAvailableTimes.Keys.Count; i++)
+                        {
+                            string[] employeeIds = Model.ThisWeek.EmployeeAvailableTimes.Keys.ToArray();
+                            <tr>
+                                @{ Dictionary<string, string[]> innerDictAvailable = Model.ThisWeek.EmployeeAvailableTimes[employeeIds[i]];}
+                                @{ string[] availableTimes = innerDictAvailable[Model.ThisWeek.weekdayNames[Model.ThisWeek.selectedWeekday].ToString()];}
+                                @{ Dictionary<string, string[]> innerDictScheduled = Model.ThisWeek.EmployeeScheduledTimes[employeeIds[i]];}
+                                @{ string[] scheduledTimes = innerDictScheduled[Model.ThisWeek.weekdayNames[Model.ThisWeek.selectedWeekday].ToString()];}
+                                @{ List<string> AvailableHourList = new List<string>();}
+                                @{ List<string> ScheduledHourList = new List<string>();}
+                                @{ int employeeRank = 0;}
+                                @{ double hoursRemaining = 0;}
+                                @{ bool block = false;}
 
-                            @for (int n = 0; n < availableTimes.Length; n++)
-                            {
-                                if (availableTimes[n] == Model.ThisWeek.selectedHour)
+                                @for (int n = 0; n < availableTimes.Length; n++)
                                 {
-                                    block = true;
-                                }
-                                if (block == true)
-                                {
-                                    hourList.Add(availableTimes[n]);
-
-                                    for (int m = 0; m < Model.ThisWeek.ScheduleHalfHourSlots.Length; m++)
+                                    if (availableTimes[n] == Model.ThisWeek.selectedHour)
                                     {
-                                        if (availableTimes[n] == Model.ThisWeek.ScheduleHalfHourSlots[m])
+                                        block = true;
+                                    }
+                                    if (block == true)
+                                    {
+                                        AvailableHourList.Add(availableTimes[n]);
+
+                                        for (int m = 0; m < Model.ThisWeek.ScheduleHalfHourSlots.Length; m++)
                                         {
-                                            if (n < availableTimes.Length - 1 && availableTimes[n + 1] != Model.ThisWeek.ScheduleHalfHourSlots[m + 1])
+                                            if (availableTimes[n] == Model.ThisWeek.ScheduleHalfHourSlots[m])
                                             {
-                                                block = false;
+                                                if (n < availableTimes.Length - 1 && availableTimes[n + 1] != Model.ThisWeek.ScheduleHalfHourSlots[m + 1])
+                                                {
+                                                    block = false;
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
+
+                                @if (AvailableHourList.Count > 0)
+                                {
+                                    for (int n = 0; n < scheduledTimes.Length; n++)
+                                    {
+                                        if (AvailableHourList[0] == scheduledTimes[n])
+                                        {
+                                            AvailableHourList.Clear();
+                                            break;
+                                        }
+                                    }
+                                }
+                                @if (AvailableHourList.Count == 1)
+                                {
+                                    AvailableHourList.Clear();
+                                }
+
+                                @{string employeeName = "";}
+                                @foreach (Employees emp in Model.ThisWeek.employeeListStore)
+                                {
+                                    if (emp.id == employeeIds[i])
+                                    {
+                                        employeeName = emp.firstName + " " + emp.lastName;
+                                        employeeRank = emp.rank;
+                                        hoursRemaining = emp.hoursRemaining;
+                                    }
+                                }
+                                @{double hourblock = 0;}
+                                @if (employeeRank <= 30)
+                                {
+                                    hourblock = 4;
+                                }
+                                else
+                                {
+                                    hourblock = 8;
+                                }
+
+                                @if (AvailableHourList.Count > 0)
+                                {
+                                    <td class="HourAvailabilityCell" onclick="selectEmployee(this.id)" id="@employeeIds[i]">@employeeName</td>
+                                    <td class="HourAvailabilityCell" onclick="selectEmployee(this.id)" id="@employeeIds[i]" style="text-align:center">@hoursRemaining</td>
+                                    <td class="HourAvailabilityCell" onclick="selectEmployee(this.id)" id="@employeeIds[i]" style="text-align:center">
+                                        @AvailableHourList[0] - @AvailableHourList[AvailableHourList.Count - 1]
+                                    </td>
+                                    double hourCount = AvailableHourList.Count;
+                                    hourCount = (hourCount / 2) - (.5);
+
+                                    if (hourCount <= hourblock)
+                                    {
+                                        <td class="HourAvailabilityCell" onclick="selectEmployee(this.id)" id="@employeeIds[i]" style="text-align:center">
+                                            @hourCount hours
+                                        </td>
+
+                                    }
+                                    else
+                                    {
+                                        <td class="HourAvailabilityCell" onclick="selectEmployee(this.id)" id="@employeeIds[i]" style="text-align:center">
+                                            @hourblock hours
+                                        </td>
+                                    }
+                                    <td class="AssignButtonCell">
+                                        <button type="button" style="text-align:center; float:right" onclick="assignEmployeeBlock(this.id)" id="@employeeIds[i]">Assign<br />Block</button>
+                                    </td>
+                                }
+                            </tr>
+                                    }
+                    </tbody>
+                </table>
+            </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="noSelect" style="padding-top:20px;">
+                                            <div style="text-align:left"><b>Available at @Model.ThisWeek.selectedHour:</b></div>
+                                            <table class="HourView" id="HourView" border="1" cellpadding="5">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            No employees available at @Model.ThisWeek.selectedHour
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+
+        @*@if (Model.ThisWeek.EmployeesScheduledPartial.Rows.Count > 0)
+            {
+                <div class="left" style="margin-left:30%">
+                    <div style="text-align:left"><b>Scheduled at @Model.ThisWeek.selectedHour:</b></div>
+                    <table class="HourView" id="HourView" border="1" cellpadding="5">
+                        <tbody>
+                            <tr>
+                                @for (int i = 0; i < Model.ThisWeek.EmployeesScheduledPartial.Rows.Count; i++)
+                                {
+                                    <td class="HourAvailability">
+                                        @Model.ThisWeek.EmployeesScheduledPartial.Rows[i][0]
+                                    </td>
+                                }
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {*@
+        <div class="left" style="margin-left:20%">
+            <div style="text-align:left"><b>Scheduled on @Model.ThisWeek.weekdayNames[Model.ThisWeek.selectedWeekday]:</b></div>
+
+            <table class="HourView" id="HourView" border="1" cellpadding="5">
+                <tbody>
+                    <tr>
+                        <td class="HourAvailabilityCell" style="text-align:center">Name</td>
+                        <td class="HourAvailabilityCell" style="text-align:center">Scheduled</td>
+                        <td class="HourAvailabilityCell" style="text-align:center">Block</td>
+                    </tr>
+                    @for (int i = 0; i < Model.ThisWeek.EmployeeScheduledTimes.Keys.Count; i++)
+                    {
+                        string[] employeeIds = Model.ThisWeek.EmployeeScheduledTimes.Keys.ToArray();
+                        <tr>
+                            @{ Dictionary<string, string[]> innerDictScheduled = Model.ThisWeek.EmployeeScheduledTimes[employeeIds[i]];}
+                            @{ string[] scheduledTimes = innerDictScheduled[Model.ThisWeek.weekdayNames[Model.ThisWeek.selectedWeekday].ToString()];}
+                            @{ List<string> ScheduledHourList = new List<string>();}
+                            @{ bool block = false;}
+
+                            @*@for (int n = 0; n < scheduledTimes.Length; n++)
+                                {
+                                    if (scheduledTimes[n] == Model.ThisWeek.selectedHour)
+                                    {
+                                        block = true;
+                                    }
+                                    if (block == true)
+                                    {
+                                        ScheduledHourList.Add(scheduledTimes[n]);
+
+                                        for (int m = 0; m < Model.ThisWeek.ScheduleHalfHourSlots.Length; m++)
+                                        {
+                                            if (scheduledTimes[n] == Model.ThisWeek.ScheduleHalfHourSlots[m])
+                                            {
+                                                if (n < scheduledTimes.Length - 1 && scheduledTimes[n + 1] != Model.ThisWeek.ScheduleHalfHourSlots[m + 1])
+                                                {
+                                                    block = false;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }*@
+
                             @{string employeeName = "";}
+                            @{string employeeId = "";}
                             @foreach (Employees emp in Model.ThisWeek.employeeListStore)
                             {
                                 if (emp.id == employeeIds[i])
                                 {
                                     employeeName = emp.firstName + " " + emp.lastName;
+                                    employeeId = emp.id;
                                 }
                             }
-                            @if (hourList.Count > 0)
+
+                            @if (scheduledTimes.Length > 0)
                             {
-                                <td class="HourAvailabilityCell" onclick="selectEmployee(this.id)" id="@employeeIds[i]">@employeeName</td>
-                                <td class="HourAvailabilityCell" onclick="selectEmployee(this.id)" id="@employeeIds[i]" style="text-align:center">
-                                    @hourList[0] - @hourList[hourList.Count - 1]
+                                string endTime = "";
+                                for (int n = 0; n < Model.ThisWeek.ScheduleHalfHourSlots.Length; n++)
+                                {
+                                    if (scheduledTimes[scheduledTimes.Length - 1].ToString() == Model.ThisWeek.ScheduleHalfHourSlots[n] &&
+                                        n < Model.ThisWeek.ScheduleHalfHourSlots.Length - 1)
+                                    {
+                                        endTime = Model.ThisWeek.ScheduleHalfHourSlots[n + 1];
+                                    }
+                                }
+
+                                <td class="HourAvailabilityCell" onclick="" id="@employeeIds[i]">@employeeName</td>
+                                <td class="HourAvailabilityCell" onclick="" id="@employeeIds[i]" style="text-align:center">
+                                    @scheduledTimes[0] - @endTime
                                 </td>
-                                <td class="HourAvailabilityCell" onclick="selectEmployee(this.id)" id="@employeeIds[i]" style="text-align:center">
-                                    @{ double hourCount = hourList.Count;}
-                                    @((hourCount / 2) - .5) hours
+                                <td class="HourAvailabilityCell" onclick="" id="@employeeIds[i]" style="text-align:center">
+                                    @{ double hourCount = scheduledTimes.Length;}
+                                    @((hourCount / 2)) hours
                                 </td>
-                                <td class="HiddenCell">
-                                    <button style="text-align:center; float:right" onclick="assignEmployeeBlock(this.id)" id="@hourList[0]">Assign<br />Block</button>
-                                </td>
-                                <td class="HiddenCell">
-                                    @*<button style="text-align:center; float:right" id="@employeeIds[i]">Another<br />button</button>*@
+                                <td style="border:none">
+                                    <button type="button" id="@employeeId" value="@scheduledTimes[0]" onclick="unassignBlock(this.id, this)">
+                                        Unassign
+                                    </button>
                                 </td>
                                         }
                         </tr>
@@ -148,46 +322,24 @@
                 </tbody>
             </table>
         </div>
-                                        }
-                                        else
-                                        {
-                                            <div class="noSelect" style="padding-top:20px;">
-                                                <div style="text-align:left"><b>Available at @Model.ThisWeek.selectedHour:</b></div>
-                                                <table class="HourView" id="HourView" border="1" cellpadding="5">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>
-                                                                No employees available at @Model.ThisWeek.selectedHour
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        }
-
-    @if (Model.ThisWeek.EmployeesScheduledPartial.Rows.Count > 0)
-    {
-        <div class="noSelect" style="padding-top:20px;">
-            <div style="text-align:left"><b>Scheduled at @Model.ThisWeek.selectedHour:</b></div>
-            <table class="HourView" id="HourView" border="1" cellpadding="5">
-                <tbody>
-                    <tr>
-                        @for (int i = 0; i < Model.ThisWeek.EmployeesScheduledPartial.Rows.Count; i++)
-                        {
-                            <td class="HourAvailability">
-                                @Model.ThisWeek.EmployeesScheduledPartial.Rows[i][0]
+        @*}
+            else
+            {
+            <div class="noSelect" style="padding-top:20px;">
+                <div style="text-align:left"><b>Available at @Model.ThisWeek.selectedHour:</b></div>
+                <table class="HourView" id="HourView" border="1" cellpadding="5">
+                    <tbody>
+                        <tr>
+                            <td>
+                                No employees available at @Model.ThisWeek.selectedHour
                             </td>
-                        }
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    }
-    else
-    {
-        <div class="noSelect" style="padding-top:20px;">
-            <div style="text-align:left"><b>Scheduled at @Model.ThisWeek.selectedHour:</b></div>
-            <table class="HourView" id="HourView" border="1" cellpadding="5">
+                        </tr>
+                    </tbody>
+                </table>*@
+
+
+
+        @*<table class="HourView" id="HourView" border="1" cellpadding="5">
                 <tbody>
                     <tr>
                         <td>
@@ -195,9 +347,8 @@
                         </td>
                     </tr>
                 </tbody>
-            </table>
-        </div>
-    }
+            </table>*@
+    </div>
 </body>
 
 @section scripts{
