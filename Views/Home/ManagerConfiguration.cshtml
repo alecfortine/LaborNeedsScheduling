@@ -143,6 +143,30 @@
             border: 1px solid #000000;
             background-color: #ff9292;
         }
+        .ExcludedDatesContent{
+            position: fixed;
+            top: 10%;
+            left: 25%;
+            z-index: 1050;
+            width: 50%;
+            height: 80%;
+            background-color: #ffffff;
+            border-radius: 20px;
+            border: 2px solid #FFFFFF;
+            background-color: #FFFFFF;
+            -webkit-box-shadow: #000000 8px 8px 8px;
+            -moz-box-shadow: #000000 8px 8px 8px;
+            box-shadow: #000000 8px 8px 8px;
+            display: none;
+        }
+        .ExcludedDatesBody{
+            position: relative;
+            max-height: 850px;
+            padding: 15px;
+            overflow-y: auto;
+            display: block;
+            padding-left: 30px;
+        }
     </style>
 
     @*side by side divs*@
@@ -297,9 +321,9 @@
                 <label>Weekend:</label>
                 @Html.TextBoxFor(m => Model.ThisWeek.WeekendPowerHours, new { style = "width:25px; text-align:center;" })<br />
                 <br />
-                <h2>Calculations</h2>
+                @*<h2>Calculations</h2>
                 <label>Historical Weeks:</label>
-                @Html.TextBoxFor(m => Model.ThisWeek.NumberHistoricalWeeks, new { style = "width:25px; text-align:center;" })<br />
+                @Html.TextBoxFor(m => Model.ThisWeek.NumberHistoricalWeeks, new { style = "width:25px; text-align:center;" })<br />*@
 
             </div>
             <button type="submit" class="right-element">Update</button><br>
@@ -315,13 +339,13 @@
     @using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "ExcludeDatesForm" }))
     {
         <div style="display:inline-block; padding-top: 10%;">
-            @*<button type="button" style="width:200px;" onclick="document.getElementById('ExcludeDatesBox').style.display = 'block'; document.getElementById('fade').style.display = 'block'">Exclude Dates</button>*@
-            <div id="ExcludeDatesBox" class="white_content">
+            <button type="button" style="width:200px;" onclick="document.getElementById('ExcludeDatesBox').style.display = 'block'; document.getElementById('fade').style.display = 'block'">Exclude Dates</button>
+            <div id="ExcludeDatesBox" class="ExcludedDatesContent">
                 <div class="white-header">
                     <a class="close" href="javascript:void(0)" onclick="document.getElementById('ExcludeDatesBox').style.display = 'none'; document.getElementById('fade').style.display = 'none'">x</a>
 
                 </div>
-                <div class="white-body">
+                <div class="ExcludedDatesBody">
                     <h4 style="padding-left:15px;">
                         Choose dates to exclude from the past
                         @Model.ThisWeek.NumberHistoricalWeeks
@@ -370,48 +394,37 @@
                     </table>
 
                     <br />
-                    <br />
 
                     <div style="float:right; padding-right: 10%;">
-                        <button type="submit">Update</button><br>
+                        <button onlick="UpdateExcludedDates()" type="submit">Update</button><br>
                     </div>
                 </div>
             </div>
             <div id="fade" class="black_overlay"></div>
         </div>
+
+        @Html.HiddenFor(m => Model.ExcludedDates, new { id = "hiddenExcludedDates" })
+                                @Html.HiddenFor(m => Model.ThisWeek.excludedDates, new { id = "hiddenExcludedDatesData" })
                                 }
 
     <br />
     <br />
 
-    @using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "BorrowEmployeeForm" }))
+    @*@using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "BorrowEmployeeForm" }))
             {
         <h2>Borrow employee</h2>
         <br />
         <div class="main">
-            @*<text>Search by </text>
-                <select>
-                    <option>--</option>
-                    <option value="empid">Employee ID</option>
-                    <option value="lastname">Last Name</option>
-                </select>*@
-
             <div>
-                Enter employee ID@*<strike>or last name</strike>*@: <br />
+                Enter employee ID: <br />
                 @Html.TextBoxFor(m => Model.ThisWeek.EmployeeSearch, new { id = "EmployeeSearch" })
                 <button type="button" onclick="findEmployee(document.getElementById('EmployeeSearch').value)" id="SearchButton">Search</button>
             </div>
-
             <br />
-
             <div id="FoundEmployee"></div>
-
         </div>
+    }*@
 
-    }
-
-    @Html.HiddenFor(m => Model.ExcludedDates, new { id = "hiddenExcludedDates" })
-    @Html.HiddenFor(m => Model.ThisWeek.ExcludedDates, new { id = "hiddenExcludedDatesData" })
 
     @*}*@
     @*}*@
@@ -425,7 +438,7 @@
 
     <script>
         function findEmployee(emp) {
-            $.get('/Home/_ManagerConfigFindEmployee/?EmployeeInfo=' + emp, function (data) {
+            $.get('/Home/FindEmployee/?EmployeeInfo=' + emp, function (data) {
                 //load partial to page
                 $('#FoundEmployee').html(data);
             });
@@ -434,7 +447,7 @@
 
     <script>
         function addEmployee() {
-            $.post('/Home/_ManagerConfigFindEmployee',
+            $.post('/Home/FindEmployee',
                 {
                     AddEmployee: 'true'
                 },
@@ -444,16 +457,6 @@
                 );
             alert('Employee added');
         }
-    </script>
-
-    <script>
-        document.getElementById("EmployeeSearch")
-    .addEventListener("keyup", function (event) {
-        event.preventDefault();
-        if (event.keyCode == 13) {
-            document.getElementById("SearchButton").click();
-        }
-    });
     </script>
 
 
@@ -530,14 +533,27 @@
                 }
             }
 
-            //for (var i = 1; i < cellvalues.length; i++) {
-
-            //    alert(cellvalues[i]);
-            //}
-
             document.getElementById("hiddenExcludedDates").value = cellvalues;
             document.getElementById("hiddenExcludedDatesData").value = cellvalues;
         }
+
+        //function UpdateExcludedDates() {
+        //    alert('hey');
+        //    var ExcludedDates = document.getElementById("hiddenExcludedDates").value = cellvalues;
+
+        //    //$.post('/Home/ManagerConfiguration/?ExcludedDates=' + ExcludedDates, function (data) {
+        //    //});
+
+        //    $.post('/Home/ManagerConfiguration',
+        //    {
+        //        ExcludedDates: ExcludedDates
+        //    },
+        //    function (data) {
+        //        $('#AssignmentTablePartial').html(data);
+        //    }
+        //    );
+        //}
+
     </script>
 
 }

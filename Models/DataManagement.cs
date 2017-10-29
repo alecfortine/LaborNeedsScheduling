@@ -26,6 +26,7 @@ namespace LaborNeedsScheduling.Models
     public class WorkWeek
     {
         #region Pending Variables
+        public DataTable BlackoutTableHelpMe = new DataTable();
 
         public double minhours = 0;
         public double maxhours = 0;
@@ -33,7 +34,7 @@ namespace LaborNeedsScheduling.Models
         public double TotalScheduledHours { get; set; }
 
         #region Selected Employee Scheduling
-        public string StoreCode = "0001";
+        public string StoreCode = "1008";
         public List<string> ErrorMessages { get; set; }
         public int selectedWeekday { get; set; }
         public string selectedHour { get; set; }
@@ -41,7 +42,7 @@ namespace LaborNeedsScheduling.Models
         public string selectedEmployeeId { get; set; }
         public string startHour { get; set; }
         public string endHour { get; set; }
-        public List<Employees> employeeListAll { get; set; }
+        //public List<Employees> employeeListAll { get; set; }
         public List<Employees> employeeListStore { get; set; }
         public string currentStoreCode { get; set; }
         public bool employeeStatus { get; set; }
@@ -93,59 +94,38 @@ namespace LaborNeedsScheduling.Models
         /// <summary>
         /// Set of possible hours for the schedule, hours shown in each table are based on selections of the ScheduleStartHours dictionary
         /// </summary>
-        public string[] ScheduleHourSlots = { "6AM-7AM", "7AM-8AM","8AM-9AM","9AM-10AM","10AM-11AM","11AM-12PM","12PM-1PM", "1PM-2PM", "2PM-3PM",
-                                              "3PM-4PM","4PM-5PM", "5PM-6PM", "6PM-7PM", "7PM-8PM", "8PM-9PM", "9PM-10PM", "10PM-11PM", "11PM-12AM", "12AM-1AM"};
+        public string[] ScheduleHourSlots = { "12AM-1AM","1AM-2AM","2AM-3AM","3AM-4AM","4AM-5AM","5AM-6AM","6AM-7AM", "7AM-8AM","8AM-9AM",
+                                              "9AM-10AM","10AM-11AM","11AM-12PM","12PM-1PM","1PM-2PM","2PM-3PM","3PM-4PM","4PM-5PM","5PM-6PM",
+                                              "6PM-7PM","7PM-8PM","8PM-9PM","9PM-10PM","10PM-11PM","11PM-12AM"};
 
-        public string[] ScheduleHalfHourSlots = { "6:00AM", "6:30AM", "7:00AM", "7:30AM","8:00AM", "8:30AM","9:00AM", "9:30AM","10:00AM", "10:30AM",
+        public string[] ScheduleHalfHourSlots = { "12:00AM","12:30AM","1:00AM","1:30AM","2:00AM","2:30AM","3:00AM","3:30AM","4:00AM","4:30AM","5:00AM","5:30AM",
+                                                  "6:00AM", "6:30AM", "7:00AM", "7:30AM","8:00AM", "8:30AM","9:00AM", "9:30AM","10:00AM", "10:30AM",
                                                   "11:00AM", "11:30AM","12:00PM","12:30PM", "1:00PM", "1:30PM", "2:00PM", "2:30PM", "3:00PM", "3:30PM",
                                                   "4:00PM", "4:30PM", "5:00PM", "5:30PM", "6:00PM", "6:30PM", "7:00PM", "7:30PM", "8:00PM", "8:30PM",
-                                                  "9:00PM", "9:30PM", "10:00PM", "10:30PM", "11:00PM", "11:30PM", "12:00AM"};
+                                                  "9:00PM", "9:30PM", "10:00PM", "10:30PM", "11:00PM", "11:30PM"};
 
-        public string[] SQLHours = {"06:00:00", "06:30:00", "07:00:00", "07:30:00", "08:00:00", "08:30:00", "09:00:00", "09:30:00", "10:00:00", "10:30:00", "11:00:00", "11:30:00", "12:00:00", "12:30:00", "13:00:00", "13:30:00", "14:00:00", "14:30:00",
-                                    "15:00:00", "15:30:00", "16:00:00", "16:30:00", "17:00:00", "17:30:00", "18:00:00", "18:30:00", "19:00:00", "19:30:00", "20:00:00", "20:30:00", "21:00:00", "21:30:00", "22:00:00", "22:30:00", "23:00:00", "23:30:00", "00:00:00"};
+        public string[] SQLHours = {"00:00:00","00:30:00","01:00:00","01:30:00","02:00:00","02:30:00","03:00:00","03:30:00","04:00:00",
+                                    "04:30:00","05:00:00","05:30:00","06:00:00", "06:30:00", "07:00:00", "07:30:00", "08:00:00", "08:30:00",
+                                    "09:00:00", "09:30:00", "10:00:00", "10:30:00", "11:00:00", "11:30:00", "12:00:00", "12:30:00",
+                                    "13:00:00", "13:30:00", "14:00:00", "14:30:00","15:00:00", "15:30:00", "16:00:00", "16:30:00", "17:00:00",
+                                    "17:30:00", "18:00:00", "18:30:00", "19:00:00", "19:30:00", "20:00:00", "20:30:00", "21:00:00", "21:30:00",
+                                    "22:00:00", "22:30:00", "23:00:00", "23:30:00"};
 
         /// <summary>
-        /// List of times for dropdown lists and start/end times for the week
+        /// List of times for dropdown lists and start times for the week
         /// </summary>
         public Dictionary<string, string> ScheduleStartHours = new Dictionary<string, string>()
         {
-            {"6:00AM", "6:00AM"},
-            {"6:30AM", "6:30AM"},
-            {"7:00AM", "7:00AM"},
-            {"7:30AM", "7:30AM"},
-            {"8:00AM", "8:00AM"},
-            {"8:30AM", "8:30AM"},
-            {"9:00AM", "9:00AM"},
-            {"9:30AM", "9:30AM"},
-            {"10:00AM", "10:00AM"},
-            {"10:30AM", "10:30AM"},
-            {"11:00AM", "11:00AM"},
-            {"11:30AM", "11:30AM"},
-            {"12:00PM", "12:00PM"},
-            {"12:30PM", "12:30PM"},
-            {"1:00PM", "1:00PM"},
-            {"1:30PM", "1:30PM"},
-            {"2:00PM", "2:00PM"},
-            {"2:30PM", "2:30PM"},
-            {"3:00PM", "3:00PM"},
-            {"3:30PM", "3:30PM"},
-            {"4:00PM", "4:00PM"},
-            {"4:30PM", "4:30PM"},
-            {"5:00PM", "5:00PM"},
-            {"5:30PM", "5:30PM"},
-            {"6:00PM", "6:00PM"},
-            {"6:30PM", "6:30PM"},
-            {"7:00PM", "7:00PM"},
-            {"7:30PM", "7:30PM"},
-            {"8:00PM", "8:00PM"},
-            {"8:30PM", "8:30PM"},
-            {"9:00PM", "9:00PM"},
-            {"9:30PM", "9:30PM"},
-            {"10:00PM", "10:00PM"},
-            {"10:30PM", "10:30PM"},
-            {"11:00PM", "11:00PM"},
-            {"11:30PM", "11:30PM"},
-            {"12:00AM", "12:00AM"},
+            {"12:00AM", "12:00AM"},{"12:30AM", "12:30AM"},{"1:00AM", "1:00AM"},{"1:30AM", "1:30AM"},{"2:00AM", "2:00AM"},
+            { "2:30AM", "2:30AM"},{"3:00AM", "3:00AM"},{"3:30AM", "3:30AM"},{"4:00AM", "4:00AM"},{"4:30AM", "4:30AM"},
+            { "5:00AM", "5:00AM"}, {"5:30AM", "5:30AM"},{"6:00AM", "6:00AM"}, {"6:30AM", "6:30AM"},{"7:00AM", "7:00AM"},
+            { "7:30AM", "7:30AM"},{"8:00AM", "8:00AM"},{"8:30AM", "8:30AM"},{"9:00AM", "9:00AM"},{"9:30AM", "9:30AM"},
+            { "10:00AM", "10:00AM"},{"10:30AM", "10:30AM"}, {"11:00AM", "11:00AM"},{"11:30AM", "11:30AM"},{"12:00PM", "12:00PM"},
+            { "12:30PM", "12:30PM"},{"1:00PM", "1:00PM"},{"1:30PM", "1:30PM"},{"2:00PM", "2:00PM"},{"2:30PM", "2:30PM"},
+            { "3:00PM", "3:00PM"},{"3:30PM", "3:30PM"},{"4:00PM", "4:00PM"},{"4:30PM", "4:30PM"},{"5:00PM", "5:00PM"},
+            { "5:30PM", "5:30PM"},{"6:00PM", "6:00PM"},{"6:30PM", "6:30PM"},{"7:00PM", "7:00PM"},{"7:30PM", "7:30PM"},
+            { "8:00PM", "8:00PM"},{"8:30PM", "8:30PM"},{"9:00PM", "9:00PM"},{"9:30PM", "9:30PM"},{"10:00PM", "10:00PM"},
+            { "10:30PM", "10:30PM"},{"11:00PM", "11:00PM"},{"11:30PM", "11:30PM"}
         };
 
         /// <summary>
@@ -153,43 +133,16 @@ namespace LaborNeedsScheduling.Models
         /// </summary>
         public Dictionary<string, string> ScheduleEndHours = new Dictionary<string, string>()
         {
-            {"6:30AM", "6:00AM"},
-            {"7:00AM", "6:30AM"},
-            {"7:30AM", "7:00AM"},
-            {"8:00AM", "7:30AM"},
-            {"8:30AM", "8:00AM"},
-            {"9:00AM", "8:30AM"},
-            {"9:30AM", "9:00AM"},
-            {"10:00AM", "9:30AM"},
-            {"10:30AM", "10:00AM"},
-            {"11:00AM", "10:30AM"},
-            {"11:30AM", "11:00AM"},
-            {"12:00PM", "11:30AM"},
-            {"12:30PM", "12:00PM"},
-            {"1:00PM", "12:30PM"},
-            {"1:30PM", "1:00PM"},
-            {"2:00PM", "1:30PM"},
-            {"2:30PM", "2:00PM"},
-            {"3:00PM", "2:30PM"},
-            {"3:30PM", "3:00PM"},
-            {"4:00PM", "3:30PM"},
-            {"4:30PM", "4:00PM"},
-            {"5:00PM", "4:30PM"},
-            {"5:30PM", "5:00PM"},
-            {"6:00PM", "5:30PM"},
-            {"6:30PM", "6:00PM"},
-            {"7:00PM", "6:30PM"},
-            {"7:30PM", "7:00PM"},
-            {"8:00PM", "7:30PM"},
-            {"8:30PM", "8:00PM"},
-            {"9:00PM", "8:30PM"},
-            {"9:30PM", "9:00PM"},
-            {"10:00PM", "9:30PM"},
-            {"10:30PM", "10:00PM"},
-            {"11:00PM", "10:30PM"},
-            {"11:30PM", "11:00PM"},
-            {"12:00AM", "11:30AM"},
-            {"12:30AM", "12:00AM"},
+            {"12:30AM", "12:00AM"},{"1:00AM", "12:30AM"},{"1:30AM", "1:00AM"},{"2:00AM", "1:30AM"},{"2:30AM", "2:00AM"},
+            { "3:00AM", "2:30AM"},{"3:30AM", "3:00AM"},{"4:00AM", "3:30AM"},{"4:30AM", "4:00AM"},{"5:00AM", "4:30AM"},
+            { "5:30AM", "5:00AM"},{"6:00AM", "5:30AM"},{"6:30AM", "6:00AM"},{"7:00AM", "6:30AM"},{"7:30AM", "7:00AM"},
+            { "8:00AM", "7:30AM"},{"8:30AM", "8:00AM"},{"9:00AM", "8:30AM"},{"9:30AM", "9:00AM"}, { "10:00AM", "9:30AM"},
+            { "10:30AM", "10:00AM"},{"11:00AM", "10:30AM"},{"11:30AM", "11:00AM"},{"12:00PM", "11:30AM"},{"12:30PM", "12:00PM"},
+            { "1:00PM", "12:30PM"},{"1:30PM", "1:00PM"},{"2:00PM", "1:30PM"},{"2:30PM", "2:00PM"},{"3:00PM", "2:30PM"},
+            { "3:30PM", "3:00PM"},{"4:00PM", "3:30PM"},{"4:30PM", "4:00PM"},{"5:00PM", "4:30PM"},{"5:30PM", "5:00PM"},
+            { "6:00PM", "5:30PM"},{"6:30PM", "6:00PM"}, {"7:00PM", "6:30PM"},{"7:30PM", "7:00PM"},{"8:00PM", "7:30PM"},
+            { "8:30PM", "8:00PM"},{"9:00PM", "8:30PM"},{"9:30PM", "9:00PM"},{"10:00PM", "9:30PM"},{"10:30PM", "10:00PM"},
+            { "11:00PM", "10:30PM"},{"11:30PM", "11:00PM"},{"12:00AM", "11:30AM"}
         };
 
         /// <summary>
@@ -303,6 +256,7 @@ namespace LaborNeedsScheduling.Models
         public DateTime[] OneWeekFromNowDates = new DateTime[7];
         public DateTime[] TwoWeeksFromNowDates = new DateTime[7];
         public DateTime[] ThreeWeeksFromNowDates = new DateTime[7];
+        public DateTime[] NextFourWeeksDates = new DateTime[28];
         public DateTime[] RequestedDates = new DateTime[7];
         public string startdateCurrentWeek { get; set; }
         public string enddateCurrentWeek { get; set; }
@@ -331,9 +285,10 @@ namespace LaborNeedsScheduling.Models
         /// </summary>
         public int[] getDefaultWeights(int numberOfWeeks)
         {
-            int[] defaultWeightingValues = { 36, 24, 16, 12, 8, 4 };
+            //int[] defaultWeightingValues = { 36, 24, 16, 12, 8, 4 };
+            int[] WeightingValues = FakeAPI.GetWeekWeighting(numberOfWeeks, StoreCode);
 
-            return defaultWeightingValues;
+            return WeightingValues;
         }
 
         public WorkWeek()
@@ -377,7 +332,7 @@ namespace LaborNeedsScheduling.Models
         {
             try
             {
-                WeekStartEndHours = FakeAPI.GetStoreHours("0001");
+                WeekStartEndHours = FakeAPI.GetStoreHours("1008");
 
                 // weighting input
                 for (int i = 0; i < weekWeighting.Length; i++)
@@ -388,7 +343,7 @@ namespace LaborNeedsScheduling.Models
                     }
                 }
 
-                employeeListAll = FakeAPI.GetAllEmployees();
+                //employeeListAll = FakeAPI.GetAllEmployees();
                 if (employeeListStore.Count <= FakeAPI.GetEmployeesForStore(currentStoreCode).Count)
                 {
                     employeeListStore = FakeAPI.GetEmployeesForStore(currentStoreCode);
@@ -396,11 +351,12 @@ namespace LaborNeedsScheduling.Models
 
                 GenerateCurrentWeekDates();
                 FakeAPI.AddNewWeekDates(OneWeekFromNowDates);
-                //FakeAPI.dothething(CurrentWeekDates);
+                //FakeAPI.dothething(ThreeWeeksFromNowDates);
 
                 GenerateWeeklyTimeSlots();
                 WTGTrafficPercent = FakeAPI.FillWTGTable(weekWeighting, NumberHistoricalWeeks, DateTime.Parse("2015-05-10"));
 
+                GenerateBlackoutTable();
                 FillExcludedDatesTable();
                 FillWeightedAverageTrafficTable();
                 FillPercentWeeklyTable();
@@ -410,7 +366,7 @@ namespace LaborNeedsScheduling.Models
                 RedistributeHours();
                 GenerateAllocatedHoursDisplay(RequestedDates);
                 GeneratePowerHourCells();
-                GetBlackoutCells(AllocatedHoursDisplay);
+                GetBlackoutCells(AllocatedHours);
 
                 if (selectedEmployeeId != null)
                 {
@@ -456,11 +412,11 @@ namespace LaborNeedsScheduling.Models
         /// <summary>
         /// Get the availability hours of all employees for each day
         /// </summary>
-        public void CreateEmpAvailabilityText()
+        public void GenerateEmployeeAvailability()
         {
             GenerateCurrentWeekDates();
             string[] weekdays = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
-            string[] employeeIdsAll = new string[LaborScheduling.EmployeeListAll.Count];
+            //string[] employeeIdsAll = new string[LaborScheduling.EmployeeListAll.Count];
             string[] employeeIdsStore = new string[employeeListStore.Count];
 
             // creating each day for an employee
@@ -469,9 +425,14 @@ namespace LaborNeedsScheduling.Models
                 employeeIdsStore[i] = employeeListStore[i].id;
             }
 
-            FakeAPI.CheckForCurrentWeek(employeeListStore, RequestedDates);
+            for (int i = 0; i < 28; i++)
+            {
+                NextFourWeeksDates[i] = currentWeekMarker.AddDays(i);
+            }
+
+            //FakeAPI.CheckForCurrentWeek(employeeListStore, RequestedDates);
             EmployeeAvailableTimes = FakeAPI.GetEmployeeAvailableTimes(employeeIdsStore);
-            EmployeeTimeOffRequests = FakeAPI.GetEmployeeTimeOff(employeeIdsStore, RequestedDates);
+            EmployeeTimeOffRequests = FakeAPI.GetEmployeeTimeOff(StoreCode, NextFourWeeksDates);
             List<string> idList = new List<string>(EmployeeTimeOffRequests.Keys);
 
             for (int i = 0; i < employeeListStore.Count; i++)
@@ -519,7 +480,7 @@ namespace LaborNeedsScheduling.Models
                 }
             }
 
-            EmployeeScheduledTimes = FakeAPI.GetEmployeeScheduledTimes(employeeIdsStore, RequestedDates);
+            EmployeeScheduledTimes = FakeAPI.GetEmployeeScheduledTimes(employeeIdsStore, StoreCode, RequestedDates);
         }
 
         /// <summary>
@@ -529,7 +490,7 @@ namespace LaborNeedsScheduling.Models
         /// <param name="weekday"></param>
         public void CheckScheduleConflicts(string employeeId, int weekday)
         {
-            List<Employees> EmployeeList = FakeAPI.GetAllEmployees();
+            List<Employees> EmployeeList = FakeAPI.GetEmployeesForStore(StoreCode);
             string employeeName = "";
             foreach (var emp in EmployeeList)
             {
@@ -564,31 +525,34 @@ namespace LaborNeedsScheduling.Models
             ScheduleConflicts = Conflicts;
         }
 
-        public DataTable FindEmployee(string EmployeeInfo)
+        public DataTable FindEmployee(string EmployeeId)
         {
-            DataTable FoundEmployee = new DataTable();
-            List<Employees> EmployeeList = FakeAPI.GetAllEmployees();
-            foreach (Employees emp in EmployeeList)
-            {
-                if (emp.storeCode != currentStoreCode && (/*emp.firstName == EmployeeInfo ||*/ emp.id == EmployeeInfo))
-                {
-                    FoundEmployee.Columns.Add("Name");
-                    FoundEmployee.Columns.Add("Id");
-                    FoundEmployee.Columns.Add("Store Code");
-                    FoundEmployee.Columns.Add("Role");
-                    FoundEmployee.Columns.Add("Level");
+            Employees FoundEmployee = FakeAPI.FindEmployee(EmployeeId);
 
-                    DataRow row = FoundEmployee.NewRow();
-                    row["Name"] = emp.firstName + " " + emp.lastName;
-                    row["Id"] = emp.id;
-                    row["Store Code"] = emp.storeCode;
-                    row["Role"] = emp.role;
-                    row["Level"] = emp.rank;
-                    FoundEmployee.Rows.Add(row);
-                }
+            DataTable EmployeeInfo = new DataTable();
+
+            if (FoundEmployee.id == "0")
+            {
+                EmployeeInfo.Columns.Add("Employee not found");
+            }
+            else
+            {
+                EmployeeInfo.Columns.Add("Name");
+                EmployeeInfo.Columns.Add("Id");
+                EmployeeInfo.Columns.Add("Store Code");
+                EmployeeInfo.Columns.Add("Role");
+                EmployeeInfo.Columns.Add("Level");
+
+                DataRow row = EmployeeInfo.NewRow();
+                row["Name"] = FoundEmployee.firstName + " " + FoundEmployee.lastName;
+                row["Id"] = FoundEmployee.id;
+                row["Store Code"] = FoundEmployee.storeCode;
+                row["Role"] = FoundEmployee.role;
+                row["Level"] = FoundEmployee.rank;
+                EmployeeInfo.Rows.Add(row);
             }
 
-            return FoundEmployee;
+            return EmployeeInfo;
         }
 
         /// <summary>
@@ -597,31 +561,126 @@ namespace LaborNeedsScheduling.Models
         /// <param name="employeeId"></param>
         public void AddEmployeeToList(string employeeId)
         {
-            Employees addedEmployee = new Employees();
-            employeeListAll = FakeAPI.GetAllEmployees();
-            foreach (Employees emp in employeeListAll)
-            {
-                if (emp.id == employeeId)
-                {
-                    addedEmployee = emp;
-                    break;
-                }
-            }
             employeeListStore = FakeAPI.GetEmployeesForStore(StoreCode);
             bool employeeExists = false;
             foreach (Employees emp in employeeListStore)
             {
-                if (emp.id == addedEmployee.id)
+                if (emp.id == employeeId)
                 {
                     employeeExists = true;
                 }
             }
 
+            for (int i = 0; i < 7; i++)
+            {
+                NextFourWeeksDates[i] = CurrentWeekDates[i];
+                NextFourWeeksDates[i + 7] = OneWeekFromNowDates[i];
+                NextFourWeeksDates[i + 14] = TwoWeeksFromNowDates[i];
+                NextFourWeeksDates[i + 21] = ThreeWeeksFromNowDates[i];
+            }
+
             if (employeeExists == false)
             {
-                employeeListStore.Add(addedEmployee);
+                FakeAPI.AddBorrowedEmployee(employeeId, StoreCode, NextFourWeeksDates);
             }
         }
+
+
+        public void GenerateBlackoutTable()
+        {
+            BlackoutTableHelpMe.Clear();
+            BlackoutTableHelpMe.Columns.Clear();
+            BlackoutTableHelpMe.Columns.Add("HourOfDay", typeof(string));
+            BlackoutTableHelpMe.Columns.Add("Sunday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[0]), typeof(string));
+            BlackoutTableHelpMe.Columns.Add("Monday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[1]), typeof(string));
+            BlackoutTableHelpMe.Columns.Add("Tuesday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[2]), typeof(string));
+            BlackoutTableHelpMe.Columns.Add("Wednesday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[3]), typeof(string));
+            BlackoutTableHelpMe.Columns.Add("Thursday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[4]), typeof(string));
+            BlackoutTableHelpMe.Columns.Add("Friday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[5]), typeof(string));
+            BlackoutTableHelpMe.Columns.Add("Saturday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[6]), typeof(string));
+
+            List<string[]> preOpenSlots = new List<string[]>();
+            List<string[]> postCloseSlots = new List<string[]>();
+
+            string[] openAddedSlots = new string[openHourSlots];
+            string[] closeAddedSlots = new string[2];
+
+            List<string> UpdatedHourSchedule = new List<string>();
+            foreach (string s in WeekHourSchedule)
+            {
+                UpdatedHourSchedule.Add(s);
+            }
+
+            for (int i = 0; i < ScheduleHalfHourSlots.Length; i++)
+            {
+                if (ScheduleHalfHourSlots[i] == UpdatedHourSchedule[0])
+                {
+                    for (int n = 0; n < openHourSlots; n++)
+                    {
+                        openAddedSlots[n] = ScheduleHalfHourSlots[i - (n + 1)];
+                    }
+                }
+                if (ScheduleHalfHourSlots[i] == UpdatedHourSchedule[UpdatedHourSchedule.Count - 1])
+                {
+                    for (int n = 0; n < 2; n++)
+                    {
+                        closeAddedSlots[n] = ScheduleHalfHourSlots[i + (n + 1)];
+                    }
+                }
+            }
+
+            for (int i = 0; i < openAddedSlots.Length; i++)
+            {
+                UpdatedHourSchedule.Insert(0, openAddedSlots[i]);
+            }
+            for (int i = 0; i < closeAddedSlots.Length; i++)
+            {
+                UpdatedHourSchedule.Insert(UpdatedHourSchedule.Count, closeAddedSlots[i]);
+            }
+
+            for (int i = 0; i < UpdatedHourSchedule.Count; i++)
+            {
+                BlackoutTableHelpMe.Rows.Add(UpdatedHourSchedule[i]);
+            }
+
+            for (int i = 1; i < 8; i++)
+            {
+                int startPosition = 0;
+                int endPosition = 0;
+                for (int n = 0; n < BlackoutTableHelpMe.Rows.Count; n++)
+                {
+                    if (BlackoutTableHelpMe.Rows[n][0].ToString() == WeekStartEndHours.Rows[0][i - 1].ToString())
+                    {
+                        startPosition = n;
+                    }
+                    if (BlackoutTableHelpMe.Rows[n][0].ToString() == WeekStartEndHours.Rows[1][i - 1].ToString())
+                    {
+                        endPosition = n;
+                    }
+                }
+                if (startPosition - openHourSlots >= 0)
+                {
+                    startPosition -= openHourSlots;
+                }
+                if (endPosition < BlackoutTableHelpMe.Rows.Count - 2)
+                {
+                    endPosition += 2;
+                }
+
+                for (int n = 0; n < BlackoutTableHelpMe.Rows.Count; n++)
+                {
+                    if (n < startPosition || n > endPosition)
+                    {
+                        BlackoutTableHelpMe.Rows[n][i] = "True";
+                    }
+                    else
+                    {
+                        BlackoutTableHelpMe.Rows[n][i] = "False";
+                    }
+                }
+            }
+        }
+
 
         /// <summary>
         /// Determine which cells should be blacked out on the main labor schedule based on individual start and end times
@@ -969,32 +1028,26 @@ namespace LaborNeedsScheduling.Models
         {
             try
             {
+                List<DateTime> DatesToExclude = FakeAPI.GetExcludedDates(StoreCode);
+
                 DateTime[] days = new DateTime[ExclusionDates.Count];
                 int counter = 0;
                 foreach (DateTime date in ExclusionDates.Keys)
                 {
                     days[counter] = date;
-
-                    //if (excludedDates[counter] == "True")
-                    //{
-                    //    ExclusionDates[date] = true;
-                    //}
-                    //else
-                    //{
-                    //    ExclusionDates[date] = false;
-                    //}
                     counter++;
                 }
 
-                for (int i = 0; i < days.Length; i++)
+                for (int i = 0; i < ExclusionDates.Keys.Count; i++)
                 {
-                    if (excludedDates[i] == "True")
+                    ExclusionDates[days[i]] = false;
+
+                    for (int n = 0; n < DatesToExclude.Count; n++)
                     {
-                        ExclusionDates[days[i]] = true;
-                    }
-                    else
-                    {
-                        ExclusionDates[days[i]] = false;
+                        if (DatesToExclude[n] == days[i])
+                        {
+                            ExclusionDates[days[i]] = true;
+                        }
                     }
                 }
 
@@ -1008,7 +1061,6 @@ namespace LaborNeedsScheduling.Models
                     {
                         ExcludedDates.Rows.Add(row.ItemArray);
                     }
-
                 }
                 #endregion
             }
@@ -1381,13 +1433,13 @@ namespace LaborNeedsScheduling.Models
 
                     for (int row = 0; row < WeightedAverageTrafficTotal.Rows.Count - 1; row++)
                     {
-                        if (WeightedAverageTrafficTotal.Rows[row][col].ToString() != "")
-                        {
-                            double hourAvg = Convert.ToDouble(WeightedAverageTrafficTotal.Rows[row][col]);
+                        //if (WeightedAverageTrafficTotal.Rows[row][col].ToString() != "")
+                        //{
+                        double hourAvg = Convert.ToDouble(WeightedAverageTrafficTotal.Rows[row][col]);
 
-                            dailyPercent = (hourAvg / dailyTotal) * 100;
-                            PercentDailyTotal.Rows[row][col] = Math.Round(dailyPercent, 1, MidpointRounding.AwayFromZero);
-                        }
+                        dailyPercent = (hourAvg / dailyTotal) * 100;
+                        PercentDailyTotal.Rows[row][col] = Math.Round(dailyPercent, 1, MidpointRounding.AwayFromZero);
+                        //}
                     }
                 }
 
@@ -1419,16 +1471,6 @@ namespace LaborNeedsScheduling.Models
         public DataTable FillAllocatedHoursTable(DateTime[] RequestedDates)
         {
             #region Table Setup
-            //DateTime[] dates = new DateTime[7];
-
-            //DateTime sundayDate = DateTime.Today.AddDays((-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Sunday) + 7);
-            //DateTime mondayDate = DateTime.Today.AddDays((-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday) + 7);
-            //DateTime tuesdayDate = DateTime.Today.AddDays((-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Tuesday) + 7);
-            //DateTime wednesdayDate = DateTime.Today.AddDays((-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Wednesday) + 7);
-            //DateTime thursdayDate = DateTime.Today.AddDays((-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Thursday) + 7);
-            //DateTime fridayDate = DateTime.Today.AddDays((-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Friday) + 7);
-            //DateTime saturdayDate = DateTime.Today.AddDays((-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Saturday) + 7);
-
             AllocatedHours.Clear();
             AllocatedHours.Columns.Clear();
             AllocatedHours.Columns.Add("HourOfDay", typeof(string));
@@ -1541,7 +1583,7 @@ namespace LaborNeedsScheduling.Models
                     List<string> addedhours = new List<string>();
                     for (int row = 0; row < PercentWeeklyTotal.Rows.Count - 1; row++)
                     {
-                        if (PercentDailyTotal.Rows[row][col].ToString() != "" && PercentDailyTotal.Rows[row][col].ToString() != "0")
+                        if (PercentDailyTotal.Rows[row][col].ToString() != "" && BlackoutTableHelpMe.Rows[row + openHourSlots][col].ToString() != "True")
                         {
                             double hourPercentage = (Convert.ToDouble(PercentDailyTotal.Rows[row][col]) / 100);
                             double employees = hourPercentage * allocatedHours[col - 1];
@@ -1558,7 +1600,7 @@ namespace LaborNeedsScheduling.Models
                             }
 
                             // set min employees based on time of day (currently changes at 1:00pm)
-                            if (employees < MinEmployeesEarly - .5 && hourposition < 14)
+                            if (employees < MinEmployeesEarly - .5 && hourposition < 26)
                             {
                                 int f = Convert.ToInt32(employees);
                                 minhours += (MinEmployeesEarly - Convert.ToDouble(f));
@@ -1566,7 +1608,7 @@ namespace LaborNeedsScheduling.Models
 
                                 employees = MinEmployeesEarly;
                             }
-                            else if (employees < MinEmployeesLater - .5 && hourposition >= 14)
+                            else if (employees < MinEmployeesLater - .5 && hourposition >= 26)
                             {
                                 int f = Convert.ToInt32(employees);
                                 minhours += (MinEmployeesLater - Convert.ToDouble(f));
@@ -1585,108 +1627,6 @@ namespace LaborNeedsScheduling.Models
                         }
                     }
 
-                    //    #region distributing hours
-                    //    Debug.WriteLine("hours added to day: " + minhours);
-                    //    for (int i = 0; i < addedhours.Count; i++)
-                    //    {
-                    //        Debug.WriteLine(addedhours[i]);
-                    //    }
-                    //    Debug.WriteLine(" ");
-
-                    //    //Debug.WriteLine("hours subtracted from day: " + maxhours / 2);
-
-                    //    double hoursAdded = (minhours / 2) - (maxhours / 2);
-                    //    List<int> EmployeesForDay = new List<int>();
-
-                    //    if (hoursAdded > 0)
-                    //    {
-                    //        //subtract hours from higher slots
-                    //        for (int i = 0; i < AllocatedHours.Rows.Count; i++)
-                    //        {
-                    //            if (AllocatedHours.Rows[i][col].ToString() != "")
-                    //            {
-                    //                EmployeesForDay.Add(Convert.ToInt32(AllocatedHours.Rows[i][col]));
-                    //            }
-                    //            else
-                    //            {
-                    //                EmployeesForDay.Add(0);
-                    //            }
-                    //        }
-
-                    //        while (hoursAdded > 0)
-                    //        {
-                    //            for (int i = 0; i < EmployeesForDay.Count; i++)
-                    //            {
-                    //                if (EmployeesForDay[i] > MinEmployeesEarly && EmployeesForDay[i] > MinEmployeesLater &&
-                    //                    EmployeesForDay[i] != 0)
-                    //                {
-                    //                    EmployeesForDay[i] -= 1;
-                    //                    break;
-                    //                }
-                    //            }
-                    //            hoursAdded -= .5;
-                    //        }
-                    //    }
-                    //    else if (hoursAdded < 0)
-                    //    {
-                    //        //add hours to lower slots
-                    //        for (int i = 0; i < AllocatedHours.Rows.Count; i++)
-                    //        {
-                    //            if (AllocatedHours.Rows[i][col].ToString() != "")
-                    //            {
-                    //                EmployeesForDay.Add(Convert.ToInt32(AllocatedHours.Rows[i][col]));
-                    //            }
-                    //            else
-                    //            {
-                    //                EmployeesForDay.Add(0);
-                    //            }
-                    //        }
-
-                    //        int highestNumberPosition = 0;
-                    //        double highestNumber = 0;
-                    //        for (int i = 0; i < EmployeesForDay.Count; i++)
-                    //        {
-                    //            if (EmployeesForDay[i] != 0 && EmployeesForDay[i] > highestNumber)
-                    //            {
-                    //                highestNumber = EmployeesForDay[i];
-                    //                highestNumberPosition = i;
-                    //            }
-                    //        }
-
-                    //        while (hoursAdded < 0)
-                    //        {
-                    //            List<int> differences = new List<int>();
-
-                    //        for (int i = 0; i < highestNumberPosition; i++)
-                    //        {
-                    //            differences.Add(EmployeesForDay[highestNumberPosition] - EmployeesForDay[i]);
-                    //        }
-
-                    //        int[] diff = differences.ToArray();
-                    //        int maxIndex = Array.IndexOf(diff, differences.Max());
-
-                    //        for(int i = 1; i < highestNumberPosition; i++)
-                    //        {
-                    //            if(EmployeesForDay[i] != EmployeesForDay[i - 1])
-                    //            {
-                    //                break;
-                    //            }
-                    //            else
-                    //            {
-                    //                maxIndex = i;
-                    //            }
-                    //        }
-
-                    //            EmployeesForDay[maxIndex] += 1;
-
-                    //            hoursAdded += .5;
-                    //        }
-                    //    }
-                    //    for (int i = 0; i < AllocatedHours.Rows.Count; i++)
-                    //    {
-                    //        AllocatedHours.Rows[i][col] = EmployeesForDay[i];
-                    //    }
-                    //#endregion
                     #endregion
                 }
                 PayrollWeeklyHours = OriginalPayrollWeeklyHours;
@@ -2000,7 +1940,7 @@ namespace LaborNeedsScheduling.Models
                 DistributionDaysGive.Columns.Add(weekdayNames[i], typeof(string));
                 for (int n = 0; n < AllocatedHours.Rows.Count; n++)
                 {
-                    DistributionDaysGive.Rows[n][i] = AllocatedHours.Rows[n][i+1];
+                    DistributionDaysGive.Rows[n][i] = AllocatedHours.Rows[n][i + 1];
                 }
             }
 
@@ -2028,10 +1968,12 @@ namespace LaborNeedsScheduling.Models
                     break;
                 }
             }
+
             if (HalfHoursToTake > 0)
             {
                 while (HalfHoursToTake != 0)
                 {
+                    int loopCounter = 0;
                     // take the hours from other slots
                     for (int i = 0; i < DistributionDaysTake.Rows.Count; i++)
                     {
@@ -2048,6 +1990,7 @@ namespace LaborNeedsScheduling.Models
                                 DistributionDaysTake.Rows[i][n] = newValue;
                                 HalfHoursToTake--;
                                 totalhours--;
+                                loopCounter++;
                             }
                             // if time is after 1pm
                             else if (i >= minChange && DistributionDaysTake.Rows[i][n].ToString() != ""
@@ -2058,8 +2001,14 @@ namespace LaborNeedsScheduling.Models
                                 DistributionDaysTake.Rows[i][n] = newValue;
                                 HalfHoursToTake--;
                                 totalhours--;
+                                loopCounter++;
                             }
                         }
+                    }
+                    //stop from infinitely looping if there are no more hours to take
+                    if (loopCounter == 0)
+                    {
+                        break;
                     }
                 }
 
@@ -2199,8 +2148,8 @@ namespace LaborNeedsScheduling.Models
                 employeeIds[x] = scheduling[x].id;
             }
 
-            FakeAPI.CheckForCurrentWeek(scheduling, RequestedDates);
-            EmployeeScheduledTimes = FakeAPI.GetEmployeeScheduledTimes(employeeIds, RequestedDates);
+            //FakeAPI.CheckForCurrentWeek(scheduling, RequestedDates);
+            EmployeeScheduledTimes = FakeAPI.GetEmployeeScheduledTimes(employeeIds, StoreCode, RequestedDates);
 
             //loop over each employee's (weekday) and check the hours that are selected - or all of them?
             foreach (Employees emp in scheduling)
@@ -2226,15 +2175,44 @@ namespace LaborNeedsScheduling.Models
                 double hoursRemaining = emp.hours;
 
                 Dictionary<string, string[]> innerDict = EmployeeScheduledTimes[emp.id];
-                double hourCount = 0;
-                for (int n = 0; n < weekdays.Length; n++)
+                DataTable AssignedHourBlocks = AssignedEmployeesRequestedWeek.Clone();
+                for (int i = 0; i < AssignedEmployeesRequestedWeek.Rows.Count; i++)
                 {
-                    for (int j = 0; j < innerDict[weekdays[n]].Length; j++)
+                    if (AssignedEmployeesRequestedWeek.Rows[i][1].ToString() == emp.id)
                     {
-                        hourCount += .5;
+                        AssignedHourBlocks.ImportRow(AssignedEmployeesRequestedWeek.Rows[i]);
                     }
                 }
+
+                double hourCount = 0;
+                for (int i = 0; i < AssignedHourBlocks.Rows.Count; i++)
+                {
+                    bool block = false;
+                    double blockHours = 0;
+                    for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
+                    {
+                        if (SQLHours[n] == AssignedHourBlocks.Rows[i][4].ToString())
+                        {
+                            block = true;
+                        }
+                        if (SQLHours[n] == AssignedHourBlocks.Rows[i][5].ToString())
+                        {
+                            block = false;
+                        }
+                        if (block == true)
+                        {
+                            blockHours += .5;
+                        }
+                    }
+                    if (blockHours > 4)
+                    {
+                        blockHours -= .5;
+                    }
+                    hourCount += blockHours;
+                }
+
                 emp.hoursRemaining = hoursRemaining - hourCount;
+                emp.hoursScheduled = hourCount;
             }
             LaborScheduling.EmployeeListStore = scheduling;
         }
@@ -2570,7 +2548,7 @@ namespace LaborNeedsScheduling.Models
             }
 
             string[] updatedHours = FakeAPI.UpdateEmployeeSchedule(ScheduleStartHours.Keys.Count, employeeHours,
-                                    employeeId, RequestedDates, EmployeeScheduledTimes[employeeId], selectedWeekday);
+                                    employeeId, RequestedDates, EmployeeScheduledTimes[employeeId], selectedWeekday, StoreCode);
 
             Dictionary<string, string[]> employeeSchedule = EmployeeScheduledTimes[employeeId];
             employeeSchedule[daysOfWeek[selectedWeekday]] = updatedHours;
@@ -3191,61 +3169,62 @@ namespace LaborNeedsScheduling.Models
             double[] dayTotals = new double[7];
             foreach (Employees emp in LaborScheduling.EmployeeListStore)
             {
-                double[] employeeDayHourCount = new double[7];
-                double weekHourAmount = 0;
+                //double[] employeeDayHourCount = new double[7];
+                //double weekHourAmount = 0;
 
-                string name = emp.firstName + " " + emp.lastName;
-                for (int n = 0; n < 7; n++)
-                {
-                    List<string> startTime = new List<string>();
-                    List<string> endTime = new List<string>();
-                    List<double> dayHourCount = new List<double>();
-                    for (int i = 0; i < AssignedEmployeesRequestedWeek.Rows.Count; i++)
-                    {
-                        if (emp.id == AssignedEmployeesRequestedWeek.Rows[i][1].ToString() && RequestedDates[n] == Convert.ToDateTime(AssignedEmployeesRequestedWeek.Rows[i][3]))
-                        {
-                            bool block = false;
-                            double hourcount = 0;
-                            for (int m = 0; m < ScheduleHalfHourSlots.Length; m++)
-                            {
-                                if (AssignedEmployeesRequestedWeek.Rows[i][4].ToString() == SQLHours[m])
-                                {
-                                    startTime.Add(ScheduleHalfHourSlots[m]);
-                                    block = true;
-                                }
-                                if (AssignedEmployeesRequestedWeek.Rows[i][5].ToString() == SQLHours[m])
-                                {
-                                    endTime.Add(ScheduleHalfHourSlots[m]);
-                                    block = false;
-                                }
-                                if (block == true)
-                                {
-                                    weekHourAmount += .5;
-                                    hourcount += .5;
-                                }
-                            }
+                //string name = emp.firstName + " " + emp.lastName;
+                //for (int n = 0; n < 7; n++)
+                //{
+                //    List<string> startTime = new List<string>();
+                //    List<string> endTime = new List<string>();
+                //    List<double> dayHourCount = new List<double>();
+                //    for (int i = 0; i < AssignedEmployeesRequestedWeek.Rows.Count; i++)
+                //    {
+                //        if (emp.id == AssignedEmployeesRequestedWeek.Rows[i][1].ToString() && RequestedDates[n] == Convert.ToDateTime(AssignedEmployeesRequestedWeek.Rows[i][3]))
+                //        {
+                //            bool block = false;
+                //            double hourcount = 0;
+                //            for (int m = 0; m < ScheduleHalfHourSlots.Length; m++)
+                //            {
+                //                if (AssignedEmployeesRequestedWeek.Rows[i][4].ToString() == SQLHours[m])
+                //                {
+                //                    startTime.Add(ScheduleHalfHourSlots[m]);
+                //                    block = true;
+                //                }
+                //                if (AssignedEmployeesRequestedWeek.Rows[i][5].ToString() == SQLHours[m])
+                //                {
+                //                    endTime.Add(ScheduleHalfHourSlots[m]);
+                //                    block = false;
+                //                }
+                //                if (block == true)
+                //                {
+                //                    weekHourAmount += .5;
+                //                    hourcount += .5;
+                //                }
+                //            }
 
-                            if (hourcount > 4)
-                            {
-                                hourcount = hourcount - .5;
-                            }
-                            dayTotals[n] += hourcount;
-                        }
-                    }
+                //            if (hourcount > 4)
+                //            {
+                //                hourcount = hourcount - .5;
+                //            }
+                //            dayTotals[n] += hourcount;
+                //        }
+                //    }
 
-                    for (int m = 0; m < startTime.Count; m++)
-                    {
+                //    for (int m = 0; m < startTime.Count; m++)
+                //    {
 
-                    }
+                //    }
 
-                    for (int m = 0; m < dayHourCount.Count; m++)
-                    {
-                        employeeDayHourCount[n] += dayHourCount[m];
-                    }
+                //    for (int m = 0; m < dayHourCount.Count; m++)
+                //    {
+                //        employeeDayHourCount[n] += dayHourCount[m];
+                //    }
 
-                }
+                //}
 
-                weekHourTotal += weekHourAmount;
+                //weekHourTotal += weekHourAmount;
+                weekHourTotal += emp.hoursScheduled;
             }
             TotalScheduledHours = weekHourTotal;
         }

@@ -481,7 +481,7 @@
 
 
 <body>
-    @if (Model.ThisWeek.employeeStatus == false)
+    @*@if (Model.ThisWeek.employeeStatus == false)
     {
         <div class="mainalt">
             <h2>You don't have permission to view the page.</h2>
@@ -490,7 +490,7 @@
         <br />
     }
     else
-    {
+    {*@
         <br />
         <div id="SelectedWeekDates" style="text-align:center; user-select: none;">
             <h2>Edit Schedule (@Model.ThisWeek.RequestedDates[0].ToShortDateString() - @Model.ThisWeek.RequestedDates[6].ToShortDateString())</h2>
@@ -525,7 +525,7 @@
         <br />
 
 
-        using (Ajax.BeginForm("LaborScheduleCurrentWeek", "Home", new AjaxOptions
+        @using (Ajax.BeginForm("LaborScheduleCurrentWeek", "Home", new AjaxOptions
         {
             HttpMethod = "post",
             InsertionMode = InsertionMode.Replace,
@@ -691,7 +691,7 @@
 
                                                 <br />
                                                 <br />
-                                                }
+                                                @*}*@
 </body>
 
 

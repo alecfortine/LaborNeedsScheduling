@@ -30,8 +30,7 @@
             /*padding: 8px;*/
             table-layout: fixed;
             word-break: break-all;
-            margin-left: auto;
-            margin-right: auto;
+            margin: auto;
             empty-cells: show;
         }
 
@@ -48,6 +47,7 @@
             -ms-user-select: none;
             user-select: none;
             cursor: default;
+            font-size: 12px;
         }
 
         .DaySelectionButton {
@@ -121,6 +121,7 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            font-size: 12px;
         }
 
         td.LowCell, th.LowCell {
@@ -180,7 +181,7 @@
             font-size: 10px;
         }
 
-            td.AssignmentCell:hover:not(:first-child) {
+            td.AssignmentCell:hover:not(:first-child):not(:last-child) {
                 background-color: #c1c1c1;
                 font-size: 10px;
             }
@@ -222,12 +223,12 @@
             height: 50px;
             width: 100px;
             white-space: nowrap;
-            background-color: #ffb7b7;
+            background-color: #b0ffad;
             font-size: 10px;
         }
 
             td.AssignmentCellOver:hover {
-                background-color: #ff8b8b;
+                background-color: #78fe73;
                 font-size: 10px;
             }
 
@@ -540,142 +541,21 @@
         new { id = "ScheduleForm" }))
         {
             <div style="overflow:auto">
-                <div class="left-element" @*style="border-style: solid; border-width: 1px;"*@>
+                <div class="left-element" >
                     <div style="padding: 20px;">
                         <div>
                             <div class="left-element">
                                 <label>Weekly Hours: </label><br />
-                                @*<label>Minimum Employees: </label><br />
-                                    <label>Maximum Employees: </label><br />*@
                             </div>
 
                             <div class="left-element">
                                 @Html.TextBoxFor(m => m.ThisWeek.PayrollWeeklyHours, new { id = "weeklyHours", style = "width:50px;" })
-                                @*@if (Model.ThisWeek.MinEmployeesDefault != 0 && Model.ThisWeek.MaxEmployeesDefault != 0)
-                                    {
-                                        if (Model.ThisWeek.MinEmployees > Model.ThisWeek.MinEmployeesDefault)
-                                        {
-                                            Model.ThisWeek.MinEmployees = Model.ThisWeek.MinEmployeesDefault;
-                                        }
-                                        if (Model.ThisWeek.MaxEmployees < Model.ThisWeek.MaxEmployeesDefault)
-                                        {
-                                            Model.ThisWeek.MaxEmployees = Model.ThisWeek.MaxEmployeesDefault;
-                                        }
-
-                                        @Html.TextBoxFor(Model => Model.ThisWeek.MinEmployees, new { id = "minEmps", style = "width:50px;" })<br>
-                                        @Html.TextBoxFor(Model => Model.ThisWeek.MaxEmployees, new { id = "maxEmps", style = "width:50px;" })<br>
-                                    }
-                                    else
-                                    {
-                                        @Html.TextBoxFor(Model => Model.ThisWeek.MinEmployees, new { id = "minEmps", style = "width:50px;" })<br>
-                                        @Html.TextBoxFor(Model => Model.ThisWeek.MaxEmployees, new { id = "maxEmps", style = "width:50px;" })<br>
-                                    }*@
-
-                                <button type="submit" id="LaborScheduleButton" style="display:inline-block; margin-left: 30px;" onclick="CreateSchedule()">Update</button><br>
+                                <button type="submit" id="LaborScheduleButton" style="display:inline-block; margin-left: 30px;" onclick="CreateSchedule()">Update</button>
                             </div>
                         </div>
-
-                        @*Exclude dates lightbox*@
-                        <div style="display:inline-block; padding-top: 10%;">
-                            @*<button type="button" style="width:200px;" onclick="document.getElementById('light').style.display='block';document.getElementById('fade').style.display='block'">Exclude Dates</button>*@
-                            <div id="light" class="white_content">
-                                <div class="white-header">
-                                    <a class="close" href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';document.getElementById('fade').style.display='none'">x</a>
-
-                                </div>
-                                <div class="white-body">
-                                    <h4 style="padding-left:15px;">
-                                        Choose dates to exclude from the past
-                                        @Model.ThisWeek.NumberHistoricalWeeks
-                                        weeks:
-                                    </h4>
-                                    @{List<string> dates = new List<string>();}
-                                    @{List<bool> bools = new List<bool>();}
-
-                                    @foreach (KeyValuePair<DateTime, bool> kvp in Model.ThisWeek.ExclusionDates)
-                                    {
-                                        string strDate = kvp.Key.ToString("MM/dd");
-                                        dates.Add(strDate);
-                                        bools.Add(kvp.Value);
-                                    }
-                                    <table class="ExcludedDates" id="ExcludedDates" border="1" cellpadding="5">
-                                        <tbody>
-                                            @{int counter = 0;}
-                                            @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
-                                            {
-                                                <tr>
-                                                    @for (int n = 0; n < 7; n++)
-                                                    {
-                                                        if (bools[n + counter] == true)
-                                                        {
-                                                            <td class="ExcludedTrue" onclick="changeCell(this)">
-                                                                @dates[n + counter]
-                                                                @*<br />
-                                                                    @bools[n + counter]*@
-                                                            </td>
-                                                        }
-                                                        else
-                                                        {
-                                                            <td class="ExcludedFalse" onclick="changeCell(this)">
-                                                                @dates[n + counter]
-                                                                @*<br />
-                                                                    @bools[n + counter]*@
-                                                            </td>
-                                                        }
-                                                    }
-                                                </tr>
-                                                {
-                                                    counter += 7;
-                                                }
-                                            }
-                                        </tbody>
-                                    </table>
-
-                                    <br />
-                                    <br />
-
-                                    <div style="float:right; padding-right: 10%;">
-                                        <button type="submit">Update</button><br>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="fade" class="black_overlay"></div>
-                        </div>
-
                         <br />
-
-                        @*<div style="display:inline-block; padding-top: 10%">
-                                Week Hours: @Html.DropDownListFor(m => m.ThisWeek.WeekStartHour, new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key")) - @Html.DropDownListFor(m => m.ThisWeek.WeekEndHour, new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key")) <br />
-                            </div>*@
                     </div>
                 </div>
-
-                @*<div class="right-element" style="border-style: solid; border-width: 1px; text-align: center;">
-                    <div style="padding: 20px;">
-                        <div style="float:left">
-                            <label>Weeks: </label>
-                                @Html.DropDownListFor(m => Model.ThisWeek.NumberHistoricalWeeks, new SelectList(new List<Object> { 6, 5, 4, 3, 2, 1 }, Model.ThisWeek.NumberHistoricalWeeks))
-                        </div>*@
-
-
-                @*<label>Week Weighting: </label><br />
-
-                    @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
-                    {
-                        <div style="float:left">
-                            @{int weekCounter = (i + 1);
-                            }
-                            <label>@Html.Raw((i + 1).ToString()): &nbsp;</label>
-                            @Html.TextBoxFor(m => Model.ThisWeek.weekWeighting[i], new { id = "week" + weekCounter, style = "width:25px;text-align:center;" })
-                            <text>%</text>
-                        </div>
-                        <br>
-                                }*@
-
-                @*<button type="submit" name="id" value="" id="LaborScheduleButton" style="margin-top: 30px;" onclick="CreateSchedule()">Update</button><br>
-                            <br />
-                        </div>
-                    </div>*@
             </div>
 
             <br />
@@ -685,18 +565,15 @@
             <div id="AssignmentTablePartial"></div>
 
             @Html.HiddenFor(m => m.ThisWeek.selectedEmployee, new { id = "hiddenEmployeeName" })
-                                                @Html.HiddenFor(m => Model.ExcludedDates, new { id = "hiddenExcludedDates" })
-                                                @Html.HiddenFor(m => Model.ThisWeek.ExcludedDates, new { id = "hiddenExcludedDatesData" })
-                                                @Html.HiddenFor(m => Model.ThisWeek.selectedHour, new { id = "hiddenSelectedHour" })
-                                                @Html.HiddenFor(m => Model.ThisWeek.startdateRequested, new { id = "hiddenRequestedDate" })
+            @Html.HiddenFor(m => Model.ExcludedDates, new { id = "hiddenExcludedDates" })
+            @Html.HiddenFor(m => Model.ThisWeek.ExcludedDates, new { id = "hiddenExcludedDatesData" })
+            @Html.HiddenFor(m => Model.ThisWeek.selectedHour, new { id = "hiddenSelectedHour" })
+            @Html.HiddenFor(m => Model.ThisWeek.startdateRequested, new { id = "hiddenRequestedDate" })
+        }
 
-                                                <input type="hidden" id="hdnParam" runat="server" clientidmode="Static" />
-
-                                                }
-
-                                                <br />
-                                                <br />
-                                                }
+        <br />
+        <br />
+    }
 </body>
 
 
@@ -709,14 +586,16 @@
     @*find employee*@
     <script>
         function findEmployee(emp) {
-            $.get('/Home/_ManagerConfigFindEmployee/?EmployeeInfo=' + emp, function (data) {
+            $.get('/Home/FindEmployee/?EmployeeId=' + emp, function (data) {
                 //load partial to page
                 $('#FoundEmployee').html(data);
             });
         }
+    </script>
 
+    <script>
         function addEmployee() {
-            $.post('/Home/_ManagerConfigFindEmployee',
+            $.post('/Home/AddEmployee',
                 {
                     AddEmployee: 'true'
                 },
@@ -725,14 +604,19 @@
                 }
                 );
         }
+    </script>
 
-        document.getElementById("EmployeeSearch")
-    .addEventListener("keyup", function (event) {
-        event.preventDefault();
-        if (event.keyCode == 13) {
-            document.getElementById("SearchButton").click();
+    <script>
+        function RemoveEmployee(EmployeeId){
+            $.post('/Home/RemoveEmployee',
+    {
+        EmployeeId: EmployeeId
+    },
+    function (data) {
+        $('#AssignmentTablePartial').html(data);
+    }
+    );
         }
-    });
     </script>
 
     <script>
@@ -749,10 +633,12 @@ function (data){
     </script>
 
     <script>
-        function AddHourStart(employeeId){
+        function AddHourStart(idHour){
+            var splitValues = idHour.split(',');
             $.post('/Home/AddHourStart',
 {
-    employeeId: employeeId
+    employeeId: splitValues[0],
+    hour: splitValues[1]
 },
 function (data){
     $('#AssignmentTablePartial').html(data);
@@ -760,10 +646,12 @@ function (data){
 );
         }
 
-        function SubtractHourStart(employeeId){
+        function SubtractHourStart(idHour){
+            var splitValues = idHour.split(',');
             $.post('/Home/SubtractHourStart',
 {
-    employeeId: employeeId
+    employeeId: splitValues[0],
+    hour: splitValues[1]
 },
 function (data){
     $('#AssignmentTablePartial').html(data);
@@ -771,10 +659,12 @@ function (data){
 );
         }
 
-        function SubtractHourEnd(employeeId){
+        function SubtractHourEnd(idHour){
+            var splitValues = idHour.split(',');
             $.post('/Home/SubtractHourEnd',
 {
-    employeeId: employeeId
+    employeeId: splitValues[0],
+    hour: splitValues[1]
 },
 function (data){
     $('#AssignmentTablePartial').html(data);
@@ -782,11 +672,13 @@ function (data){
 );
         }
 
-        function AddHourEnd(employeeId) {
+        function AddHourEnd(idHour) {
+            var splitValues = idHour.split(',');
             $.post('/Home/AddHourEnd',
-    {
-        employeeId: employeeId
-    },
+{
+    employeeId: splitValues[0],
+    hour: splitValues[1]
+},
     function (data){
         $('#AssignmentTablePartial').html(data);
     }
@@ -799,7 +691,7 @@ function (data){
         function CreateSchedule(){
             var Date = document.getElementById("hiddenRequestedDate").value;
 
-            $.post('/Home/_LaborSchedule',
+            $.post('/Home/_LaborScheduleAssignmentView',
     {
     },
     function (data){
@@ -1257,110 +1149,12 @@ function (data){
     <script>
         function checkInp()
         {
-            //var hours = document.forms["ScheduleForm"]["hours"].value
-            //alert(hours);
             var hours = document.getElementById("weeklyHours").value;
-            //var min = document.getElementById("minEmps").value;
-            //var max = document.getElementById("maxEmps").value;
-
-            //var weeks = document.getElementById("weeks").value;
-            //alert(weeks);
-
-            //var week1 = document.getElementById("week1").value;
-            //alert(week1);
-
-            //var week2;
-            //var week3;
-            //var week4;
-            //var week5;
-            //var week6;
-            //var nums = document.getElementsByName("heck");
-            //if (!document.getElementById("week2") != null){
-            //    week2 = document.forms["ScheduleForm"]["week2"].value;
-            //}
-            //if (!document.getElementById("week3") != null){
-            //    week3 = document.forms["ScheduleForm"]["week3"].value;
-            //}
-            //if (!document.getElementById("week4") != null){
-            //    week4 = document.forms["ScheduleForm"]["week4"].value;
-            //}
-            //if (!document.getElementById("week5") != null){
-            //    week5 = document.forms["ScheduleForm"]["week5"].value;
-            //}
-            //if (!document.getElementById("week6") != null){
-            //    week6 = document.forms["ScheduleForm"]["week6"].value;
-            //}
-
-            //|| isNaN(min) || isNaN(max)
             if (isNaN(hours))
             {
                 alert("Input must be numbers");
                 return false;
-
-                //if (!document.getElementById("week2") != null){
-                //    if(isNaN(week2)){
-                //        alert("Input must be numbers");
-                //        return false;
-                //    }
-                //    if (!document.getElementById("week3") != null){
-                //        if(isNaN(week3)){
-                //            alert("Input must be numbers");
-                //            return false;
-                //        }                }
-                //    if (!document.getElementById("week4") != null){
-                //        if(isNaN(week4)){
-                //            alert("Input must be numbers");
-                //            return false;
-                //        }                }
-                //    if (!document.getElementById("week5") != null){
-                //        if(isNaN(week5)){
-                //            alert("Input must be numbers");
-                //            return false;
-                //        }                }
-                //    if (!document.getElementById("week6") != null){
-                //        if(isNaN(week6)){
-                //            alert("Input must be numbers");
-                //            return false;
-                //        }
-                //    }
-                //}
             }
-        }
-    </script>
-
-    @*validate that an employee is selected and assignment times are in order*@
-    <script>
-        function checkTimes()
-        {
-            var startHour = document.forms["AssignForm"]["startHour"].value;
-            var endHour = document.forms["AssignForm"]["endHour"].value;
-            var hours = [ "6:00AM", "6:30AM", "7:00AM", "7:30AM","8:00AM", "8:30AM","9:00AM", "9:30AM","10:00AM", "10:30AM",
-                          "11:00AM", "11:30AM","12:00PM","12:30PM", "1:00PM", "1:30PM", "2:00PM", "2:30PM", "3:00PM", "3:30PM",
-                          "4:00PM", "4:30PM", "5:00PM", "5:30PM", "6:00PM", "6:30PM", "7:00PM", "7:30PM", "8:00PM", "8:30PM",
-                          "9:00PM", "9:30PM", "10:00PM", "10:30PM", "11:00PM", "11:30PM", "12:00AM"];
-            var start;
-            var end;
-            var employeeId = document.getElementById("hiddenEmployeeId").value;
-
-            for (i = 0; i < hours.length; i++){
-                if(startHour == hours[i]){
-                    start = i;
-                }
-                if(endHour == hours[i]){
-                    end = i;
-                }
-            }
-
-            if(employeeId == ""){
-                alert('Select an employee to assign.');
-                return false;
-            }
-
-            if(end < start){
-                alert('The assigned start hour must be before the end hour.')
-                return false;
-            }
-
         }
     </script>
 

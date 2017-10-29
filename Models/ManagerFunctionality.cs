@@ -7,5 +7,8 @@ namespace LaborNeedsScheduling.Models
 {
     public class ManagerFunctionality
     {
+
     }
+
+
 }

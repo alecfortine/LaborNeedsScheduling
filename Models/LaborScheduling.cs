@@ -56,13 +56,13 @@ namespace LaborNeedsScheduling.Models
         }
 
 
-        public LaborScheduling(/*string storeCode*/)
+        public LaborScheduling(string LocationCode)
         {
-            EmployeeListAll = FakeAPI.GetAllEmployees();
+            //EmployeeListAll = FakeAPI.GetAllEmployees();
 
             //EmployeeListStore = FakeAPI.GetEmployeesForStore(storeCode);
 
-            ManagerMessageList = FakeAPI.GetMessagesForManager();
+            ManagerMessageList = FakeAPI.GetMessagesForManager(LocationCode);
 
             ThisWeek = new WorkWeek();
 
@@ -70,6 +70,11 @@ namespace LaborNeedsScheduling.Models
             /// A horizontal table to display the amount of employees needed for each hour of a selected day
             /// </summary>
             DataTable AssignmentTable = new DataTable();
+        }
+
+        public LaborScheduling()
+        {
+
         }
     }
 }

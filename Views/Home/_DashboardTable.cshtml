@@ -42,8 +42,8 @@
                     double dayHourCount = 0;
 
                     <tr>
-                        @{string name = emp.firstName + " " + emp.lastName;}
-                        <td>@name</td>
+                        @{string name = emp.firstName + " " + emp.lastName[0] + ".";}
+                        <td style="font-weight:bold">@name</td>
                         @for (int n = 0; n < 7; n++)
                         {
                             List<string> startTime = new List<string>();
@@ -93,13 +93,13 @@
                         }
                         <td>@dayHourCount</td>
                     </tr>
-                                weekHourTotal += weekHourAmount;
                             }
                 <tr>
                     <td style="font-weight:bold">Total</td>
                     @for (int i = 0; i < 7; i++)
                     {
                         <td>@dayTotals[i]</td>
+                        weekHourTotal += dayTotals[i];
                     }
                     <td style="font-weight:bold">@weekHourTotal</td>
                 </tr>

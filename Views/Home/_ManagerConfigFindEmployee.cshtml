@@ -29,25 +29,35 @@
     </style>
 </head>
 <body>
+    @if (Model.Rows.Count == 0)
+    {
+        <h4>Employee not found.</h4>
+    }
+    else if (Model.Rows[0][0].ToString() == "1")
+    {
+        <h4>Employee is already assigned to the current store.</h4>
+    }
+    else
+    {
     <div style="display:table">
         <div style="display:inline-block; float:left">
             <table class="FoundEmployee" id="FoundEmployee" border="1" cellpadding="5">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Id</th>
-                        <th>Store Code</th>
-                        <th>Role</th>
-                        <th>Level</th>
+                        <th style="text-align:center">Name</th>
+                        <th style="text-align:center">Id</th>
+                        <th style="text-align:center">Store Code</th>
+                        <th style="text-align:center">Role</th>
+                        <th style="text-align:center">Level</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>@Model.Rows[0][0]</td>
-                        <td>@Model.Rows[0][1]</td>
-                        <td>@Model.Rows[0][2]</td>
-                        <td>@Model.Rows[0][3]</td>
-                        <td>@Model.Rows[0][4]</td>
+                        <td style="text-align:center">@Model.Rows[0][0]</td>
+                        <td style="text-align:center">@Model.Rows[0][1]</td>
+                        <td style="text-align:center">@Model.Rows[0][2]</td>
+                        <td style="text-align:center">@Model.Rows[0][3]</td>
+                        <td style="text-align:center">@Model.Rows[0][4]</td>
                     </tr>
                 </tbody>
             </table>
@@ -57,4 +67,5 @@
             <button type="button" onclick="addEmployee()" class="AddButton">Add</button>
         </div>
     </div>
+    }
 </body>

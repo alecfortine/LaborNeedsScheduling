@@ -35,36 +35,36 @@
 
 <body>
     @*@if (Model.EmployeeStatus == false)
-    {
-        <div class="mainalt">
-            <h2>You don't have permission to view the page.</h2>
-        </div>
-        <br />
-        <br />
-    }
-    else
-    {*@
-        <br />
-        <br />
-        <h3>Employee Availability</h3>
-        <br />
-        <br />
+        {
+            <div class="mainalt">
+                <h2>You don't have permission to view the page.</h2>
+            </div>
+            <br />
+            <br />
+        }
+        else
+        {*@
+    <br />
+    <br />
+    <h3>Employee Availability</h3>
+    <br />
+    <br />
 
-        @Html.DropDownListFor(m => m.EmpAvailabilityTable, new SelectList(Model.empList.Items, "Key", "Value"), new { id = "EmployeeDropdown" })
+    @Html.DropDownListFor(m => m.EmpAvailabilityTable, new SelectList(Model.empList.Items, "Key", "Value"), new { id = "EmployeeDropdown" })
 
-        <br />
-        <br />
-        <hr />
-        <br />
+    <br />
+    <br />
+    <hr />
+    <br />
 
-        <div id="EmployeeAvailability"></div>
-        @*<button type="button" onclick="updateSchedule()" style="float:right">Update</button><br>*@
+    <div id="EmployeeAvailability"></div>
+    @*<button type="button" onclick="updateSchedule()" style="float:right">Update</button><br>*@
 
-        @Html.HiddenFor(m => Model.updatedSchedule, new { id = "hiddenUpdatedSchedule" })
-        @Html.HiddenFor(m => Model.selectedEmployeeId, new { id = "hiddenSelectedEmployeeId" })
+    @Html.HiddenFor(m => Model.updatedSchedule, new { id = "hiddenUpdatedSchedule" })
+    @Html.HiddenFor(m => Model.selectedEmployeeId, new { id = "hiddenSelectedEmployeeId" })
+    @Html.HiddenFor(m => Model.selectedEmployeeName, new { id = "hiddenSelectedEmployeeName" })
 
-
-        @*}*@
+    @*}*@
     @*}*@
 
 </body>
@@ -72,13 +72,27 @@
 @section scripts
 {
     <script>
-        function updateSchedule() {
-            $.post('/Home/EmployeeAvailability/?UpdatedSchedule=' + document.getElementById("hiddenUpdatedSchedule").value, function (data) {
+        //function updateSchedule() {
+        //    alert(document.getElementById("hiddenUpdatedSchedule").value);
+        //    $.post('/Home/EmployeeAvailability/?UpdatedSchedule=' + document.getElementById("hiddenUpdatedSchedule").value, function (data) {
 
-                //load partial to page
-                $('#EmployeeAvailability').html(data);
-            });
-            alert(document.getElementById("hiddenSelectedEmployeeId").value + "'s availability has been updated.")
+        //        //load partial to page
+        //        $('#EmployeeAvailability').html(data);
+        //    });
+        //    alert(document.getElementById("hiddenSelectedEmployeeId").value + "'s availability has been updated.")
+        //}
+
+        function updateSchedule() {
+            var table = document.getElementById("hiddenUpdatedSchedule").value
+            $.post('/Home/EmployeeAvailability',
+                {
+                    UpdatedSchedule: table
+                },
+                function (data) {
+                    $('#EmployeeAvailability').html(data);
+                }
+                );
+            alert(document.getElementById("hiddenSelectedEmployeeName").value + "'s availability has been updated.")
         }
     </script>
 
@@ -87,18 +101,16 @@
 
             /* Get the selected value of dropdownlist */
             var selectedID = $(this).val();
+            var selectedName = $("#EmployeeDropdown option:selected").text();
             document.getElementById("hiddenSelectedEmployeeId").value = selectedID;
+            document.getElementById("hiddenSelectedEmployeeName").value = selectedName;
 
             /* Request the partial view with .get request. */
             $.get('/Home/_EmployeeAvailabilityTable/?EmployeeId=' + selectedID, function (data) {
 
                 /* data is the pure html returned from action method, load it to your page */
                 $('#EmployeeAvailability').html(data);
-                /* little fade in effect */
-                $('#EmployeeAvailability').fadeIn('fast');
             });
-
-
         });
     </script>
 

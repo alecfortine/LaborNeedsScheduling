@@ -23,6 +23,7 @@ namespace LaborNeedsScheduling.Models
         public string[] endTimes = {"--", "7:00AM","8:00AM","9:00AM","10:00AM","11:00AM","12:00PM", "1:00PM", "2:00PM", "3:00PM",
                                     "4:00PM", "5:00PM", "6:00PM", "7:00PM", "8:00PM", "9:00PM", "10:00PM", "11:00PM", "12:00AM"};
         public List<string> startDates = new List<string>();
+        public List<string> endDates = new List<string>();
 
         public string messageId { get; set; }
         public string created { get; set; }
@@ -38,7 +39,7 @@ namespace LaborNeedsScheduling.Models
 
         public EmployeeModel(string LocationCode, string EmployeeID, DateTime[] NextWeekDates)
         {
-            ListOfEmployees = FakeAPI.GetAllEmployees();
+            //ListOfEmployees = FakeAPI.GetAllEmployees();
 
             EmployeeNotifications = FakeAPI.GetMessagesForEmployee(EmployeeID);
 
@@ -99,9 +100,9 @@ namespace LaborNeedsScheduling.Models
         /// <param name="startTime"></param>
         /// <param name="endTime"></param>
         /// <param name="message"></param>
-        public void submitTimeOffRequest(string created, string startDate, string endDate, string Name, string Id, string startTime, string endTime, string message)
+        public void submitTimeOffRequest(string created, string startDate, string endDate, string Name, string Id, string LocationCode, string startTime, string endTime, string message)
         {
-            FakeAPI.SubmitTimeOffRequest(created, startDate, endDate, Name, Id, startTime, endTime, message);
+            FakeAPI.SubmitTimeOffRequest(created, startDate, endDate, Name, Id, LocationCode, startTime, endTime, message);
         }
 
         /// <summary>
@@ -122,6 +123,7 @@ namespace LaborNeedsScheduling.Models
     {
         public string created { get; set; }
         public string Id { get; set; }
+        public string LocationCode { get; set; }
         public string Name { get; set; }
         public string startDate { get; set; }
         public string endDate { get; set; }
@@ -183,6 +185,7 @@ namespace LaborNeedsScheduling.Models
         public int rank { get; set; }
         public int hours { get; set; }
         public double hoursRemaining { get; set; }
+        public double hoursScheduled { get; set; }
         public bool[] availableHours { get; set; }
         public bool[] scheduledHours { get; set; }
         public DataTable weeklySchedule { get; set; }

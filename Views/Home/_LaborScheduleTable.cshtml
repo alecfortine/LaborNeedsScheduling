@@ -144,7 +144,7 @@
                         {
                             double hourtotal = 0;
 
-                            for (int n = 0; n < Model.ThisWeek.LaborSchedule.Rows.Count; n += 2)
+                            for (int n = 0; n < Model.ThisWeek.LaborSchedule.Rows.Count; n++)
                             {
                                 if (Model.ThisWeek.LaborSchedule.Rows[n][i].ToString() != "")
                                 {
@@ -152,7 +152,7 @@
                                     hourtotal += hour;
                                 }
                             }
-
+                            hourtotal = hourtotal / 2;
                             <td style="text-align:center">@hourtotal</td>
                         }
                     </tr>

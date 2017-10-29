@@ -20,6 +20,7 @@ namespace LaborNeedsScheduling.Models
 
         public string[] updatedSchedule { get; set; }
         public string selectedEmployeeId { get; set; }
+        public string selectedEmployeeName { get; set; }
         public bool EmployeeStatus { get; set; }
 
         public Dictionary<string, Dictionary<DateTime, string[]>> EmployeeTimeOffRequests = new Dictionary<string, Dictionary<DateTime, string[]>>();
@@ -27,7 +28,7 @@ namespace LaborNeedsScheduling.Models
         public AvailabilityViewModel(string LocationCode)
         {
             //get the employees for the store
-            EmployeeList = FakeAPI.GetAllEmployees();
+            EmployeeList = FakeAPI.GetEmployeesForStore(LocationCode);
 
             // set of employee ids and names
             EmpsForStore = new Dictionary<string, string>();
