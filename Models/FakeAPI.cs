@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Configuration;
 
 namespace LaborNeedsScheduling.Models
 {
@@ -73,6 +74,113 @@ namespace LaborNeedsScheduling.Models
                 {
                     conn.Close();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Summary description for AppSecurity
+        /// </summary>
+        public class AppSecurity
+        {
+            public const string AppId = "TransferWebsite";
+            public string sqlcon = ConfigurationManager.ConnectionStrings["MovadoDB"].ToString();
+
+            public string ApplicationId()
+            {
+                return AppId;
+            }
+
+            public DataTable GetUserSecurity(String UserName)
+            {
+                DataTable dtSecTable = new DataTable();
+                SqlConnection cn = new SqlConnection(sqlcon);
+                SqlCommand sqlcmd = new SqlCommand();
+
+                try
+                {
+                    if (System.Web.HttpContext.Current.Session["TransferWebsite_UserSecurity"].ToString() != "")
+                    {
+                        System.Web.HttpContext.Current.Session["TransferWebsite_UserSecurity"] = dtSecTable;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    return dtSecTable;
+                }
+
+                if (dtSecTable.Rows.Count > 0)
+                {
+                    return dtSecTable;
+                }
+
+                //Retrieve Security From Database
+                try
+                {
+                    cn.Open();
+                }
+                catch (Exception ex)
+                {
+                    return dtSecTable;
+                }
+
+                try
+                {
+                    sqlcmd.Connection = cn;
+                    sqlcmd.CommandType = CommandType.StoredProcedure;
+                    sqlcmd.CommandText = "UserSecurity_UserNameApplicationId";
+                    sqlcmd.Parameters.AddWithValue("@UserName", UserName);
+                    sqlcmd.Parameters.AddWithValue("@ApplicationId", AppId);
+
+                    dtSecTable.Load(sqlcmd.ExecuteReader());
+                    dtSecTable.AcceptChanges();
+                }
+                catch (Exception ex)
+                {
+                    sqlcmd.Dispose();
+                    cn.Close();
+                    cn.Dispose();
+                    return dtSecTable;
+                }
+
+                sqlcmd.Dispose();
+                cn.Close();
+                cn.Dispose();
+
+                if (dtSecTable.Rows.Count > 0)
+                {
+                    System.Web.HttpContext.Current.Session["TransferWebsite_UserSecurity"] = dtSecTable;
+                }
+
+                return dtSecTable;
+            }
+
+            public Boolean UserHasAccess(String UserName, String SecurityOption)
+            {
+                DataTable dtSecurity = new DataTable();
+                //DataRow Row;
+
+                //UserHasAccess = false;
+
+
+                dtSecurity = GetUserSecurity(UserName);
+
+                foreach (DataRow row in dtSecurity.Rows)
+                {
+                    string ColSecurityOption = row["SecurityOption"].ToString();
+                    if (ColSecurityOption.ToUpper() == SecurityOption.ToUpper())
+                    {
+                        if (Convert.ToBoolean(row["GrantAccess"]) == true)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return false;
             }
         }
 
@@ -586,12 +694,31 @@ namespace LaborNeedsScheduling.Models
                     cmd.CommandText = "insert into dbo.Messages (Created, Type, ManagerCode, EmployeeCode, LocationCode, StartDate, EndDate, StartTime, EndTime, Approved)"
                                     + " values ('" + Created + "', 'ManagerResponse', '" + managerId + "', '" + EmployeeId + "', '" + LocationCode + "', '" + StartDate + "', '"
                                     + EndDate + "', '" + StartTime + "', '" + EndTime + "', '" + Approved + "')";
-
                     cmd.ExecuteNonQuery();
 
                     cmd.CommandText = "delete from dbo.Messages where ID = '" + messageId + "' and LocationCode = '" + LocationCode + "'";
-
                     cmd.ExecuteNonQuery();
+
+                    string EmployeeCode = RequestInfo.Rows[0][0].ToString();
+                    string startDateString = RequestInfo.Rows[0][1].ToString();
+                    string endDateString = RequestInfo.Rows[0][2].ToString();
+                    DateTime startDate = Convert.ToDateTime(startDateString);
+                    DateTime endDate = new DateTime();
+                    if (endDateString != "")
+                    {
+                        endDate = Convert.ToDateTime(endDateString);
+                    }
+                    string startTime = Convert.ToString(RequestInfo.Rows[0][3]);
+                    string endTime = Convert.ToString(RequestInfo.Rows[0][4]);
+                    string[] allTimes = ScheduleHalfHourSlots;
+
+                    // fill out arrays with assigned dates and times
+                    //check if the selected employee is assigned during those times or just unassign those times
+                    //string date  if date is length 1
+                    //string[] dates   if date is length > 1
+                    //string[] hours   if date is length 1
+                                    
+
                 }
                 catch (Exception ex)
                 {
@@ -1304,7 +1431,7 @@ namespace LaborNeedsScheduling.Models
                             if (startTime != "--" && endTime != "--")
                             {
                                 //one day, specific times
-                                for (int n = 0; n < 7; n++)
+                                for (int n = 0; n < 28; n++)
                                 {
                                     if (currentWeekDates[n] == startDate)
                                     {
@@ -1317,15 +1444,14 @@ namespace LaborNeedsScheduling.Models
                                             {
                                                 start = true;
                                             }
+                                            if (ScheduleHalfHourSlots[h] == endTime)
+                                            {
+                                                start = false;
+                                                break;
+                                            }
                                             if (start == true)
                                             {
                                                 offHours.Add(ScheduleHalfHourSlots[h]);
-                                            }
-                                            if (currentWeekDates[n] == endDate)
-                                            {
-                                                offHours.Add(ScheduleHalfHourSlots[h]);
-                                                start = false;
-                                                break;
                                             }
                                         }
 
@@ -2324,17 +2450,6 @@ namespace LaborNeedsScheduling.Models
             string[] employeeAssignedHours = employeeWeekSchedule[days[selectedDay]];
             string[] unassignHours = unassignTimes.Split(',');  // split the single element array into multiple elements
 
-            //string storeCode = "";
-            //foreach (Employees emp in GetAllEmployees())
-            //{
-            //    if (emp.id == employeeId)
-            //    {
-            //        storeCode = emp.storeCode;
-            //        break;
-            //    }
-            //}
-
-
             for (int i = 0; i < employeeAssignedHours.Length; i++)
             {
                 for (int h = 0; h < unassignHours.Length; h++)
@@ -2353,6 +2468,7 @@ namespace LaborNeedsScheduling.Models
             int hourcount = 0;
             bool bl = false;
 
+            if (employeeAssignedHours.Length > 0) { 
             for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
             {
                 if (hourcount == employeeAssignedHours.Length - 1)
@@ -2392,6 +2508,7 @@ namespace LaborNeedsScheduling.Models
                     hourcount++;
                 }
             }
+        }
 
             //convert to sql hours
             for (int i = 0; i < assignedBlocks.Count; i++)

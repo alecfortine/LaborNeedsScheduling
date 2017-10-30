@@ -1969,8 +1969,10 @@ namespace LaborNeedsScheduling.Models
                 }
             }
 
+            // take hours if necessary
             if (HalfHoursToTake > 0)
             {
+                // take hours from non-power hours
                 while (HalfHoursToTake != 0)
                 {
                     int loopCounter = 0;
@@ -2012,6 +2014,49 @@ namespace LaborNeedsScheduling.Models
                     }
                 }
 
+                // take hours from power hours if still necessary
+                while (HalfHoursToTake != 0)
+                {
+                    int loopCounter = 0;
+                    // take the hours from other slots
+                    for (int i = 0; i < DistributionDaysTake.Rows.Count; i++)
+                    {
+                        for (int n = 1; n < DistributionDaysTake.Columns.Count; n++)
+                        {
+                            // check if the hour is in the day's schedule, if the number is above the minimum,
+                            // and if the hour is a power hour
+                            // if time is before 1pm
+                            if (i < minChange && DistributionDaysTake.Rows[i][n].ToString() != ""
+                                && Convert.ToInt32(DistributionDaysTake.Rows[i][n]) > MinEmployeesEarly
+                                && PowerHours.Rows[i][n].ToString() != "False" && HalfHoursToTake != 0)
+                            {
+                                int newValue = Convert.ToInt32(DistributionDaysTake.Rows[i][n]) - 1;
+                                DistributionDaysTake.Rows[i][n] = newValue;
+                                HalfHoursToTake--;
+                                totalhours--;
+                                loopCounter++;
+                            }
+                            // if time is after 1pm
+                            else if (i >= minChange && DistributionDaysTake.Rows[i][n].ToString() != ""
+                                && Convert.ToInt32(DistributionDaysTake.Rows[i][n]) > MinEmployeesLater
+                                && PowerHours.Rows[i][n].ToString() != "False" && HalfHoursToTake != 0)
+                            {
+                                int newValue = Convert.ToInt32(DistributionDaysTake.Rows[i][n]) - 1;
+                                DistributionDaysTake.Rows[i][n] = newValue;
+                                HalfHoursToTake--;
+                                totalhours--;
+                                loopCounter++;
+                            }
+                        }
+                    }
+                    //stop from infinitely looping if there are no more hours to take
+                    if (loopCounter == 0)
+                    {
+                        break;
+                    }
+                }
+
+                // add the updated day columns to the table
                 for (int i = 1; i < 8; i++)
                 {
                     for (int n = 0; n < AllocatedHours.Rows.Count; n++)
@@ -2020,6 +2065,7 @@ namespace LaborNeedsScheduling.Models
                     }
                 }
             }
+            // add hours if necessary
             else if (HalfHoursToTake < 0)
             {
                 while (HalfHoursToTake != 0)

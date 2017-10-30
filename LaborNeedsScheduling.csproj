@@ -330,6 +330,7 @@
     <Content Include="Views\Home\_DashboardTable.cshtml" />
     <Content Include="Views\Home\ManagerFunctionality.cshtml" />
     <Content Include="Views\Home\TimeOffRequest.cshtml" />
+    <Content Include="Views\Home\_DashboardPrintSchedulePage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

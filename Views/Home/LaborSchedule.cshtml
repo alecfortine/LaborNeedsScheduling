@@ -232,10 +232,16 @@
                 font-size: 10px;
             }
 
-        /*.container {
-            align-content: center;
-            margin: 0;
-        }*/
+        td.EmployeeCell {
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000000;
+            height: 20px;
+            background-color: #ffffff;
+            white-space: nowrap;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
 
         .left-element {
             display: inline;
@@ -550,7 +556,7 @@
 
                             <div class="left-element">
                                 @Html.TextBoxFor(m => m.ThisWeek.PayrollWeeklyHours, new { id = "weeklyHours", style = "width:50px;" })
-                                <button type="submit" id="LaborScheduleButton" style="display:inline-block; margin-left: 30px;" onclick="CreateSchedule()">Update</button>
+                                <button type="submit" id="LaborScheduleButton" style="display:inline-block; margin-left: 30px;" @*onclick="CreateSchedule()"*@>Update</button>
                             </div>
                         </div>
                         <br />
@@ -583,7 +589,7 @@
     <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
 
 
-    @*find employee*@
+    @*search for an employee to add*@
     <script>
         function findEmployee(emp) {
             $.get('/Home/FindEmployee/?EmployeeId=' + emp, function (data) {
@@ -593,6 +599,7 @@
         }
     </script>
 
+    @*add a found employee*@
     <script>
         function addEmployee() {
             $.post('/Home/AddEmployee',
@@ -606,6 +613,7 @@
         }
     </script>
 
+    @*remove a borrowed employee from the schedule*@
     <script>
         function RemoveEmployee(EmployeeId){
             $.post('/Home/RemoveEmployee',
@@ -619,6 +627,7 @@
         }
     </script>
 
+    @*toggle whether the open hour is preceeded by a half hour or an hour*@
     <script>
         function ToggleStartHour(slots){
             $.post('/Home/ToggleHourSlots',
@@ -632,6 +641,7 @@ function (data){
         }
     </script>
 
+    @*add or subtract half hour slots from an assigned employee on the schedule*@
     <script>
         function AddHourStart(idHour){
             var splitValues = idHour.split(',');
@@ -687,7 +697,8 @@ function (data){
 
     </script>
 
-    <script>
+    @*update the schedule partial - not needed with form submit*@
+    @*<script>
         function CreateSchedule(){
             var Date = document.getElementById("hiddenRequestedDate").value;
 
@@ -699,8 +710,9 @@ function (data){
     }
     );
         }
-    </script>
+    </script>*@
 
+    @*determine which week to create a schedule for, change values when changing selection*@
     <script>
         function OneWeekSchedule() {
             var OneWeekStartDate = @Html.Raw(Json.Encode(Model.ThisWeek.startdateOneWeek));
@@ -710,9 +722,7 @@ function (data){
 
             document.getElementById("hiddenRequestedDate").value = OneWeekStartDate;
         }
-    </script>
 
-    <script>
         function TwoWeeksSchedule() {
             var TwoWeeksStartDate = @Html.Raw(Json.Encode(Model.ThisWeek.startdateTwoWeeks));
             var TwoWeeksEndDate = @Html.Raw(Json.Encode(Model.ThisWeek.enddateTwoWeeks));
@@ -721,9 +731,7 @@ function (data){
 
             document.getElementById("hiddenRequestedDate").value = TwoWeeksStartDate;
         }
-    </script>
 
-    <script>
         function ThreeWeeksSchedule() {
             var ThreeWeeksStartDate = @Html.Raw(Json.Encode(Model.ThisWeek.startdateThreeWeeks));
             var ThreeWeeksEndDate = @Html.Raw(Json.Encode(Model.ThisWeek.enddateThreeWeeks));
@@ -734,6 +742,7 @@ function (data){
         }
     </script>
 
+    @*approve or deny a time off request*@
     <script>
         function approveRequest(messageId)
         {
@@ -754,9 +763,7 @@ function (data){
 
             document.getElementById("messages").innerHTML = messageCountUpdate + ' Messages';
         }
-    </script>
 
-    <script>
         function denyRequest(messageId)
         {
             $.ajax({
@@ -778,6 +785,7 @@ function (data){
         }
     </script>
 
+    @*remove a time off request from the screen when a button is clicked*@
     <script>
         $(document).ready(function(c) {
             $('.approve').on('click', function(c){
@@ -785,9 +793,7 @@ function (data){
                 });
             });
         });
-    </script>
 
-    <script>
         $(document).ready(function(c) {
             $('.deny').on('click', function(c){
                 $(this).parent().fadeOut('slow', function(c){
@@ -796,7 +802,7 @@ function (data){
         });
     </script>
 
-    @*assignment partial by clicking table buttons*@
+    @*open the assignment partial by clicking table buttons*@
     <script>
         function getValue(value){
             $.get('/Home/_LaborScheduleAssignmentView/?selectedColumn=' + value, function (data) {
@@ -807,7 +813,8 @@ function (data){
         }
     </script>
 
-    <script>
+    @*old method of assigning an employee and validating input - changed how this works*@
+    @*<script>
         function updateAssignmentView(value){
 
             var selectedEmployeeId = document.getElementById("hiddenEmployeeId").value;
@@ -857,8 +864,9 @@ function (data){
                 );
             alert('Employee assigned');
         }
-    </script>
+    </script>*@
 
+    @*import last week's schedule or clear the selected week's schedule on button click*@
     <script>
         function importSchedule(){
             var result = confirm("Warning: This will replace the current schedule.");
@@ -872,6 +880,7 @@ function (data){
                     );
             }
         }
+
         function clearSchedule(){
             var result = confirm("Warning: This will clear the current schedule.");
             if (result) {
@@ -886,6 +895,7 @@ function (data){
         }
     </script>
 
+    @*unassign an employee's block on a button click*@
     <script>
         function unassignBlock(employeeId, startTime){
             var start = startTime.value
@@ -900,21 +910,23 @@ function (data){
                 );
         }
 
-        function unassignEmployee(value){
-            var unassignTimes = document.getElementById("hiddenUnassignTimes").value
-            $.post('/Home/_LaborScheduleEmployeeAvailability',
-                {
-                    unassignTimes: unassignTimes
-                },
-                function (data){
-                    $('#AssignmentTablePartial').html(data);
-                }
-                );
-            alert('Employee unassigned');
-        }
+        //old method of unassigning
+        //function unassignEmployee(value){
+        //    var unassignTimes = document.getElementById("hiddenUnassignTimes").value
+        //    $.post('/Home/_LaborScheduleEmployeeAvailability',
+        //        {
+        //            unassignTimes: unassignTimes
+        //        },
+        //        function (data){
+        //            $('#AssignmentTablePartial').html(data);
+        //        }
+        //        );
+        //    alert('Employee unassigned');
+        //}
     </script>
 
-    <script>
+    @*old method of assigning and unassigning employees*@
+    @*<script>
         function changeAssignment(cell) {
             if (cell.className == "AssignedCell") {
                 cell.className = "UnassignedCell";
@@ -951,10 +963,10 @@ function (data){
 
             document.getElementById("hiddenUnassignTimes").value = cellvalues;
         }
-    </script>
+    </script>*@
 
     @*highlight the selected employee on the employee list and display the partial*@
-    <script>
+    @*<script>
         //get the name/id of the selected employee and highlight their row on the selection table
         function getEmployee(emp) {
             var employee = emp;
@@ -1005,10 +1017,10 @@ function (data){
             document.getElementById("hiddenEmployeeId").value = selectedEmployeeId;
             document.getElementById("hiddenEmployeeName").value = selectedEmployeeName;
         }
-    </script>
+    </script>*@
 
     @*highlight the selected employee on the availability list and display the buttons*@
-    <script>
+    @*<script>
         //get the name/id of the selected employee and highlight their row on the selection table
         function selectEmployee(emp) {
             var employee = emp;
@@ -1067,8 +1079,9 @@ function (data){
 
         document.getElementById("hiddenEmployeeId").value = selectedEmployeeId;
         document.getElementById("hiddenEmployeeName").value = selectedEmployeeName;
-    </script>
+    </script>*@
 
+    @*assign an employee at the selected hour on the assignment table*@
     <script>
         function assignEmployeeBlock(employeeId){
             var startHour = document.getElementById("hiddenSelectedHour").value;
@@ -1083,6 +1096,7 @@ function (data){
                 );
         }
     </script>
+
     @*display the hour availability partial*@
     <script>
         function getHour(hour) {
@@ -1105,8 +1119,8 @@ function (data){
         }
     </script>
 
-    @*update the dates to include or exclude from the algorithm*@
-    <script>
+    @*excluded dates - moved to variables page*@
+    @*<script>
         function changeCell(cell) {
             if (cell.className == "ExcludedFalse") {
                 cell.className = "ExcludedTrue";
@@ -1143,9 +1157,9 @@ function (data){
             document.getElementById("hiddenExcludedDates").value = cellvalues;
             document.getElementById("hiddenExcludedDatesData").value = cellvalues;
         }
-    </script>
+    </script>*@
 
-    @*validate that all inputs are numbers*@
+    @*validate that input is a number*@
     <script>
         function checkInp()
         {
