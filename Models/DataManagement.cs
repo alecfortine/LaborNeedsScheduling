@@ -26,7 +26,8 @@ namespace LaborNeedsScheduling.Models
     public class WorkWeek
     {
         #region Pending Variables
-        public DataTable BlackoutTableHelpMe = new DataTable();
+        public DataTable TrafficData = new DataTable();
+        public DataTable BlackoutTableView = new DataTable();
 
         public double minhours = 0;
         public double maxhours = 0;
@@ -34,7 +35,7 @@ namespace LaborNeedsScheduling.Models
         public double TotalScheduledHours { get; set; }
 
         #region Selected Employee Scheduling
-        public string StoreCode = "1008";
+        //public string currentStoreCode = "1008";
         public List<string> ErrorMessages { get; set; }
         public int selectedWeekday { get; set; }
         public string selectedHour { get; set; }
@@ -242,9 +243,9 @@ namespace LaborNeedsScheduling.Models
         public List<DayOfWorkWeek> DaysOfWorkWeek { get; set; }
 
         /// <summary>
-        /// The most recent Saturday (the day before the current week)
+        /// The most recent Sunday
         /// </summary>
-        public static DateTime weekMarker = DateTime.Parse("05/09/2015"); //DateTime.Today.AddDays(-1 * (int)DayOfWeek.Saturday); //change later
+        public static DateTime weekMarker = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
         //public static DateTime currentWeekMarker = DateTime.Today.AddDays(-1 * (int)DayOfWeek.Saturday);
 
         DateTime currentWeekMarker = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
@@ -286,7 +287,7 @@ namespace LaborNeedsScheduling.Models
         public int[] getDefaultWeights(int numberOfWeeks)
         {
             //int[] defaultWeightingValues = { 36, 24, 16, 12, 8, 4 };
-            int[] WeightingValues = FakeAPI.GetWeekWeighting(numberOfWeeks, StoreCode);
+            int[] WeightingValues = FakeAPI.GetWeekWeighting(numberOfWeeks, currentStoreCode);
 
             return WeightingValues;
         }
@@ -305,19 +306,19 @@ namespace LaborNeedsScheduling.Models
 
                 for (int i = 0; i < DefaultHistoricalWeeks; i++)
                 {
-                    for (int j = 0; j < 7; j++)
+                    for (int j = 1; j < 8; j++)
                     {
-                        ExclusionDates.Add(weekMarker.AddDays((-7 * (i + 1)) + (j + 1)), false);
+                        ExclusionDates.Add(weekMarker.AddDays(-j - (7 * i)), false);
                     }
                 }
             }
             else
             {
-                for (int i = 0; i < NumberHistoricalWeeks; i++)
+                for (int i = 0; i < DefaultHistoricalWeeks; i++)
                 {
-                    for (int j = 0; j < 7; j++)
+                    for (int j = 1; j < 8; j++)
                     {
-                        ExclusionDates.Add(weekMarker.AddDays((-7 * (i + 1)) + (j + 1)), false);
+                        ExclusionDates.Add(weekMarker.AddDays(-j - (7 * i)), false);
                     }
                 }
             }
@@ -332,7 +333,7 @@ namespace LaborNeedsScheduling.Models
         {
             try
             {
-                WeekStartEndHours = FakeAPI.GetStoreHours("1008");
+                WeekStartEndHours = FakeAPI.GetStoreHours(currentStoreCode);
 
                 // weighting input
                 for (int i = 0; i < weekWeighting.Length; i++)
@@ -349,12 +350,12 @@ namespace LaborNeedsScheduling.Models
                     employeeListStore = FakeAPI.GetEmployeesForStore(currentStoreCode);
                 }
 
-                GenerateCurrentWeekDates();
-                FakeAPI.AddNewWeekDates(OneWeekFromNowDates);
-                //FakeAPI.dothething(ThreeWeeksFromNowDates);
+                //GenerateCurrentWeekDates();
+                //FakeAPI.AddNewWeekDates(OneWeekFromNowDates);
+                //FakeAPI.dothething(OneWeekFromNowDates);
 
                 GenerateWeeklyTimeSlots();
-                WTGTrafficPercent = FakeAPI.FillWTGTable(weekWeighting, NumberHistoricalWeeks, DateTime.Parse("2015-05-10"));
+                WTGTrafficPercent = TrafficData;/*FakeAPI.FillWTGTable(weekWeighting, NumberHistoricalWeeks, DateTime.Parse("2015-05-10"));*/
 
                 GenerateBlackoutTable();
                 FillExcludedDatesTable();
@@ -414,7 +415,7 @@ namespace LaborNeedsScheduling.Models
         /// </summary>
         public void GenerateEmployeeAvailability()
         {
-            GenerateCurrentWeekDates();
+            //GenerateCurrentWeekDates();
             string[] weekdays = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
             //string[] employeeIdsAll = new string[LaborScheduling.EmployeeListAll.Count];
             string[] employeeIdsStore = new string[employeeListStore.Count];
@@ -432,7 +433,7 @@ namespace LaborNeedsScheduling.Models
 
             //FakeAPI.CheckForCurrentWeek(employeeListStore, RequestedDates);
             EmployeeAvailableTimes = FakeAPI.GetEmployeeAvailableTimes(employeeIdsStore);
-            EmployeeTimeOffRequests = FakeAPI.GetEmployeeTimeOff(StoreCode, NextFourWeeksDates);
+            EmployeeTimeOffRequests = FakeAPI.GetEmployeeTimeOff(currentStoreCode, NextFourWeeksDates);
             List<string> idList = new List<string>(EmployeeTimeOffRequests.Keys);
 
             for (int i = 0; i < employeeListStore.Count; i++)
@@ -480,7 +481,7 @@ namespace LaborNeedsScheduling.Models
                 }
             }
 
-            EmployeeScheduledTimes = FakeAPI.GetEmployeeScheduledTimes(employeeIdsStore, StoreCode, RequestedDates);
+            EmployeeScheduledTimes = FakeAPI.GetEmployeeScheduledTimes(employeeIdsStore, currentStoreCode, RequestedDates);
         }
 
         /// <summary>
@@ -490,7 +491,7 @@ namespace LaborNeedsScheduling.Models
         /// <param name="weekday"></param>
         public void CheckScheduleConflicts(string employeeId, int weekday)
         {
-            List<Employees> EmployeeList = FakeAPI.GetEmployeesForStore(StoreCode);
+            List<Employees> EmployeeList = FakeAPI.GetEmployeesForStore(currentStoreCode);
             string employeeName = "";
             foreach (var emp in EmployeeList)
             {
@@ -561,7 +562,7 @@ namespace LaborNeedsScheduling.Models
         /// <param name="employeeId"></param>
         public void AddEmployeeToList(string employeeId)
         {
-            employeeListStore = FakeAPI.GetEmployeesForStore(StoreCode);
+            employeeListStore = FakeAPI.GetEmployeesForStore(currentStoreCode);
             bool employeeExists = false;
             foreach (Employees emp in employeeListStore)
             {
@@ -581,23 +582,23 @@ namespace LaborNeedsScheduling.Models
 
             if (employeeExists == false)
             {
-                FakeAPI.AddBorrowedEmployee(employeeId, StoreCode, NextFourWeeksDates);
+                FakeAPI.AddBorrowedEmployee(employeeId, currentStoreCode, NextFourWeeksDates);
             }
         }
 
 
         public void GenerateBlackoutTable()
         {
-            BlackoutTableHelpMe.Clear();
-            BlackoutTableHelpMe.Columns.Clear();
-            BlackoutTableHelpMe.Columns.Add("HourOfDay", typeof(string));
-            BlackoutTableHelpMe.Columns.Add("Sunday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[0]), typeof(string));
-            BlackoutTableHelpMe.Columns.Add("Monday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[1]), typeof(string));
-            BlackoutTableHelpMe.Columns.Add("Tuesday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[2]), typeof(string));
-            BlackoutTableHelpMe.Columns.Add("Wednesday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[3]), typeof(string));
-            BlackoutTableHelpMe.Columns.Add("Thursday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[4]), typeof(string));
-            BlackoutTableHelpMe.Columns.Add("Friday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[5]), typeof(string));
-            BlackoutTableHelpMe.Columns.Add("Saturday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[6]), typeof(string));
+            BlackoutTableView.Clear();
+            BlackoutTableView.Columns.Clear();
+            BlackoutTableView.Columns.Add("HourOfDay", typeof(string));
+            BlackoutTableView.Columns.Add("Sunday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[0]), typeof(string));
+            BlackoutTableView.Columns.Add("Monday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[1]), typeof(string));
+            BlackoutTableView.Columns.Add("Tuesday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[2]), typeof(string));
+            BlackoutTableView.Columns.Add("Wednesday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[3]), typeof(string));
+            BlackoutTableView.Columns.Add("Thursday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[4]), typeof(string));
+            BlackoutTableView.Columns.Add("Friday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[5]), typeof(string));
+            BlackoutTableView.Columns.Add("Saturday " + Environment.NewLine + String.Format("{0:M/dd}", RequestedDates[6]), typeof(string));
 
             List<string[]> preOpenSlots = new List<string[]>();
             List<string[]> postCloseSlots = new List<string[]>();
@@ -640,20 +641,20 @@ namespace LaborNeedsScheduling.Models
 
             for (int i = 0; i < UpdatedHourSchedule.Count; i++)
             {
-                BlackoutTableHelpMe.Rows.Add(UpdatedHourSchedule[i]);
+                BlackoutTableView.Rows.Add(UpdatedHourSchedule[i]);
             }
 
             for (int i = 1; i < 8; i++)
             {
                 int startPosition = 0;
                 int endPosition = 0;
-                for (int n = 0; n < BlackoutTableHelpMe.Rows.Count; n++)
+                for (int n = 0; n < BlackoutTableView.Rows.Count; n++)
                 {
-                    if (BlackoutTableHelpMe.Rows[n][0].ToString() == WeekStartEndHours.Rows[0][i - 1].ToString())
+                    if (BlackoutTableView.Rows[n][0].ToString() == WeekStartEndHours.Rows[0][i - 1].ToString())
                     {
                         startPosition = n;
                     }
-                    if (BlackoutTableHelpMe.Rows[n][0].ToString() == WeekStartEndHours.Rows[1][i - 1].ToString())
+                    if (BlackoutTableView.Rows[n][0].ToString() == WeekStartEndHours.Rows[1][i - 1].ToString())
                     {
                         endPosition = n;
                     }
@@ -662,20 +663,20 @@ namespace LaborNeedsScheduling.Models
                 {
                     startPosition -= openHourSlots;
                 }
-                if (endPosition < BlackoutTableHelpMe.Rows.Count - 2)
+                if (endPosition < BlackoutTableView.Rows.Count - 2)
                 {
                     endPosition += 2;
                 }
 
-                for (int n = 0; n < BlackoutTableHelpMe.Rows.Count; n++)
+                for (int n = 0; n < BlackoutTableView.Rows.Count; n++)
                 {
                     if (n < startPosition || n > endPosition)
                     {
-                        BlackoutTableHelpMe.Rows[n][i] = "True";
+                        BlackoutTableView.Rows[n][i] = "True";
                     }
                     else
                     {
-                        BlackoutTableHelpMe.Rows[n][i] = "False";
+                        BlackoutTableView.Rows[n][i] = "False";
                     }
                 }
             }
@@ -1028,7 +1029,7 @@ namespace LaborNeedsScheduling.Models
         {
             try
             {
-                List<DateTime> DatesToExclude = FakeAPI.GetExcludedDates(StoreCode);
+                List<DateTime> DatesToExclude = FakeAPI.GetExcludedDates(currentStoreCode);
 
                 DateTime[] days = new DateTime[ExclusionDates.Count];
                 int counter = 0;
@@ -1057,7 +1058,8 @@ namespace LaborNeedsScheduling.Models
                 foreach (DataRow row in WTGTrafficPercent.Rows)
                 {
                     // if the date in the dictionary is true don't add it to the table
-                    if (!ExclusionDates[DateTime.Parse(row["Date"].ToString())])
+                    DateTime date = DateTime.Parse(row["TrafficDate"].ToString()).Date;
+                    if (!ExclusionDates[DateTime.Parse(row["TrafficDate"].ToString()).Date])
                     {
                         ExcludedDates.Rows.Add(row.ItemArray);
                     }
@@ -1104,18 +1106,43 @@ namespace LaborNeedsScheduling.Models
 
                 #region Calculations
 
-                double total = 0;
-                int col = 1;
-                int row = 0;
-
                 //string[] hours = { "9AM-10AM","10AM-11AM","11AM-12PM","12PM-1PM", "1PM-2PM", "2PM-3PM", "3PM-4PM",
                 //                   "4PM-5PM", "5PM-6PM", "6PM-7PM", "7PM-8PM", "8PM-9PM", "9PM-10PM", "10PM-11PM" };
 
+                // get the dates for each weekday from weeks past depending on historical weeks variable
+                DateTime[] Sundays = new DateTime[NumberHistoricalWeeks];
+                DateTime[] Mondays = new DateTime[NumberHistoricalWeeks];
+                DateTime[] Tuesdays = new DateTime[NumberHistoricalWeeks];
+                DateTime[] Wednesdays = new DateTime[NumberHistoricalWeeks];
+                DateTime[] Thursdays = new DateTime[NumberHistoricalWeeks];
+                DateTime[] Fridays = new DateTime[NumberHistoricalWeeks];
+                DateTime[] Saturdays = new DateTime[NumberHistoricalWeeks];
+                for (int i = 1; i <= NumberHistoricalWeeks; i++)
+                {
+                    Sundays[i - 1] = weekMarker.AddDays(-(i * 7));
+                    Mondays[i - 1] = weekMarker.AddDays(-(i * 7 - 1));
+                    Tuesdays[i - 1] = weekMarker.AddDays(-(i * 7 - 2));
+                    Wednesdays[i - 1] = weekMarker.AddDays(-(i * 7 - 3));
+                    Thursdays[i - 1] = weekMarker.AddDays(-(i * 7 - 4));
+                    Fridays[i - 1] = weekMarker.AddDays(-(i * 7 - 5));
+                    Saturdays[i - 1] = weekMarker.AddDays(-(i * 7 - 6));
+                }
+                List<DateTime[]> WeekdayDates = new List<DateTime[]>();
+                WeekdayDates.Add(Sundays);
+                WeekdayDates.Add(Mondays);
+                WeekdayDates.Add(Tuesdays);
+                WeekdayDates.Add(Wednesdays);
+                WeekdayDates.Add(Thursdays);
+                WeekdayDates.Add(Fridays);
+                WeekdayDates.Add(Saturdays);
+
                 for (int i = 0; i < 7; i++)
                 {
                     DataRow[] datarow;
-                    int startslot = 0;
+                    DateTime[] Dates = WeekdayDates[i];
+                    double DayTotalHours = 0;
 
+                    int startslot = 0;
                     for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
                     {
                         if (WeekHourSchedule[0] == ScheduleHalfHourSlots[n])
@@ -1123,178 +1150,109 @@ namespace LaborNeedsScheduling.Models
                             startslot = n / 2;
                         }
                     }
+
+
                     for (int n = 0; n <= WeekHourSchedule.Count - 1; n++)
                     {
-                        //datarow = ExcludedDates.Select("WeekDay = '" + weekdayAbv[col - 1] + "' AND HourOfDay = '" + ScheduleHourSlots[n] + "'");
-                        int wronghourcount = (n / 2);
-                        datarow = ExcludedDates.Select("WeekDay = '" + weekdayAbv[col - 1] + "' AND HourOfDay = '" + ScheduleHourSlots[startslot + wronghourcount] + "'");
-
-                        if (datarow.Length == 0)
+                        string SQLTime = "";
+                        for (int m = 0; m < ScheduleHalfHourSlots.Length; m++)
                         {
-                            WeightedAverageTraffic.Rows[row][col] = 0;
-                            row++;
-                        }
-
-                        for (int j = 0; j < datarow.Length; j++)
-                        {
-                            if (j < datarow.Length - 1)
+                            if (WeekHourSchedule[n] == ScheduleHalfHourSlots[m])
                             {
-                                total += Convert.ToDouble(datarow[j]["TrafficOut"]);
-                            }
-                            else
-                            {
-                                total += Convert.ToDouble(datarow[j]["TrafficOut"]);
-                                Math.Round(total, MidpointRounding.AwayFromZero);
-                                WeightedAverageTraffic.Rows[row][col] = (Math.Round(total, MidpointRounding.AwayFromZero));
-                                total = 0;
-                                row++;
+                                SQLTime = SQLHours[m];
+                                break;
                             }
                         }
-                    }
 
-                    row = 0;
-                    col++;
-                }
+                        double HourTotal = 0;
 
-                #region Totals
-                int totalCol = 1;
-                double[] daySums = new double[7];
-
-                for (int i = 0; i < 7; i++)
-                {
-                    daySums[i] = (double)WeightedAverageTraffic.Compute("Sum(" + weekdayAbv[i] + "WeightedAverage)", "");
-                    WeightedAverageTraffic.Rows[WeightedAverageTraffic.Rows.Count - 1][totalCol] = daySums[i];
-                    totalCol++;
-                }
-
-                foreach (DataRow trow in WeightedAverageTraffic.Rows)
-                {
-                    double rowSum = 0;
-                    foreach (DataColumn tcol in WeightedAverageTraffic.Columns)
-                    {
-                        if (!trow.IsNull(tcol))
+                        for (int m = 0; m < NumberHistoricalWeeks; m++)
                         {
-                            string stringValue = trow[tcol].ToString();
-                            double d;
-                            if (double.TryParse(stringValue, out d))
-                                rowSum += d;
-                        }
-                    }
-                    trow.SetField("Total", rowSum);
-                }
-
-                #endregion
-                #endregion
-
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            #region Total WTG Table
-            #region Table Setup
-            WeightedAverageTrafficTotal.Clear();
-            WeightedAverageTrafficTotal.Columns.Clear();
-            WeightedAverageTrafficTotal.Columns.Add("HourOfDay", typeof(string));
-            WeightedAverageTrafficTotal.Columns.Add("SunWeightedAverage", typeof(double));
-            WeightedAverageTrafficTotal.Columns.Add("MonWeightedAverage", typeof(double));
-            WeightedAverageTrafficTotal.Columns.Add("TueWeightedAverage", typeof(double));
-            WeightedAverageTrafficTotal.Columns.Add("WedWeightedAverage", typeof(double));
-            WeightedAverageTrafficTotal.Columns.Add("ThuWeightedAverage", typeof(double));
-            WeightedAverageTrafficTotal.Columns.Add("FriWeightedAverage", typeof(double));
-            WeightedAverageTrafficTotal.Columns.Add("SatWeightedAverage", typeof(double));
-            WeightedAverageTrafficTotal.Columns.Add("Total", typeof(double));
-
-
-            for (int i = 0; i < WeekHourSchedule.Count; i++)
-            {
-                WeightedAverageTrafficTotal.Rows.Add(WeekHourSchedule[i]);
-            }
-            WeightedAverageTrafficTotal.Rows.Add("Total");
-            #endregion
-
-            try
-            {
-
-                #region Calculations
-
-                double total = 0;
-                int col = 1;
-                int row = 0;
-
-                for (int i = 0; i < 7; i++)
-                {
-                    DataRow[] datarow;
-                    int startslot = 0;
-                    for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
-                    {
-                        if (WeekHourSchedule[0] == ScheduleHalfHourSlots[n])
-                        {
-                            startslot = n / 2;
-                        }
-                    }
-                    for (int n = 0; n < WeekHourSchedule.Count; n++)
-                    {
-                        int wronghourcount = (n / 2);
-                        datarow = ExcludedDates.Select("WeekDay = '" + weekdayAbv[col - 1] + "' AND HourOfDay = '" + ScheduleHourSlots[startslot + wronghourcount] + "'");
-
-                        if (datarow.Length == 0)
-                        {
-                            WeightedAverageTrafficTotal.Rows[row][col] = 0;
-                            WeightedAverageTrafficTotal.Rows[row][col] = 0;
-                            row += 1;
-                        }
-
-                        for (int j = 0; j < datarow.Length; j++)
-                        {
-                            if (j < datarow.Length - 1)
+                            //datarow = ExcludedDates.Select("WeekDay = '" + weekdayAbv[col - 1] + "' AND HourOfDay = '" + ScheduleHourSlots[n] + "'");
+                            datarow = ExcludedDates.Select("TrafficDate = '" + Dates[m] + "' and TrafficTime = '" + SQLTime + "'");
+                            if (datarow.Length != 0)
                             {
-                                total += Convert.ToDouble(datarow[j]["TrafficOut"]);
-                            }
-                            else
-                            {
-                                total += Convert.ToDouble(datarow[j]["TrafficOut"]);
-                                Math.Round(total, MidpointRounding.AwayFromZero);
-                                WeightedAverageTrafficTotal.Rows[row][col] = Math.Round((Math.Round(total, MidpointRounding.AwayFromZero) / 2));
-                                total = 0;
-                                row += 1;
+                                HourTotal += Convert.ToDouble(datarow[0]["TrafficCount"]);
                             }
                         }
-                    }
 
-                    row = 0;
-                    col++;
-                }
-
-                #region Totals
-                int totalCol = 1;
-                double[] daySums = new double[7];
-
-                for (int i = 0; i < 7; i++)
-                {
-                    daySums[i] = (double)WeightedAverageTrafficTotal.Compute("Sum(" + weekdayAbv[i] + "WeightedAverage)", "");
-                    WeightedAverageTrafficTotal.Rows[WeightedAverageTrafficTotal.Rows.Count - 1][totalCol] = daySums[i];
-                    totalCol++;
-                }
-
-                foreach (DataRow trow in WeightedAverageTrafficTotal.Rows)
-                {
-                    double rowSum = 0;
-                    foreach (DataColumn tcol in WeightedAverageTrafficTotal.Columns)
-                    {
-                        if (!trow.IsNull(tcol))
+                        int RowPosition = 0;
+                        for (int m = 0; m < WeightedAverageTraffic.Rows.Count; m++)
                         {
-                            string stringValue = trow[tcol].ToString();
-                            double d;
-                            if (double.TryParse(stringValue, out d))
-                                rowSum += d;
+                            if(WeightedAverageTraffic.Rows[m][0].ToString() == WeekHourSchedule[n])
+                            {
+                                RowPosition = m;
+                            }
                         }
+                        WeightedAverageTraffic.Rows[RowPosition][i+1] = HourTotal;
+
+                        //if (datarow.Length == 0)
+                        //{
+                        //    WeightedAverageTraffic.Rows[row][col] = 0;
+                        //    row++;
+                        //}
+
+                        //for (int j = 0; j < datarow.Length; j++)
+                        //{
+                        //    if (j < datarow.Length - 1)
+                        //    {
+                        //        total += Convert.ToDouble(datarow[j]["TrafficCount"]);
+                        //    }
+                        //    else
+                        //    {
+                        //        total += Convert.ToDouble(datarow[j]["TrafficCount"]);
+                        //        Math.Round(total, MidpointRounding.AwayFromZero);
+                        //        WeightedAverageTraffic.Rows[row][col] = (Math.Round(total, MidpointRounding.AwayFromZero));
+                        //        total = 0;
+                        //        row++;
+                        //    }
+                        //}
+
+                        DayTotalHours += HourTotal;
                     }
-                    trow.SetField("Total", rowSum);
+                    //row = 0;
+                    //col++;
+                    WeightedAverageTraffic.Rows[WeightedAverageTraffic.Rows.Count-1][i + 1] = DayTotalHours;
                 }
 
-                #endregion
+                for(int i = 0; i < WeightedAverageTraffic.Rows.Count; i++)
+                {
+                    double HourTotal = 0;
+                    for(int n = 1; n < WeightedAverageTraffic.Columns.Count-1; n++)
+                    {
+                        HourTotal += Convert.ToDouble(WeightedAverageTraffic.Rows[i][n]);
+                    }
+                    WeightedAverageTraffic.Rows[i][8] = HourTotal;
+                }
+
+                //#region Totals
+                //int totalCol = 1;
+                //double[] daySums = new double[7];
+
+                //for (int i = 0; i < 7; i++)
+                //{
+                //    daySums[i] = (double)WeightedAverageTraffic.Compute("Sum(" + weekdayAbv[i] + "WeightedAverage)", "");
+                //    WeightedAverageTraffic.Rows[WeightedAverageTraffic.Rows.Count - 1][totalCol] = daySums[i];
+                //    totalCol++;
+                //}
+
+                //foreach (DataRow trow in WeightedAverageTraffic.Rows)
+                //{
+                //    double rowSum = 0;
+                //    foreach (DataColumn tcol in WeightedAverageTraffic.Columns)
+                //    {
+                //        if (!trow.IsNull(tcol))
+                //        {
+                //            string stringValue = trow[tcol].ToString();
+                //            double d;
+                //            if (double.TryParse(stringValue, out d))
+                //                rowSum += d;
+                //        }
+                //    }
+                //    trow.SetField("Total", rowSum);
+                //}
+
+                //#endregion
                 #endregion
 
             }
@@ -1302,7 +1260,119 @@ namespace LaborNeedsScheduling.Models
             {
                 throw ex;
             }
-            #endregion
+            //#region Total WTG Table
+            //#region Table Setup
+            //WeightedAverageTrafficTotal.Clear();
+            //WeightedAverageTrafficTotal.Columns.Clear();
+            WeightedAverageTrafficTotal = WeightedAverageTraffic;
+
+            //WeightedAverageTrafficTotal.Columns.Add("HourOfDay", typeof(string));
+            //WeightedAverageTrafficTotal.Columns.Add("SunWeightedAverage", typeof(double));
+            //WeightedAverageTrafficTotal.Columns.Add("MonWeightedAverage", typeof(double));
+            //WeightedAverageTrafficTotal.Columns.Add("TueWeightedAverage", typeof(double));
+            //WeightedAverageTrafficTotal.Columns.Add("WedWeightedAverage", typeof(double));
+            //WeightedAverageTrafficTotal.Columns.Add("ThuWeightedAverage", typeof(double));
+            //WeightedAverageTrafficTotal.Columns.Add("FriWeightedAverage", typeof(double));
+            //WeightedAverageTrafficTotal.Columns.Add("SatWeightedAverage", typeof(double));
+            //WeightedAverageTrafficTotal.Columns.Add("Total", typeof(double));
+
+
+            //for (int i = 0; i < WeekHourSchedule.Count; i++)
+            //{
+            //    WeightedAverageTrafficTotal.Rows.Add(WeekHourSchedule[i]);
+            //}
+            //WeightedAverageTrafficTotal.Rows.Add("Total");
+            //#endregion
+
+            //try
+            //{
+
+            //    #region Calculations
+
+            //    double total = 0;
+            //    int col = 1;
+            //    int row = 0;
+
+            //    for (int i = 0; i < 7; i++)
+            //    {
+            //        DataRow[] datarow;
+            //        int startslot = 0;
+            //        for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
+            //        {
+            //            if (WeekHourSchedule[0] == ScheduleHalfHourSlots[n])
+            //            {
+            //                startslot = n / 2;
+            //            }
+            //        }
+            //        for (int n = 0; n < WeekHourSchedule.Count; n++)
+            //        {
+            //            int wronghourcount = (n / 2);
+            //            datarow = ExcludedDates.Select("WeekDay = '" + weekdayAbv[col - 1] + "' AND HourOfDay = '" + ScheduleHourSlots[startslot + wronghourcount] + "'");
+
+            //            if (datarow.Length == 0)
+            //            {
+            //                WeightedAverageTrafficTotal.Rows[row][col] = 0;
+            //                WeightedAverageTrafficTotal.Rows[row][col] = 0;
+            //                row += 1;
+            //            }
+
+            //            for (int j = 0; j < datarow.Length; j++)
+            //            {
+            //                if (j < datarow.Length - 1)
+            //                {
+            //                    total += Convert.ToDouble(datarow[j]["TrafficOut"]);
+            //                }
+            //                else
+            //                {
+            //                    total += Convert.ToDouble(datarow[j]["TrafficOut"]);
+            //                    Math.Round(total, MidpointRounding.AwayFromZero);
+            //                    WeightedAverageTrafficTotal.Rows[row][col] = Math.Round((Math.Round(total, MidpointRounding.AwayFromZero) / 2));
+            //                    total = 0;
+            //                    row += 1;
+            //                }
+            //            }
+            //        }
+
+            //        row = 0;
+            //        col++;
+            //    }
+
+            //    #region Totals
+            //    int totalCol = 1;
+            //    double[] daySums = new double[7];
+
+            //    for (int i = 0; i < 7; i++)
+            //    {
+            //        daySums[i] = (double)WeightedAverageTrafficTotal.Compute("Sum(" + weekdayAbv[i] + "WeightedAverage)", "");
+            //        WeightedAverageTrafficTotal.Rows[WeightedAverageTrafficTotal.Rows.Count - 1][totalCol] = daySums[i];
+            //        totalCol++;
+            //    }
+
+            //    foreach (DataRow trow in WeightedAverageTrafficTotal.Rows)
+            //    {
+            //        double rowSum = 0;
+            //        foreach (DataColumn tcol in WeightedAverageTrafficTotal.Columns)
+            //        {
+            //            if (!trow.IsNull(tcol))
+            //            {
+            //                string stringValue = trow[tcol].ToString();
+            //                double d;
+            //                if (double.TryParse(stringValue, out d))
+            //                    rowSum += d;
+            //            }
+            //        }
+            //        trow.SetField("Total", rowSum);
+            //    }
+
+            //    #endregion
+            //    #endregion
+
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw ex;
+            //}
+            //#endregion
 
         }
 
@@ -1583,7 +1653,7 @@ namespace LaborNeedsScheduling.Models
                     List<string> addedhours = new List<string>();
                     for (int row = 0; row < PercentWeeklyTotal.Rows.Count - 1; row++)
                     {
-                        if (PercentDailyTotal.Rows[row][col].ToString() != "" && BlackoutTableHelpMe.Rows[row + openHourSlots][col].ToString() != "True")
+                        if (PercentDailyTotal.Rows[row][col].ToString() != "" && BlackoutTableView.Rows[row + openHourSlots][col].ToString() != "True")
                         {
                             double hourPercentage = (Convert.ToDouble(PercentDailyTotal.Rows[row][col]) / 100);
                             double employees = hourPercentage * allocatedHours[col - 1];
@@ -1958,7 +2028,10 @@ namespace LaborNeedsScheduling.Models
             }
             totalhours = totalhours / 2;
 
+            //still 1 off I guess
             double HalfHoursToTake = minhours - maxhours;
+            HalfHoursToTake = totalhours * 2 - PayrollWeeklyHours * 2;
+
             int minChange = 0;
             for (int i = 0; i < DistributionDaysTake.Rows.Count; i++)
             {
@@ -2070,6 +2143,8 @@ namespace LaborNeedsScheduling.Models
             {
                 while (HalfHoursToTake != 0)
                 {
+                    int loopCounter = 0;
+
                     //add the hours to other slots
                     for (int i = 0; i < DistributionDaysGive.Rows.Count; i++)
                     {
@@ -2086,8 +2161,14 @@ namespace LaborNeedsScheduling.Models
                                 DistributionDaysGive.Rows[i][n] = newValue;
                                 HalfHoursToTake++;
                                 totalhours++;
+                                loopCounter++;
                             }
                         }
+                    }
+                    //stop from infinitely looping if there are no more hours to take
+                    if (loopCounter == 0)
+                    {
+                        break;
                     }
                 }
                 for (int i = 1; i < 5; i++)
@@ -2195,7 +2276,7 @@ namespace LaborNeedsScheduling.Models
             }
 
             //FakeAPI.CheckForCurrentWeek(scheduling, RequestedDates);
-            EmployeeScheduledTimes = FakeAPI.GetEmployeeScheduledTimes(employeeIds, StoreCode, RequestedDates);
+            EmployeeScheduledTimes = FakeAPI.GetEmployeeScheduledTimes(employeeIds, currentStoreCode, RequestedDates);
 
             //loop over each employee's (weekday) and check the hours that are selected - or all of them?
             foreach (Employees emp in scheduling)
@@ -2594,7 +2675,7 @@ namespace LaborNeedsScheduling.Models
             }
 
             string[] updatedHours = FakeAPI.UpdateEmployeeSchedule(ScheduleStartHours.Keys.Count, employeeHours,
-                                    employeeId, RequestedDates, EmployeeScheduledTimes[employeeId], selectedWeekday, StoreCode);
+                                    employeeId, RequestedDates, EmployeeScheduledTimes[employeeId], selectedWeekday, currentStoreCode);
 
             Dictionary<string, string[]> employeeSchedule = EmployeeScheduledTimes[employeeId];
             employeeSchedule[daysOfWeek[selectedWeekday]] = updatedHours;

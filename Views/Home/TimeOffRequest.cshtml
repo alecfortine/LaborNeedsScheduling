@@ -382,7 +382,7 @@
 
             <text>Enter Employee ID Number:</text>
             <br />
-            @Html.TextBoxFor(m => m.employeeId)
+            @Html.TextBoxFor(m => m.employeeId, new { id = "EmployeeId1", autocomplete = "off" })
 
             <br />
             <br />
@@ -390,32 +390,32 @@
             <div style="display:inline-block">
                 <div style="border:solid; border-width:1px; display: inline; float:left; padding:20px;">
                     <div class="inline">
-                        @Html.DropDownListFor(m => Model.startDate, new SelectList(Model.startDates), new { id = "startDate" })
+                        @Html.DropDownListFor(m => Model.startDate, new SelectList(Model.startDates), new { id = "startDate1" })
                     </div>
 
-                    <div class="inline" id="dayCheck">
+                    <div class="inline">
                         @Html.CheckBoxFor(m => Model.allDayCheck, new { id = "dayCheck", onchange = "change_checkbox(this)" })
                         <label>All Day</label>
                     </div>
 
-                    <div class="visible" id="startTime">
+                    <div class="visible">
                         <label>Start:</label>
                         @Html.DropDownListFor(m => Model.startTime, new SelectList(Model.startTimes), new { id = "startTime" })
                     </div>
 
-                    <div class="visible" id="endTime">
+                    <div class="visible">
                         <label>End: </label>
                         @Html.DropDownListFor(m => Model.endTime, new SelectList(Model.endTimes), new { id = "endTime" })
                     </div>
 
                     <div class="inline">
-                        <button type="submit" @*onclick="SubmitRequest()"*@>Submit</button><br>
+                        <button type="button" onclick="validateEmployeeId(0)">Submit</button><br>
                     </div>
                 </div>
             </div>
         </form>
-            @*}*@
-</section>
+        @*}*@
+    </section>
 </div>
 
 <br />
@@ -429,7 +429,7 @@
         {
             <text>Enter Employee ID Number:</text>
             <br />
-            @Html.TextBoxFor(m => m.employeeId)
+            @Html.TextBoxFor(m => m.employeeId, new { id = "EmployeeId2", autocomplete = "off" })
 
             <br />
             <br />
@@ -437,19 +437,19 @@
             <div style="display:inline-block">
                 <div style="border:solid; border-width:1px; display: inline; float:left; padding:20px;">
                     <div class="inline">
-                        @Html.DropDownListFor(m => Model.startDate, new SelectList(Model.startDates), new { id = "startDate" })
+                        @Html.DropDownListFor(m => Model.startDate, new SelectList(Model.startDates), new { id = "startDate2" })
                     </div>
                     <label>-</label>
                     <div class="inline" style="margin-left:15px;">
                         @Html.DropDownListFor(m => Model.endDate, new SelectList(Model.endDates), new { id = "endDate" })
                     </div>
-
+                    @{ string type = "multiple";}
                     <div class="inline">
-                        <button type="submit" @*onclick="SubmitRequest()"*@>Submit</button><br>
+                        <button type="button" onclick="validateEmployeeId(1)">Submit</button><br>
                     </div>
                 </div>
             </div>
-        }
+                        }
     </section>
 </div>
 
@@ -458,25 +458,155 @@
 
 @section scripts{
 
-@*<script>
-   $("SubmitRequest").submit(function() {
-       var employeeId = $("#employeeIdTextbox").val();
-       $("#hiddenEmployeeId").val(employeeId);
-     return true;
-  });
-</script>*@
+    <script>
+        function validateEmployeeId(type) {
+            var EmployeeList = @Html.Raw(Json.Encode(Model.ListOfEmployees));
+            var check = 0;
+
+            // type determines a single day or multiple days
+            if(type == 0){
+                var employeeId = document.getElementById('EmployeeId1').value;
+                for(i = 0; i < EmployeeList.length; i++){
+                    var id = EmployeeList[i].id;
+                    if(employeeId == id){
+                        check = 1;
+                    }
+                }
+                if(check == 0){
+                    alert('Employee ID not found for current store');
+                }
+                else if(check == 1){
+                    var StartDate = document.getElementById('startDate1').value;
+                    var StartTime = document.getElementById('startTime').value;
+                    var EndTime = document.getElementById('endTime').value;
+                    var AllDay = document.getElementById('dayCheck').checked;
+
+                    // make sure the start time comes before the end time
+                    var TimeCheck = 1;
+                    var StartTimes = @Html.Raw(Json.Encode(Model.startTimes));
+                    var EndTimes = @Html.Raw(Json.Encode(Model.endTimes));
+
+                    var startpos = 0;
+                    var endpos = 0;
+                    for(i = 0; i < StartTimes.length; i++){
+                        if(StartTimes[i] == StartTime){
+                            startpos = i;
+                        }
+                    }
+                    for(i = 0; i < EndTimes.length; i++){
+                        if(EndTimes[i] == EndTime){
+                            endpos = i;
+                        }
+                    }
+                    if(startpos > endpos){
+                        TimeCheck = 0;
+                    }
+
+                    alert(startpos);
+                    alert(endpos);
+                    alert(TimeCheck);
+
+                    if(TimeCheck == 0){
+                        alert('The start time must come before the end time')
+                    }
+                    else{
+                        var model = @Html.Raw(Json.Encode(Model));
+                        model.Id = employeeId
+                        model.startDate = StartDate;
+                        model.startTime = StartTime;
+                        model.endTime = EndTime;
+                        model.allDayCheck = AllDay;
+
+                        $.post('/Home/TimeOffRequest',
+                        {
+                            TimeOff: model,
+                            employeeId: employeeId
+                        },
+                        function (data){
+                            alert('Request submitted');
+                        }
+                        );
+                    }
+                }
+            }
+            else if(type == 1){
+                var employeeId = document.getElementById('EmployeeId2').value;
+                for(i = 0; i < EmployeeList.length; i++){
+                    var id = EmployeeList[i].id;
+                    if(employeeId == id){
+                        check = 1;
+                    }
+                }
+                if(check == 0){
+                    alert('Employee ID not found for current store');
+                }
+                else if(check == 1){
+                    var StartDate = document.getElementById('startDate2').value;
+                    var EndDate = document.getElementById('endDate').value;
+
+                    // make sure the start date comes before the end date
+                    var DateCheck = 1;
+                    var StartDates = @Html.Raw(Json.Encode(Model.startDates));
+                    var EndDates = @Html.Raw(Json.Encode(Model.endDates));
+
+                    var startpos = 0;
+                    var endpos = 0;
+                    for(i = 0; i < StartDates.length; i++){
+                        if(StartDates[i] == StartDate){
+                            startpos = i;
+                        }
+                    }
+                    for(i = 0; i < EndDates.length; i++){
+                        if(EndDates[i] == EndDate){
+                            endpos = i;
+                        }
+                    }
+                    if(startpos > endpos){
+                        DateCheck = 0;
+                    }
+
+                    if(DateCheck == 0){
+                        alert('The start date must come before the end date')
+                    }
+
+                    var model = @Html.Raw(Json.Encode(Model));
+                    model.Id = employeeId
+                    model.startDate = StartDate;
+                    model.endDate = EndDate;
+
+                    $.post('/Home/TimeOffRequest',
+                    {
+                        TimeOff: model,
+                        employeeId: employeeId
+                    },
+                    function (data){
+                        alert('Request submitted');
+                    }
+                    );
+                }
+            }
+        }
+    </script>
 
     @*<script>
-        function SubmitRequest() {
-            $.post('/Home/TimeOffRequest',
-    {
-        employeeId: ,
-    },
-    function (data) {
-        $('#AssignmentTablePartial').html(data);
-    }
-    );
-            alert('Employee assigned');
+           $("SubmitRequest").submit(function() {
+               var employeeId = $("#employeeIdTextbox").val();
+               $("#hiddenEmployeeId").val(employeeId);
+             return true;
+          });
+        </script>*@
+
+    @*<script>
+            function SubmitRequest() {
+                $.post('/Home/TimeOffRequest',
+        {
+            employeeId: ,
+        },
+        function (data) {
+            $('#AssignmentTablePartial').html(data);
         }
-    </script>*@
+        );
+                alert('Employee assigned');
+            }
+        </script>*@
 }

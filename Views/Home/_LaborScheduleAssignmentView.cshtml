@@ -670,10 +670,10 @@
                                 @foreach (Employees emp in Model.ThisWeek.employeeListStore)
                                 {
                                     <tr>
-                                        @if (emp.storeCode != Model.ThisWeek.StoreCode)
+                                        @if (emp.storeCode != Model.ThisWeek.currentStoreCode)
                                         {
                                             <td class="EmployeeCell" style="background-color:#b6e4ff;">@emp.id</td>
-                                            <td class="EmployeeCell" style="background-color:#b6e4ff;">@emp.firstName</td>
+                                            <td class="EmployeeCell" style="background-color:#b6e4ff; text-align:left;">@emp.firstName <br /> @emp.lastName</td>
                                             <td class="EmployeeCell" style="background-color:#b6e4ff;">@emp.role</td>
                                             <td class="EmployeeCell" style="background-color:#b6e4ff;">@emp.rank</td>
                                             <td class="EmployeeCell" style="background-color:#b6e4ff;">@emp.hours</td>
@@ -683,7 +683,7 @@
                                         else
                                         {
                                             <td class="EmployeeCell">@emp.id</td>
-                                            <td class="EmployeeCell">@emp.firstName</td>
+                                            <td class="EmployeeCell" style="text-align:left;">@emp.firstName <br /> @emp.lastName</td>
                                             <td class="EmployeeCell">@emp.role</td>
                                             <td class="EmployeeCell">@emp.rank</td>
                                             <td class="EmployeeCell">@emp.hours</td>
@@ -720,7 +720,7 @@
                             <div class="main">
                                 <div>
                                     Enter employee ID: <br />
-                                    @Html.TextBoxFor(m => Model.ThisWeek.EmployeeSearch, new { id = "EmployeeSearch" })
+                                    @Html.TextBoxFor(m => Model.ThisWeek.EmployeeSearch, new { id = "EmployeeSearch", autocomplete = "off" })
                                     <button type="button" onclick="findEmployee(document.getElementById('EmployeeSearch').value)" id="SearchButton">Search</button>
                                 </div>
                                 <br />

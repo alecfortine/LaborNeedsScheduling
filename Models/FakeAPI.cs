@@ -42,28 +42,28 @@ namespace LaborNeedsScheduling.Models
                     cmd.CommandType = CommandType.Text;
                     cmd.Connection = conn;
                     conn.Open();
-                    foreach (Employees emp in employees)
-                    {
-                        for (int i = 0; i < ScheduleHalfHourSlots.Length; i++)
-                        {
-                            cmd.CommandText = "insert into dbo.EmployeeAvailability(EmployeeId, Hour, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday)"
-                                            + "values('" + emp.id + "', '" + ScheduleHalfHourSlots[i] + "', '1', '1', '1', '1', '1', '1', '1')";
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-
-
-
                     //foreach (Employees emp in employees)
                     //{
-                    //    for (int i = 0; i < weekdates.Length; i++)
+                    //    for (int i = 0; i < ScheduleHalfHourSlots.Length; i++)
                     //    {
-
-                    //        cmd.CommandText = "insert into dbo.EmployeeSchedule(EmployeeId, LocationCode, ScheduleDate, BeginTime, EndTime, OnSchedule)"
-                    //                        + " values('" + emp.id + "', '" + emp.storeCode + "', '" + weekdates[i] + "', '', '', '0')";
+                    //        cmd.CommandText = "insert into dbo.EmployeeAvailability(EmployeeId, Hour, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday)"
+                    //                        + "values('" + emp.id + "', '" + ScheduleHalfHourSlots[i] + "', '1', '1', '1', '1', '1', '1', '1')";
                     //        cmd.ExecuteNonQuery();
                     //    }
                     //}
+
+
+
+                    foreach (Employees emp in employees)
+                    {
+                        for (int i = 0; i < weekdates.Length; i++)
+                        {
+
+                            cmd.CommandText = "insert into dbo.EmployeeSchedule(EmployeeId, LocationCode, ScheduleDate, BeginTime, EndTime, OnSchedule)"
+                                            + " values('" + emp.id + "', '" + emp.storeCode + "', '" + weekdates[i] + "', '', '', '0')";
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
 
                 }
                 catch (Exception ex)
@@ -77,111 +77,38 @@ namespace LaborNeedsScheduling.Models
             }
         }
 
-        /// <summary>
-        /// Summary description for AppSecurity
-        /// </summary>
-        public class AppSecurity
+        public static string GetStoreCode(string User)
         {
-            public const string AppId = "TransferWebsite";
-            public string sqlcon = ConfigurationManager.ConnectionStrings["MovadoDB"].ToString();
+            string StoreCode = "";
 
-            public string ApplicationId()
+            using (SqlConnection conn = new SqlConnection(strSQLCon))
             {
-                return AppId;
-            }
-
-            public DataTable GetUserSecurity(String UserName)
-            {
-                DataTable dtSecTable = new DataTable();
-                SqlConnection cn = new SqlConnection(sqlcon);
-                SqlCommand sqlcmd = new SqlCommand();
-
                 try
                 {
-                    if (System.Web.HttpContext.Current.Session["TransferWebsite_UserSecurity"].ToString() != "")
-                    {
-                        System.Web.HttpContext.Current.Session["TransferWebsite_UserSecurity"] = dtSecTable;
-                    }
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Connection = conn;
+                    conn.Open();
+                    DataTable dt = new DataTable();
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+                    cmd.CommandText = "select StoreCode from dbo.UserAttributes where UserId='" + User + "'";
+                    da.Fill(dt);
+
+                    StoreCode = dt.Rows[0][0].ToString();
 
                 }
                 catch (Exception ex)
                 {
-                    return dtSecTable;
+                    Console.WriteLine(ex.Message);
                 }
-
-                if (dtSecTable.Rows.Count > 0)
+                finally
                 {
-                    return dtSecTable;
+                    conn.Close();
                 }
-
-                //Retrieve Security From Database
-                try
-                {
-                    cn.Open();
-                }
-                catch (Exception ex)
-                {
-                    return dtSecTable;
-                }
-
-                try
-                {
-                    sqlcmd.Connection = cn;
-                    sqlcmd.CommandType = CommandType.StoredProcedure;
-                    sqlcmd.CommandText = "UserSecurity_UserNameApplicationId";
-                    sqlcmd.Parameters.AddWithValue("@UserName", UserName);
-                    sqlcmd.Parameters.AddWithValue("@ApplicationId", AppId);
-
-                    dtSecTable.Load(sqlcmd.ExecuteReader());
-                    dtSecTable.AcceptChanges();
-                }
-                catch (Exception ex)
-                {
-                    sqlcmd.Dispose();
-                    cn.Close();
-                    cn.Dispose();
-                    return dtSecTable;
-                }
-
-                sqlcmd.Dispose();
-                cn.Close();
-                cn.Dispose();
-
-                if (dtSecTable.Rows.Count > 0)
-                {
-                    System.Web.HttpContext.Current.Session["TransferWebsite_UserSecurity"] = dtSecTable;
-                }
-
-                return dtSecTable;
             }
 
-            public Boolean UserHasAccess(String UserName, String SecurityOption)
-            {
-                DataTable dtSecurity = new DataTable();
-                //DataRow Row;
-
-                //UserHasAccess = false;
-
-
-                dtSecurity = GetUserSecurity(UserName);
-
-                foreach (DataRow row in dtSecurity.Rows)
-                {
-                    string ColSecurityOption = row["SecurityOption"].ToString();
-                    if (ColSecurityOption.ToUpper() == SecurityOption.ToUpper())
-                    {
-                        if (Convert.ToBoolean(row["GrantAccess"]) == true)
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                    }
-                }
-                return false;
-            }
+            return StoreCode;
         }
 
         public static int GetMinEmployeesEarly(string LocationCode)
@@ -647,7 +574,7 @@ namespace LaborNeedsScheduling.Models
                 }
             }
 
-            for(int i = 0; i < Weeks; i++)
+            for (int i = 0; i < Weeks; i++)
             {
                 WeekWeights.Add(Convert.ToInt32(weights.Rows[0][i]));
             }
@@ -682,22 +609,10 @@ namespace LaborNeedsScheduling.Models
                     DateTime Created = DateTime.Now;
                     string ManagerName = "";
 
-                    foreach (Employees emp in GetEmployeesForStore(LocationCode))
-                    {
-                        if (emp.id == managerId)
-                        {
-                            ManagerName = emp.firstName + " " + emp.lastName;
-                        }
-                    }
-                    //string response = GenerateManagerResponse(managerId, EmployeeId, StartDate, EndDate, StartTime, EndTime, Approved);
 
-                    cmd.CommandText = "insert into dbo.Messages (Created, Type, ManagerCode, EmployeeCode, LocationCode, StartDate, EndDate, StartTime, EndTime, Approved)"
-                                    + " values ('" + Created + "', 'ManagerResponse', '" + managerId + "', '" + EmployeeId + "', '" + LocationCode + "', '" + StartDate + "', '"
-                                    + EndDate + "', '" + StartTime + "', '" + EndTime + "', '" + Approved + "')";
-                    cmd.ExecuteNonQuery();
 
-                    cmd.CommandText = "delete from dbo.Messages where ID = '" + messageId + "' and LocationCode = '" + LocationCode + "'";
-                    cmd.ExecuteNonQuery();
+
+
 
                     string EmployeeCode = RequestInfo.Rows[0][0].ToString();
                     string startDateString = RequestInfo.Rows[0][1].ToString();
@@ -717,7 +632,176 @@ namespace LaborNeedsScheduling.Models
                     //string date  if date is length 1
                     //string[] dates   if date is length > 1
                     //string[] hours   if date is length 1
-                                    
+
+
+                    List<DateTime> dates = new List<DateTime>();
+                    List<string> times = new List<string>();
+
+                    // if the request is multiple days
+                    if (endDateString != "")
+                    {
+                        DateTime date = startDate;
+                        for (int i = 0; date <= endDate; i++)
+                        {
+                            date = date.AddDays(i);
+                            dates.Add(date);
+                        }
+
+                        //string[] employeeId = { EmployeeId };
+                        //Dictionary<string, Dictionary<string, string[]>> EmployeeScheduledDates = GetEmployeeScheduledTimes(employeeId, LocationCode, dates.ToArray());
+                        //Dictionary<string, string[]> EmployeeScheduledTimes = EmployeeScheduledDates[EmployeeId];
+
+                        for (int i = 0; i < dates.Count; i++)
+                        {
+                            DataTable AssignedHourBlocks = new DataTable();
+                            cmd.CommandText = "select * from dbo.EmployeeSchedule where ScheduleDate = '" + dates[i] + "' " +
+                                              "and EmployeeId = '" + EmployeeId + "' and LocationCode = '" + LocationCode + "'";
+                            da.Fill(AssignedHourBlocks);
+
+                            if (AssignedHourBlocks.Rows.Count > 0 && AssignedHourBlocks.Rows[0][4].ToString() != "00:00:00" || AssignedHourBlocks.Rows[0][5].ToString() != "00:00:00")
+                            {
+
+                                cmd.CommandText = "delete from dbo.EmployeeSchedule where ScheduleDate = '" + dates[i] + "' " +
+                                               "and EmployeeId = '" + EmployeeId + "' and LocationCode = '" + LocationCode + "'";
+                                cmd.ExecuteNonQuery();
+
+                                cmd.CommandText = "insert into dbo.EmployeeSchedule(EmployeeId, LocationCode, ScheduleDate, BeginTime, EndTime, OnSchedule)" +
+                                                  "values('" + EmployeeId + "', '" + LocationCode + "', '" + dates[i] + "', " +
+                                                  "'00:00:00', '00:00:00', '0')";
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+
+                    }
+                    // if the request is one day
+                    else
+                    {
+                        // all day - currently unassigning the entire day even if times are specified
+                        //if (startTime == "--" && endTime == "--")
+                        //{
+                        DataTable AssignedHourBlocks = new DataTable();
+                        cmd.CommandText = "select * from dbo.EmployeeSchedule where ScheduleDate = '" + startDate + "' " +
+                                          "and EmployeeId = '" + EmployeeId + "' and LocationCode = '" + LocationCode + "'";
+                        da.Fill(AssignedHourBlocks);
+
+                        if (AssignedHourBlocks.Rows.Count > 0 && AssignedHourBlocks.Rows[0][4].ToString() != "00:00:00" || AssignedHourBlocks.Rows[0][5].ToString() != "00:00:00")
+                        {
+                            cmd.CommandText = "delete from dbo.EmployeeSchedule where ScheduleDate = '" + startDate + "' " +
+                                          "and EmployeeId = '" + EmployeeId + "' and LocationCode = '" + LocationCode + "'";
+                            cmd.ExecuteNonQuery();
+
+                            cmd.CommandText = "insert into dbo.EmployeeSchedule(EmployeeId, LocationCode, ScheduleDate, BeginTime, EndTime, OnSchedule)" +
+                                              "values('" + EmployeeId + "', '" + LocationCode + "', '" + startDate + "', " +
+                                              "'00:00:00', '00:00:00', '0')";
+                            cmd.ExecuteNonQuery();
+                        }
+                        //}
+                        // specific hours - not including in the current build
+                        //else
+                        //{
+                        //    DataTable AssignedHourBlocks = new DataTable();
+                        //    cmd.CommandText = "select * from dbo.EmployeeSchedule where ScheduleDate = '" + startDate + "' " +
+                        //                      "and EmployeeId = '" + EmployeeId + "' and LocationCode = '" + LocationCode + "'";
+                        //    da.Fill(AssignedHourBlocks);
+
+                        //    if (AssignedHourBlocks.Rows.Count > 0 && AssignedHourBlocks.Rows[0][4].ToString() != "00:00:00" || AssignedHourBlocks.Rows[0][5].ToString() != "00:00:00")
+                        //    {
+                        //        for (int n = 0; n < AssignedHourBlocks.Rows.Count; n++)
+                        //        {
+                        //            string starthoursql = AssignedHourBlocks.Rows[n][4].ToString();
+                        //            string endhoursql = AssignedHourBlocks.Rows[n][5].ToString();
+                        //            string starthour = "";
+                        //            string endhour = "";
+                        //            for (int h = 0; h < SQLHours.Length; h++)
+                        //            {
+                        //                if (SQLHours[h] == starthoursql)
+                        //                {
+                        //                    starthour = ScheduleHalfHourSlots[h];
+                        //                }
+                        //                if (SQLHours[h] == endhoursql)
+                        //                {
+                        //                    endhour = ScheduleHalfHourSlots[h];
+                        //                }
+                        //            }
+
+                        //            // get the employee's scheduled hours
+                        //            bool block = false;
+                        //            List<string> ScheduledHours = new List<string>();
+                        //            for (int h = 0; h < ScheduleHalfHourSlots.Length; h++)
+                        //            {
+                        //                if (ScheduleHalfHourSlots[h] == starthour)
+                        //                {
+                        //                    block = true;
+                        //                }
+                        //                if (block == true)
+                        //                {
+                        //                    ScheduledHours.Add(ScheduleHalfHourSlots[h]);
+                        //                }
+                        //                if (ScheduleHalfHourSlots[h] == endhour)
+                        //                {
+                        //                    block = false;
+                        //                }
+                        //            }
+                        //            // get the time off request hours
+                        //            block = false;
+                        //            List<string> TimeOffHours = new List<string>();
+                        //            for (int h = 0; h < SQLHours.Length; h++)
+                        //            {
+                        //                if (SQLHours[h] == startTime)
+                        //                {
+                        //                    block = true;
+                        //                }
+                        //                if (block == true)
+                        //                {
+                        //                    TimeOffHours.Add(ScheduleHalfHourSlots[h]);
+                        //                }
+                        //                if (SQLHours[h] == endhour)
+                        //                {
+                        //                    block = false;
+                        //                }
+                        //            }
+                        //            // if any scheduled hours are in the time off span, unassign them
+                        //            block = false;
+                        //            List<string> UnassignHours = new List<string>();
+                        //            for (int h = 0; h < ScheduledHours.Count; h++)
+                        //            {
+                        //                for (int j = 0; j < TimeOffHours.Count; j++)
+                        //                {
+                        //                    if (ScheduledHours[h] == TimeOffHours[j])
+                        //                    {
+                        //                        UnassignHours.Add(ScheduledHours[h]);
+                        //                    }
+                        //                }
+                        //            }
+
+                        //            //need a way to unassign by date and time here or in a new function
+
+                        //        }
+                        //    }
+                        //}
+                    }
+
+
+
+
+
+
+                    foreach (Employees emp in GetEmployeesForStore(LocationCode))
+                    {
+                        if (emp.id == managerId)
+                        {
+                            ManagerName = emp.firstName + " " + emp.lastName;
+                        }
+                    }
+                    //string response = GenerateManagerResponse(managerId, EmployeeId, StartDate, EndDate, StartTime, EndTime, Approved);
+
+                    cmd.CommandText = "insert into dbo.Messages (Created, Type, ManagerCode, EmployeeCode, LocationCode, StartDate, EndDate, StartTime, EndTime, Approved)"
+                                    + " values ('" + Created + "', 'ManagerResponse', '" + managerId + "', '" + EmployeeId + "', '" + LocationCode + "', '" + StartDate + "', '"
+                                    + EndDate + "', '" + StartTime + "', '" + EndTime + "', '" + Approved + "')";
+                    cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = "delete from dbo.Messages where ID = '" + messageId + "' and LocationCode = '" + LocationCode + "'";
+                    cmd.ExecuteNonQuery();
 
                 }
                 catch (Exception ex)
@@ -730,6 +814,148 @@ namespace LaborNeedsScheduling.Models
                 }
             }
         }
+        //public static void Unassign(string unassignTimes, string employeeId, int selectedDay, Dictionary<string, Dictionary<string, string[]>> EmployeeScheduledTimes, DateTime[] CurrentWeekDates, string LocationCode)
+        //{
+        //    Dictionary<string, string[]> employeeWeekSchedule = EmployeeScheduledTimes[employeeId];
+        //    string[] employeeAssignedHours = employeeWeekSchedule[days[selectedDay]];
+        //    string[] unassignHours = unassignTimes.Split(',');  // split the single element array into multiple elements
+
+        //    for (int i = 0; i < employeeAssignedHours.Length; i++)
+        //    {
+        //        for (int h = 0; h < unassignHours.Length; h++)
+        //        {
+        //            if (employeeAssignedHours[i] == unassignHours[h])
+        //            {
+        //                var foos = new List<string>(employeeAssignedHours);
+        //                foos.RemoveAt(i);
+        //                employeeAssignedHours = foos.ToArray();
+        //            }
+        //        }
+        //    }
+        //    List<string[]> assignedBlocks = new List<string[]>();
+
+        //    List<string> employeeBlock = new List<string>();
+        //    int hourcount = 0;
+        //    bool bl = false;
+
+        //    if (employeeAssignedHours.Length > 0)
+        //    {
+        //        for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
+        //        {
+        //            if (hourcount == employeeAssignedHours.Length - 1)
+        //            {
+        //                employeeBlock.Add(ScheduleHalfHourSlots[n]);
+        //                string[] hours = employeeBlock.ToArray();
+
+        //                List<string> StartEndTimes = new List<string>();
+        //                StartEndTimes.Add(hours[0]);
+        //                StartEndTimes.Add(hours[hours.Length - 1]);
+
+        //                assignedBlocks.Add(StartEndTimes.ToArray());
+        //                break;
+        //            }
+        //            if (ScheduleHalfHourSlots[n] == employeeAssignedHours[hourcount])
+        //            {
+        //                bl = true;
+        //            }
+        //            if (bl == true && n < ScheduleHalfHourSlots.Length - 1 &&
+        //                ScheduleHalfHourSlots[n + 1] != employeeAssignedHours[hourcount + 1])
+        //            {
+        //                bl = false;
+        //                employeeBlock.Add(ScheduleHalfHourSlots[n]);
+        //                string[] hours = employeeBlock.ToArray();
+
+        //                List<string> StartEndTimes = new List<string>();
+        //                StartEndTimes.Add(hours[0]);
+        //                StartEndTimes.Add(hours[hours.Length - 1]);
+
+        //                assignedBlocks.Add(StartEndTimes.ToArray());
+        //                employeeBlock.Clear();
+        //                hourcount++;
+        //            }
+        //            if (bl == true)
+        //            {
+        //                employeeBlock.Add(ScheduleHalfHourSlots[n]);
+        //                hourcount++;
+        //            }
+        //        }
+        //    }
+
+        //    //convert to sql hours
+        //    for (int i = 0; i < assignedBlocks.Count; i++)
+        //    {
+        //        string[] startend = assignedBlocks[i];
+        //        string start = startend[0];
+        //        string end = startend[1];
+
+        //        for (int n = 0; n < ScheduleHalfHourSlots.Length - 1; n++)
+        //        {
+        //            if (ScheduleHalfHourSlots[n] == start)
+        //            {
+        //                start = SQLHours[n];
+        //            }
+        //            if (ScheduleHalfHourSlots[n] == end)
+        //            {
+        //                end = SQLHours[n + 1];
+        //            }
+        //        }
+        //        startend[0] = start;
+        //        startend[1] = end;
+        //        assignedBlocks[i] = startend;
+        //    }
+
+        //    using (SqlConnection conn = new SqlConnection(strSQLCon))
+        //    {
+        //        try
+        //        {
+        //            SqlCommand cmd = new SqlCommand();
+        //            cmd.CommandType = CommandType.Text;
+        //            cmd.Connection = conn;
+        //            conn.Open();
+
+
+        //            cmd.CommandText = "delete from dbo.EmployeeSchedule where ScheduleDate = '" + CurrentWeekDates[selectedDay] + "' and EmployeeId = '" + employeeId + "'";
+        //            cmd.ExecuteNonQuery();
+
+        //            for (int i = 0; i < assignedBlocks.Count; i++)
+        //            {
+        //                string[] hourBlock = assignedBlocks[i];
+
+        //                TimeSpan BeginTime = Convert.ToDateTime(hourBlock[0]).TimeOfDay;
+        //                TimeSpan EndTime = Convert.ToDateTime(hourBlock[1]).TimeOfDay;
+
+        //                cmd.CommandText = "insert into dbo.EmployeeSchedule (EmployeeId, LocationCode, ScheduleDate, BeginTime, EndTime, OnSchedule)"
+        //                                + " values ('" + employeeId + "', '" + LocationCode + "', '" + CurrentWeekDates[selectedDay] + "', '" + BeginTime + "', '"
+        //                                + EndTime + "', '1')";
+        //                cmd.ExecuteNonQuery();
+        //            }
+
+
+
+        //            //cmd.CommandText = "update dbo.EmployeeSchedule set BeginTime = '" + startHours + "', EndTime = '" + endHours + "', "
+        //            //                + "OnSchedule = 1 where EmployeeId = '" + employeeId + "' and ScheduleDate = '" + CurrentWeekDates[selectedDay] + "'";
+
+        //            //cmd.ExecuteNonQuery();
+
+        //            if (assignedBlocks.Count == 0)
+        //            {
+        //                cmd.CommandText = "update dbo.EmployeeSchedule set OnSchedule = 0 where EmployeeId = '"
+        //                                 + employeeId + "' and ScheduleDate = '" + CurrentWeekDates[selectedDay] + "'";
+
+        //                cmd.ExecuteNonQuery();
+        //            }
+        //        }
+
+        //        catch (Exception ex)
+        //        {
+        //            Console.WriteLine(ex.Message);
+        //        }
+        //        finally
+        //        {
+        //            conn.Close();
+        //        }
+        //    }
+        //}
 
         public static void denyRequest(int messageId, string managerId, string LocationCode)
         {
@@ -1178,9 +1404,16 @@ namespace LaborNeedsScheduling.Models
 
                     for (int i = 0; i < employeeIds.Length; i++)
                     {
+                        DataTable ExistingEmployeeAvailability = new DataTable();
                         cmd.CommandText = "select * from dbo.EmployeeAvailability where EmployeeId = '" + employeeIds[i] + "'";
 
                         SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        da.Fill(ExistingEmployeeAvailability);
+                        if (ExistingEmployeeAvailability.Rows.Count == 0)
+                        {
+                            CreateEmployeeAvailability(employeeIds[i]);
+                        }
+
                         da.Fill(AvailableTimesUnordered);
                     }
 
@@ -1230,6 +1463,39 @@ namespace LaborNeedsScheduling.Models
                 }
             }
             return EmployeeAvailableTimes;
+        }
+
+        /// <summary>
+        /// Create an employee's availability in the database if they are active but do not have availability yet
+        /// </summary>
+        /// <param name="EmployeeCode"></param>
+        public static void CreateEmployeeAvailability(string EmployeeCode)
+        {
+            using (SqlConnection conn = new SqlConnection(strSQLCon))
+            {
+                try
+                {
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Connection = conn;
+                    conn.Open();
+
+                    for (int i = 0; i < ScheduleHalfHourSlots.Length; i++)
+                    {
+                        cmd.CommandText = "insert into dbo.EmployeeAvailability (EmployeeId, Hour, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday) " +
+                                           "values('" + EmployeeCode + "', '" + ScheduleHalfHourSlots[i] + "', '0', '0', '0', '0', '0', '0', '0')";
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
         }
 
         /// <summary>
@@ -1986,17 +2252,19 @@ namespace LaborNeedsScheduling.Models
                     EmployeeHours.Add(60, 45);
                     for (int i = 0; i < EmployeeListSQL.Rows.Count; i++)
                     {
-                        employees.Add(new Employees()
+                        if (Convert.ToInt32(EmployeeListSQL.Rows[i][5]) < 70)
                         {
-                            id = Convert.ToString(EmployeeListSQL.Rows[i][0]),
-                            storeCode = Convert.ToString(EmployeeListSQL.Rows[i][1]),
-                            firstName = Convert.ToString(EmployeeListSQL.Rows[i][2]),
-                            lastName = Convert.ToString(EmployeeListSQL.Rows[i][3]),
-                            role = Convert.ToString(EmployeeListSQL.Rows[i][4]),
-                            rank = Convert.ToInt32(EmployeeListSQL.Rows[i][5]),
-                            hours = EmployeeHours[Convert.ToInt32(EmployeeListSQL.Rows[i][5])]
-                        });
-
+                            employees.Add(new Employees()
+                            {
+                                id = Convert.ToString(EmployeeListSQL.Rows[i][0]),
+                                storeCode = Convert.ToString(EmployeeListSQL.Rows[i][1]),
+                                firstName = Convert.ToString(EmployeeListSQL.Rows[i][2]),
+                                lastName = Convert.ToString(EmployeeListSQL.Rows[i][3]),
+                                role = Convert.ToString(EmployeeListSQL.Rows[i][4]),
+                                rank = Convert.ToInt32(EmployeeListSQL.Rows[i][5]),
+                                hours = EmployeeHours[Convert.ToInt32(EmployeeListSQL.Rows[i][5])]
+                            });
+                        }
                     }
 
                 }
@@ -2011,6 +2279,84 @@ namespace LaborNeedsScheduling.Models
 
                 return employees;
             }
+        }
+
+        public static DataTable GetStoreTrafficData(DateTime CurrentWeekMarker, List<DateTime> TrafficDates, string LocationCode, int[] Weights, int HistoricalWeeks = 6)
+        {
+            DataTable TrafficData = new DataTable();
+            Dictionary<DateTime, double> TrafficWeighting = new Dictionary<DateTime, double>();
+            int WeightCount = 0;
+            int WeightIterator = 0;
+            for (int i = 0; i < TrafficDates.Count; i++)
+            {
+                if (WeightIterator == 7)
+                {
+                    WeightIterator = 0;
+                    WeightCount++;
+                }
+
+                TrafficWeighting[TrafficDates[i]] = Weights[WeightCount];
+                WeightIterator++;
+            }
+            using (SqlConnection conn = new SqlConnection(strSQLCon))
+            {
+                try
+                {
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Connection = conn;
+                    conn.Open();
+
+                    for (int i = 0; i < TrafficDates.Count; i++)
+                    {
+                        string DateOnly = TrafficDates[i].ToString("yyyy-MM-dd");
+                        cmd.CommandText = "select TrafficDate, TrafficTime, TrafficCount from StoreTraffic where Convert(VARCHAR(10), TrafficDate, 120) = "
+                                          + "Convert(Varchar(10), '" + DateOnly + "', 120)" + " and LocationCode = '" + LocationCode + "'";
+                        //SELECT* FROM  StoreTraffic WHERE Convert(VARCHAR(10), TrafficDate, 120) = Convert(Varchar(10), '2017-11-04', 120)
+
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        da.Fill(TrafficData);
+                    }
+
+                    for (int i = 0; i < TrafficData.Rows.Count; i++)
+                    {
+                        string hour = TrafficData.Rows[i][1].ToString().Substring(0, 2);
+                        string minutes = TrafficData.Rows[i][1].ToString().Substring(2, 2);
+                        string TrafficTime = hour + ":" + minutes + ":00";
+
+                        TrafficData.Rows[i][1] = TrafficTime;
+                    }
+
+                    DataTable HalfHourData = TrafficData.Clone();
+                    int rowCount = 0;
+                    for (int i = 0; i < TrafficData.Rows.Count; i += 2)
+                    {
+                        DataRow TrafficRow = HalfHourData.NewRow();
+                        TrafficRow[0] = TrafficData.Rows[i][0];
+                        TrafficRow[1] = TrafficData.Rows[i][1];
+                        double data1 = Convert.ToInt32(TrafficData.Rows[i][2]);
+                        double data2 = Convert.ToInt32(TrafficData.Rows[i + 1][2]);
+                        data1 = data1 * (TrafficWeighting[Convert.ToDateTime(TrafficRow[0])] / 100);
+                        data2 = data2 * (TrafficWeighting[Convert.ToDateTime(TrafficRow[0])] / 100);
+
+                        TrafficRow[2] = data1 + data2;
+
+                        HalfHourData.Rows.InsertAt(TrafficRow, rowCount);
+                        rowCount++;
+                    }
+                    TrafficData = HalfHourData;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+
+            return TrafficData;
         }
 
         public static List<Employees> GetEmployeesForStore(string storeCode)
@@ -2058,17 +2404,19 @@ namespace LaborNeedsScheduling.Models
                     EmployeeHours.Add(60, 45);
                     for (int i = 0; i < EmployeeListSQL.Rows.Count; i++)
                     {
-                        employees.Add(new Employees()
+                        if (Convert.ToInt32(EmployeeListSQL.Rows[i][5]) < 70)
                         {
-                            id = Convert.ToString(EmployeeListSQL.Rows[i][0]),
-                            storeCode = Convert.ToString(EmployeeListSQL.Rows[i][1]),
-                            firstName = Convert.ToString(EmployeeListSQL.Rows[i][2]),
-                            lastName = Convert.ToString(EmployeeListSQL.Rows[i][3]),
-                            role = Convert.ToString(EmployeeListSQL.Rows[i][4]),
-                            rank = Convert.ToInt32(EmployeeListSQL.Rows[i][5]),
-                            hours = EmployeeHours[Convert.ToInt32(EmployeeListSQL.Rows[i][5])]
-                        });
-
+                            employees.Add(new Employees()
+                            {
+                                id = Convert.ToString(EmployeeListSQL.Rows[i][0]),
+                                storeCode = Convert.ToString(EmployeeListSQL.Rows[i][1]),
+                                firstName = Convert.ToString(EmployeeListSQL.Rows[i][2]),
+                                lastName = Convert.ToString(EmployeeListSQL.Rows[i][3]),
+                                role = Convert.ToString(EmployeeListSQL.Rows[i][4]),
+                                rank = Convert.ToInt32(EmployeeListSQL.Rows[i][5]),
+                                hours = EmployeeHours[Convert.ToInt32(EmployeeListSQL.Rows[i][5])]
+                            });
+                        }
                     }
 
 
@@ -2468,47 +2816,48 @@ namespace LaborNeedsScheduling.Models
             int hourcount = 0;
             bool bl = false;
 
-            if (employeeAssignedHours.Length > 0) { 
-            for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
+            if (employeeAssignedHours.Length > 0)
             {
-                if (hourcount == employeeAssignedHours.Length - 1)
+                for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
                 {
-                    employeeBlock.Add(ScheduleHalfHourSlots[n]);
-                    string[] hours = employeeBlock.ToArray();
+                    if (hourcount == employeeAssignedHours.Length - 1)
+                    {
+                        employeeBlock.Add(ScheduleHalfHourSlots[n]);
+                        string[] hours = employeeBlock.ToArray();
 
-                    List<string> StartEndTimes = new List<string>();
-                    StartEndTimes.Add(hours[0]);
-                    StartEndTimes.Add(hours[hours.Length - 1]);
+                        List<string> StartEndTimes = new List<string>();
+                        StartEndTimes.Add(hours[0]);
+                        StartEndTimes.Add(hours[hours.Length - 1]);
 
-                    assignedBlocks.Add(StartEndTimes.ToArray());
-                    break;
-                }
-                if (ScheduleHalfHourSlots[n] == employeeAssignedHours[hourcount])
-                {
-                    bl = true;
-                }
-                if (bl == true && n < ScheduleHalfHourSlots.Length - 1 &&
-                    ScheduleHalfHourSlots[n + 1] != employeeAssignedHours[hourcount + 1])
-                {
-                    bl = false;
-                    employeeBlock.Add(ScheduleHalfHourSlots[n]);
-                    string[] hours = employeeBlock.ToArray();
+                        assignedBlocks.Add(StartEndTimes.ToArray());
+                        break;
+                    }
+                    if (ScheduleHalfHourSlots[n] == employeeAssignedHours[hourcount])
+                    {
+                        bl = true;
+                    }
+                    if (bl == true && n < ScheduleHalfHourSlots.Length - 1 &&
+                        ScheduleHalfHourSlots[n + 1] != employeeAssignedHours[hourcount + 1])
+                    {
+                        bl = false;
+                        employeeBlock.Add(ScheduleHalfHourSlots[n]);
+                        string[] hours = employeeBlock.ToArray();
 
-                    List<string> StartEndTimes = new List<string>();
-                    StartEndTimes.Add(hours[0]);
-                    StartEndTimes.Add(hours[hours.Length - 1]);
+                        List<string> StartEndTimes = new List<string>();
+                        StartEndTimes.Add(hours[0]);
+                        StartEndTimes.Add(hours[hours.Length - 1]);
 
-                    assignedBlocks.Add(StartEndTimes.ToArray());
-                    employeeBlock.Clear();
-                    hourcount++;
-                }
-                if (bl == true)
-                {
-                    employeeBlock.Add(ScheduleHalfHourSlots[n]);
-                    hourcount++;
+                        assignedBlocks.Add(StartEndTimes.ToArray());
+                        employeeBlock.Clear();
+                        hourcount++;
+                    }
+                    if (bl == true)
+                    {
+                        employeeBlock.Add(ScheduleHalfHourSlots[n]);
+                        hourcount++;
+                    }
                 }
             }
-        }
 
             //convert to sql hours
             for (int i = 0; i < assignedBlocks.Count; i++)
@@ -2532,150 +2881,6 @@ namespace LaborNeedsScheduling.Models
                 startend[1] = end;
                 assignedBlocks[i] = startend;
             }
-
-
-            //old
-            //for (int i = 0; i < employeeAssignedHours.Length; i++)
-            //{
-            //    bool checkHour = true;
-            //    foreach (string[] block in assignedBlocks)
-            //    {
-            //        string start = block[0];
-            //        string end = block[1];
-            //        List<string> blockHours = new List<string>();
-            //        bool blockCheck = false;
-
-            //        for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
-            //        {
-            //            if (start == ScheduleHalfHourSlots[n])
-            //            {
-            //                blockCheck = true;
-            //            }
-            //            if (blockCheck == true)
-            //            {
-            //                blockHours.Add(ScheduleHalfHourSlots[n]);
-            //            }
-            //            if (end == ScheduleHalfHourSlots[n])
-            //            {
-            //                blockCheck = false;
-            //            }
-            //        }
-            //        for (int n = 0; n < blockHours.Count; n++)
-            //        {
-            //            if (employeeAssignedHours[i] == blockHours[n])
-            //            {
-            //                checkHour = false;
-            //            }
-            //        }
-            //    }
-
-            //    if (checkHour == true)
-            //    {
-            //        int blockStart = 0; // the position of the block start hour in the hours array
-            //        for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
-            //        {
-            //            if (employeeAssignedHours[i] == ScheduleHalfHourSlots[n])
-            //            {
-            //                blockStart = n;
-            //                break;
-            //            }
-            //        }
-            //        int blockEnd = 0; // the position of the block end hour in the hours array
-            //        int blockCounter = 1;
-            //        bool endBlockCheck = false;
-            //        for (int n = 1; n < employeeAssignedHours.Length; n++)
-            //        {
-            //            if (i + blockCounter < employeeAssignedHours.Length)
-            //            {
-            //                if (employeeAssignedHours[i + blockCounter] == ScheduleHalfHourSlots[blockStart + blockCounter])
-            //                {
-            //                    blockEnd = blockStart + n;
-            //                    blockCounter++;
-            //                }
-            //                else
-            //                {
-            //                    blockEnd = blockStart + blockCounter;
-            //                    endBlockCheck = true;
-            //                    break;
-            //                }
-            //            }
-            //            else
-            //            {
-            //                blockEnd = blockStart + blockCounter;
-            //                break;
-            //            }
-            //        }
-            //        if (endBlockCheck == false)
-            //        {
-            //            blockEnd = blockEnd + 1;
-            //        }
-
-            //        string[] assignedBlock = new string[2];
-            //        assignedBlock[0] = ScheduleHalfHourSlots[blockStart];
-            //        assignedBlock[1] = ScheduleHalfHourSlots[blockEnd/* + 1*/];
-
-            //        assignedBlocks.Add(assignedBlock);
-            //    }
-            //}
-
-            //List<string[]> updatedAssignedHours = new List<string[]>();
-            //for (int i = 0; i < assignedBlocks.Count; i++)
-            //{
-            //    string[] block = assignedBlocks[i];
-            //    string start = block[0];
-            //    string end = block[1];
-            //    List<string> blockHours = new List<string>();
-            //    bool blockCheck = false;
-
-            //    for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
-            //    {
-            //        if (start == ScheduleHalfHourSlots[n])
-            //        {
-            //            blockCheck = true;
-            //        }
-            //        if (blockCheck == true)
-            //        {
-            //            blockHours.Add(ScheduleHalfHourSlots[n]);
-            //        }
-            //        if (end == ScheduleHalfHourSlots[n])
-            //        {
-            //            blockCheck = false;
-            //        }
-            //    }
-
-            //    string[] blockStartEndHours = new string[2];
-            //    for (int n = 0; n < blockHours.Count; n++)
-            //    {
-            //        if (n == 0)
-            //        {
-            //            blockStartEndHours[0] = blockHours[n];
-            //        }
-            //        if (n == blockHours.Count - 1)
-            //        {
-            //            blockStartEndHours[1] = blockHours[n];
-            //        }
-            //    }
-            //    updatedAssignedHours.Add(blockStartEndHours);
-            //}
-
-            //List<string[]> updatedBlocks = new List<string[]>();
-
-            //string startHours = "";
-            //string endHours = "";
-            //for (int i = 0; i < updatedAssignedHours.Count; i++)
-            //{
-            //    string[] hours = updatedAssignedHours[i];
-            //    if (i == updatedAssignedHours.Count - 1)
-            //    {
-            //        startHours += hours[0];
-            //        endHours += hours[1];
-            //    }
-            //    else
-            //    {
-            //        startHours += hours[0] + ", ";
-            //        endHours += hours[1] + ", ";
-            //    }
-            //}
 
             using (SqlConnection conn = new SqlConnection(strSQLCon))
             {
@@ -2712,9 +2917,8 @@ namespace LaborNeedsScheduling.Models
 
                     if (assignedBlocks.Count == 0)
                     {
-                        cmd.CommandText = "update dbo.EmployeeSchedule set OnSchedule = 0 where EmployeeId = '"
-                                         + employeeId + "' and ScheduleDate = '" + CurrentWeekDates[selectedDay] + "'";
-
+                        cmd.CommandText = "insert into dbo.EmployeeSchedule (EmployeeId, LocationCode, ScheduleDate, BeginTime, EndTime, OnSchedule)"
+                                        + " values ('" + employeeId + "', '" + LocationCode + "', '" + CurrentWeekDates[selectedDay] + "', '00:00:00', '00:00:00', '0')";
                         cmd.ExecuteNonQuery();
                     }
                 }

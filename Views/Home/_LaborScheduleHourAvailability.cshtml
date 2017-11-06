@@ -171,8 +171,8 @@
                                     hourblock = 8;
                                 }
                                 @{
-                                    int selectedHour = 0;
-                                    int dayEndHour = 0;
+                                    double selectedHour = 0;
+                                    double dayEndHour = 0;
                                 }
                                 @for (int n = 0; n < Model.ThisWeek.ScheduleHalfHourSlots.Length; n++)
                                 {
@@ -186,9 +186,10 @@
                                         dayEndHour = n + 2;
                                     }
                                 }
-                                @if (selectedHour + (hourblock * 2) > dayEndHour)
+                                @if (selectedHour + (hourblock * 2) > dayEndHour+1)
                                 {
-                                    hourblock = dayEndHour - selectedHour - 1;
+                                    double difference = ((dayEndHour - selectedHour) / 2);
+                                    hourblock =  difference + .5;
                                 }
 
                                 @if (AvailableHourList.Count > 0)
@@ -254,7 +255,7 @@
                                         </div>
                                     }
 
-        <div class="left" style="margin-left:20%">
+        <div class="left" style="margin-left:10%">
             <div style="text-align:left"><b>Scheduled on @Model.ThisWeek.weekdayNames[Model.ThisWeek.selectedWeekday]:</b></div>
             @{ int AssignedEmployeeCount = 0;}
             @for (int i = 0; i < Model.ThisWeek.AssignedEmployeesRequestedWeek.Rows.Count; i++)
