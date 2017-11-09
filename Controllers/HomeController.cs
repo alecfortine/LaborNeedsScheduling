@@ -53,6 +53,8 @@ namespace LaborNeedsScheduling.Controllers
             ls.ThisWeek.GenerateNumEmployeesNeeded(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
             ls.ThisWeek.AssignmentView = ls.ThisWeek.GenerateAssignmentView(ls.ThisWeek.selectedWeekday);
             ls.ThisWeek.AssignedEmployeesRequestedWeek = FakeAPI.CreateConsolidatedSchedule(ls.ThisWeek.RequestedDates);
+            ls.ThisWeek.CheckSchedulingRules(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
+            ls.ThisWeek.GenerateNumEmployeesNeeded(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
             ls.ThisWeek.GenerateTotalHours();
 
             return PartialView("_LaborScheduleAssignmentView", ls);
@@ -71,10 +73,19 @@ namespace LaborNeedsScheduling.Controllers
 
             FakeAPI.ClearRequestedWeekSchedule(StoreCode, employeeIds.ToArray(), ls.ThisWeek.RequestedDates);
 
+            //ls.ThisWeek.CheckSchedulingRules(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
+            //ls.ThisWeek.GenerateNumEmployeesNeeded(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
+            //ls.ThisWeek.AssignmentView = ls.ThisWeek.GenerateAssignmentView(ls.ThisWeek.selectedWeekday);
+            //ls.ThisWeek.AssignedEmployeesRequestedWeek = FakeAPI.CreateConsolidatedSchedule(ls.ThisWeek.RequestedDates);
+            //ls.ThisWeek.CheckSchedulingRules(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
+            //ls.ThisWeek.GenerateTotalHours();
+
             ls.ThisWeek.CheckSchedulingRules(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
             ls.ThisWeek.GenerateNumEmployeesNeeded(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
             ls.ThisWeek.AssignmentView = ls.ThisWeek.GenerateAssignmentView(ls.ThisWeek.selectedWeekday);
             ls.ThisWeek.AssignedEmployeesRequestedWeek = FakeAPI.CreateConsolidatedSchedule(ls.ThisWeek.RequestedDates);
+            ls.ThisWeek.CheckSchedulingRules(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
+            ls.ThisWeek.GenerateNumEmployeesNeeded(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
             ls.ThisWeek.GenerateTotalHours();
 
             return PartialView("_LaborScheduleAssignmentView", ls);
@@ -136,6 +147,40 @@ namespace LaborNeedsScheduling.Controllers
                                 }
                             }
                         }
+                    }
+                }
+            }
+
+            Dictionary<string, string[]> EmployeeAvailability = ls.ThisWeek.EmployeeAvailableTimes[employeeId];
+            string[] AvailableTimes = EmployeeAvailability[ls.ThisWeek.weekdayNames[ls.ThisWeek.selectedWeekday]];
+            bool block = false;
+            int startposition = 0;
+            for (int i = 0; i < ls.ThisWeek.ScheduleHalfHourSlots.Length; i++)
+            {
+                if (ls.ThisWeek.ScheduleHalfHourSlots[i] == StartTime)
+                {
+                    startposition = i;
+                    break;
+                }
+            }
+            int halfhouriterator = 0;
+            for (int i = 0; i < AvailableTimes.Length-1; i++)
+            {
+                if (AvailableTimes[i] == ls.ThisWeek.ScheduleHalfHourSlots[startposition])
+                {
+                    block = true;
+                }
+                if (AvailableTimes[i] == ls.ThisWeek.endHour)
+                {
+                    block = false;
+                }
+                if (block == true)
+                {
+                    halfhouriterator++;
+                    if(AvailableTimes[i+1] != ls.ThisWeek.ScheduleHalfHourSlots[startposition + halfhouriterator])
+                    {
+                        ls.ThisWeek.endHour = AvailableTimes[i];
+                        block = false;
                     }
                 }
             }
@@ -218,6 +263,7 @@ namespace LaborNeedsScheduling.Controllers
             ls.ThisWeek.AssignedEmployeesRequestedWeek = FakeAPI.CreateConsolidatedSchedule(ls.ThisWeek.RequestedDates);
             ls.ThisWeek.GenerateNumEmployeesNeeded(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
             ls.ThisWeek.AssignmentView = ls.ThisWeek.GenerateAssignmentView(ls.ThisWeek.selectedWeekday);
+            ls.ThisWeek.CheckSchedulingRules(ls.ThisWeek.selectedWeekday, ls.ThisWeek.employeeListStore);
             ls.ThisWeek.GenerateTotalHours();
 
             return PartialView("_LaborScheduleAssignmentView", ls);

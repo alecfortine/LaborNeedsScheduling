@@ -502,10 +502,6 @@
                         TimeCheck = 0;
                     }
 
-                    alert(startpos);
-                    alert(endpos);
-                    alert(TimeCheck);
-
                     if(TimeCheck == 0){
                         alert('The start time must come before the end time')
                     }
@@ -568,21 +564,22 @@
                     if(DateCheck == 0){
                         alert('The start date must come before the end date')
                     }
+                    else{
+                        var model = @Html.Raw(Json.Encode(Model));
+                        model.Id = employeeId
+                        model.startDate = StartDate;
+                        model.endDate = EndDate;
 
-                    var model = @Html.Raw(Json.Encode(Model));
-                    model.Id = employeeId
-                    model.startDate = StartDate;
-                    model.endDate = EndDate;
-
-                    $.post('/Home/TimeOffRequest',
-                    {
-                        TimeOff: model,
-                        employeeId: employeeId
-                    },
-                    function (data){
-                        alert('Request submitted');
+                        $.post('/Home/TimeOffRequest',
+                        {
+                            TimeOff: model,
+                            employeeId: employeeId
+                        },
+                        function (data){
+                            alert('Request submitted');
+                        }
+                        );
                     }
-                    );
                 }
             }
         }

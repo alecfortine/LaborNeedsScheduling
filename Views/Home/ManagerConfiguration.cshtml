@@ -137,7 +137,8 @@
             border: 1px solid #000000;
             background-color: #ff9292;
         }
-        .ExcludedDatesContent{
+
+        .ExcludedDatesContent {
             position: fixed;
             top: 10%;
             left: 25%;
@@ -153,7 +154,8 @@
             box-shadow: #000000 8px 8px 8px;
             display: none;
         }
-        .ExcludedDatesBody{
+
+        .ExcludedDatesBody {
             position: relative;
             max-height: 850px;
             padding: 15px;
@@ -226,7 +228,7 @@
     <br />
     <br />
 
-<h2>Set Defaults</h2> <h4>Store @Model.ThisWeek.currentStoreCode</h4>
+    <h2>Set Variables</h2> <h4>Store @Model.ThisWeek.currentStoreCode</h4>
 
     <br />
 
@@ -271,8 +273,8 @@
                             <tr><td>Monday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[1], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "mondayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[1], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "mondayEnd" })</tr>
                             <tr><td>Tuesday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[2], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "tuesdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[2], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "tuesdayEnd" })</tr>
                             <tr><td>Wednesday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[3], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "wednesdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[3], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "wednesdayEnd" })</tr>
-                                    <tr><td>Thursday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[4], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "thursdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[4], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "thursdayEnd" })</tr>
-                                    <tr><td>Friday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[5], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "fridayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[5], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "fridayEnd" })</tr>
+                            <tr><td>Thursday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[4], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "thursdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[4], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "thursdayEnd" })</tr>
+                            <tr><td>Friday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[5], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "fridayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[5], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "fridayEnd" })</tr>
                                     <tr><td>Saturday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[6], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key"), "--", new { id = "saturdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[6], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key"), "--", new { id = "saturdayEnd" })</tr>
                         }
                         else
@@ -281,14 +283,16 @@
                             <tr><td>Monday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[1], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[1]), "--", new { id = "mondayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[1], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[1]), "--", new { id = "mondayEnd" })</tr>
                             <tr><td>Tuesday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[2], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[2]), "--", new { id = "tuesdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[2], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[2]), "--", new { id = "tuesdayEnd" })</tr>
                             <tr><td>Wednesday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[3], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[3]), "--", new { id = "wednesdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[3], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[3]), "--", new { id = "wednesdayEnd" })</tr>
-                                    <tr><td>Thursday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[4], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[4]), "--", new { id = "thursdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[4], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[4]), "--", new { id = "thursdayEnd" })</tr>
-                                    <tr><td>Friday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[5], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[5]), "--", new { id = "fridayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[5], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[5]), "--", new { id = "fridayEnd" })</tr>
+                            <tr><td>Thursday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[4], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[4]), "--", new { id = "thursdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[4], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[4]), "--", new { id = "thursdayEnd" })</tr>
+                            <tr><td>Friday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[5], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[5]), "--", new { id = "fridayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[5], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[5]), "--", new { id = "fridayEnd" })</tr>
                                     <tr><td>Saturday:</td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekStartHours[6], new SelectList(Model.ThisWeek.ScheduleStartHours, "Value", "Key", Model.ThisWeek.WeekStartHours[6]), "--", new { id = "saturdayStart" }) <td> - </td><td>@Html.DropDownListFor(m => Model.ThisWeek.WeekEndHours[6], new SelectList(Model.ThisWeek.ScheduleEndHours, "Value", "Key", Model.ThisWeek.WeekEndHours[6]), "--", new { id = "saturdayEnd" })</tr>
                         }
                     </tbody>
                 </table>
             </div>
-            <button type="submit" class="right-element">Update</button><br>
+            @*<button type="submit" class="right-element">Update</button><br>*@
+            <button type="button" onclick="validateTimes()" class="right-element">Update</button><br>
+
         </div>
         <div id="fade" class="black_overlay"></div>
     }
@@ -359,27 +363,27 @@
                             @{int counter = 0;}
                             @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
                             {
-                                <tr>
-                                    @for (int n = 0; n < 7; n++)
+                            <tr>
+                                @for (int n = 0; n < 7; n++)
                                     {
                                         if (bools[n + counter] == true)
                                         {
-                                            <td class="ExcludedTrue" onclick="changeCell(this)">
-                                                @dates[n + counter]
-                                                @*<br />
-                                                    @bools[n + counter]*@
-                                            </td>
+                                    <td class="ExcludedTrue" onclick="changeCell(this)">
+                                        @dates[n + counter]
+                                        @*<br />
+                                            @bools[n + counter]*@
+                                    </td>
                                         }
                                         else
                                         {
-                                            <td class="ExcludedFalse" onclick="changeCell(this)">
-                                                @dates[n + counter]
-                                                @*<br />
-                                                    @bools[n + counter]*@
-                                            </td>
+                                    <td class="ExcludedFalse" onclick="changeCell(this)">
+                                        @dates[n + counter]
+                                        @*<br />
+                                            @bools[n + counter]*@
+                                    </td>
                                         }
                                     }
-                                </tr>
+                            </tr>
                                 {
                                     counter += 7;
                                 }
@@ -431,27 +435,89 @@
     <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
 
     <script>
-        function findEmployee(emp) {
-            $.get('/Home/FindEmployee/?EmployeeInfo=' + emp, function (data) {
-                //load partial to page
-                $('#FoundEmployee').html(data);
-            });
-        }
-    </script>
+        function validateEmployeeId(type) {
+            @*var configmodel = @Html.Raw(Json.Encode(Model));*@
 
-    <script>
-        function addEmployee() {
-            $.post('/Home/FindEmployee',
+            var StartHours = @Html.Raw(Json.Encode(Model.ThisWeek.ScheduleStartHours));
+            var EndHours = @Html.Raw(Json.Encode(Model.ThisWeek.ScheduleEndHours));
+
+            var startStrings = ["sundayStart", "mondayStart", "tuesdayStart", "wednesdayStart", "thursdayStart", "fridayStart", "saturdayStart"]
+            var endStrings = ["sundayEnd", "mondayEnd", "tuesdayEnd", "wednesdayEnd", "thursdayEnd", "fridayEnd", "saturdayEnd"]
+
+            var check = 1;
+
+            for(i=0;i<StartHours.length;i++){
+                var startpos = 0;
+                var endpos = 0;
+
+                for(n = 0; n< StartHours.length; n++){
+                    if(StartHours[n] == startStrings[n]){
+                        startpos = n;
+                    }
+                }
+                for(n = 0; n< EndHours.length; n++){
+                    if(EndHours[n] == endStrings[n]){
+                        endpos = n;
+                    }
+                }
+                if(startpos > endpos){
+                    check = 0;
+                }
+            }
+
+            if(check == 0){
+                alert('All open hours must come before close hours');
+            }
+            else{
+
+                for(i=0;i<7;i++){
+                    var selectedStartHour = document.getElementById(startStrings[i]).value;
+                    var selectedEndHour = document.getElementById(endStrings[i]).value;
+
+                    var starthours = @Html.Raw(Json.Encode(Model.ThisWeek.ScheduleStartHours));
+                    var StartHour = starthours[selectedStartHour];
+                    var EndHour = starthours[selectedEndHour];
+
+                    configmodel.ThisWeek.WeekStartHours[i] = StartHour;
+                    configmodel.ThisWeek.WeekEndHours[i] = EndHour;
+                }
+
+                $.post('/Home/ManagerConfiguration',
                 {
-                    AddEmployee: 'true'
+                    ls: configmodel
                 },
-                function (data) {
-                    $('#FoundEmployee').html(data);
+                function (data){
+                    alert('success');
                 }
                 );
-            alert('Employee added');
+
+            }
         }
+
     </script>
+
+    @*<script>
+            function findEmployee(emp) {
+                $.get('/Home/FindEmployee/?EmployeeInfo=' + emp, function (data) {
+                    //load partial to page
+                    $('#FoundEmployee').html(data);
+                });
+            }
+        </script>
+
+        <script>
+            function addEmployee() {
+                $.post('/Home/FindEmployee',
+                    {
+                        AddEmployee: 'true'
+                    },
+                    function (data) {
+                        $('#FoundEmployee').html(data);
+                    }
+                    );
+                alert('Employee added');
+            }
+        </script>*@
 
 
     @*validate that times are selected for each dropdown*@

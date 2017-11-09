@@ -27,7 +27,8 @@ namespace LaborNeedsScheduling.Models
 
         public static string[] days = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 
-        public static string strSQLCon = @"Data Source=AFORTINE\SQLEXPRESS;Initial Catalog=LaborNeedsScheduling;Integrated Security=True; MultipleActiveResultSets=True;";
+        //public static string strSQLCon = @"Data Source=AFORTINE\SQLEXPRESS;Initial Catalog=LaborNeedsScheduling;Integrated Security=True; MultipleActiveResultSets=True;";
+        public static string strSQLCon = @"Data Source = 192.168.1.250; Integrated Security = False; User ID = LaborScheduler; Password=H@!ey121 ;Connect Timeout = 180; Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
         public static void dothething(DateTime[] weekdates)
         {
@@ -1301,17 +1302,19 @@ namespace LaborNeedsScheduling.Models
                         {
                             cmd.CommandText = "select * from dbo.EmployeeSchedule where EmployeeId = '" + EmployeeIds[n] + "' and ScheduleDate = '" + PreviousWeekDates[i] + "'";
                             da.Fill(LastWeekSchedule);
-                        }
-                    }
-
-                    for (int i = 0; i < RequestedDates.Length; i++)
-                    {
-                        for (int n = 0; n < EmployeeIds.Length; n++)
-                        {
                             cmd.CommandText = "delete from dbo.EmployeeSchedule where EmployeeId = '" + EmployeeIds[n] + "' and ScheduleDate = '" + RequestedDates[i] + "'";
                             cmd.ExecuteNonQuery();
                         }
                     }
+
+                    //for (int i = 0; i < RequestedDates.Length; i++)
+                    //{
+                    //    for (int n = 0; n < EmployeeIds.Length; n++)
+                    //    {
+                    //        cmd.CommandText = "delete from dbo.EmployeeSchedule where EmployeeId = '" + EmployeeIds[n] + "' and ScheduleDate = '" + RequestedDates[i] + "'";
+                    //        cmd.ExecuteNonQuery();
+                    //    }
+                    //}
 
                     for (int i = 0; i < LastWeekSchedule.Rows.Count; i++)
                     {
@@ -1357,20 +1360,26 @@ namespace LaborNeedsScheduling.Models
                     {
                         for (int n = 0; n < EmployeeIds.Length; n++)
                         {
-                            cmd.CommandText = "delete from dbo.EmployeeSchedule where EmployeeId = '" + EmployeeIds[n] + "' and ScheduleDate = '" + RequestedDates[i] + "'";
+                            cmd.CommandText = "delete from dbo.EmployeeSchedule where EmployeeId = '" + EmployeeIds[n] + "' and  LocationCode = '" + LocationCode + "' " +
+                                              "and ScheduleDate = '" + RequestedDates[i] + "'";
                             cmd.ExecuteNonQuery();
-                        }
-                    }
-                    for (int i = 0; i < RequestedDates.Length; i++)
-                    {
-                        for (int n = 0; n < EmployeeIds.Length; n++)
-                        {
+
                             cmd.CommandText = "insert into dbo.EmployeeSchedule(EmployeeId, LocationCode, ScheduleDate, BeginTime, EndTime, OnSchedule)" +
                                               "values('" + EmployeeIds[n] + "', '" + LocationCode + "', '" + RequestedDates[i] + "', " +
                                               "'00:00:00', '00:00:00', '0')";
                             cmd.ExecuteNonQuery();
                         }
                     }
+                    //for (int i = 0; i < RequestedDates.Length; i++)
+                    //{
+                    //    for (int n = 0; n < EmployeeIds.Length; n++)
+                    //    {
+                    //        cmd.CommandText = "insert into dbo.EmployeeSchedule(EmployeeId, LocationCode, ScheduleDate, BeginTime, EndTime, OnSchedule)" +
+                    //                          "values('" + EmployeeIds[n] + "', '" + LocationCode + "', '" + RequestedDates[i] + "', " +
+                    //                          "'00:00:00', '00:00:00', '0')";
+                    //        cmd.ExecuteNonQuery();
+                    //    }
+                    //}
                 }
                 catch (Exception ex)
                 {
@@ -1483,7 +1492,7 @@ namespace LaborNeedsScheduling.Models
                     for (int i = 0; i < ScheduleHalfHourSlots.Length; i++)
                     {
                         cmd.CommandText = "insert into dbo.EmployeeAvailability (EmployeeId, Hour, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday) " +
-                                           "values('" + EmployeeCode + "', '" + ScheduleHalfHourSlots[i] + "', '0', '0', '0', '0', '0', '0', '0')";
+                                           "values('" + EmployeeCode + "', '" + ScheduleHalfHourSlots[i] + "', '1', '1', '1', '1', '1', '1', '1')";
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -2816,7 +2825,7 @@ namespace LaborNeedsScheduling.Models
             int hourcount = 0;
             bool bl = false;
 
-            if (employeeAssignedHours.Length > 0)
+            if (employeeAssignedHours.Length > 1)
             {
                 for (int n = 0; n < ScheduleHalfHourSlots.Length; n++)
                 {
@@ -2857,6 +2866,13 @@ namespace LaborNeedsScheduling.Models
                         hourcount++;
                     }
                 }
+            }
+            else if (employeeAssignedHours.Length == 1)
+            {
+                List<string> StartEndTimes = new List<string>();
+                StartEndTimes.Add(employeeAssignedHours[0]);
+                StartEndTimes.Add(employeeAssignedHours[0]);
+                assignedBlocks.Add(StartEndTimes.ToArray());
             }
 
             //convert to sql hours

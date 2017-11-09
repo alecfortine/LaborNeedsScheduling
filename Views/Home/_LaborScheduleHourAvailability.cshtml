@@ -94,6 +94,7 @@
                     <tbody>
                         <tr>
                             <td class="HourAvailabilityCell" style="text-align:center">Name</td>
+                            <td class="HourAvailabilityCell" style="text-align:center">Level</td>
                             <td class="HourAvailabilityCell" style="text-align:center">Hours <br /> Remaining</td>
                             <td class="HourAvailabilityCell" style="text-align:center">Available</td>
                             <td class="HourAvailabilityCell" style="text-align:center">Block</td>
@@ -209,6 +210,7 @@
                                         }
                                     }
                                     <td class="HourAvailabilityCell" @*onclick="selectEmployee(this.id)" *@ id="@employeeIds[i]">@employeeName</td>
+                                    <td class="HourAvailabilityCell" @*onclick="selectEmployee(this.id)" *@ id="@employeeIds[i]" style="text-align:center">@employeeRank</td>
                                     <td class="HourAvailabilityCell" @*onclick="selectEmployee(this.id)" *@ id="@employeeIds[i]" style="text-align:center">@hoursRemaining</td>
                                     <td class="HourAvailabilityCell" @*onclick="selectEmployee(this.id)" *@ id="@employeeIds[i]" style="text-align:center">
                                         @AvailableHourList[0] - @BlockEndHour
@@ -255,7 +257,7 @@
                                         </div>
                                     }
 
-        <div class="left" style="margin-left:10%">
+        <div class="left" style="margin-left:5%">
             <div style="text-align:left"><b>Scheduled on @Model.ThisWeek.weekdayNames[Model.ThisWeek.selectedWeekday]:</b></div>
             @{ int AssignedEmployeeCount = 0;}
             @for (int i = 0; i < Model.ThisWeek.AssignedEmployeesRequestedWeek.Rows.Count; i++)

@@ -1179,12 +1179,12 @@ namespace LaborNeedsScheduling.Models
                         int RowPosition = 0;
                         for (int m = 0; m < WeightedAverageTraffic.Rows.Count; m++)
                         {
-                            if(WeightedAverageTraffic.Rows[m][0].ToString() == WeekHourSchedule[n])
+                            if (WeightedAverageTraffic.Rows[m][0].ToString() == WeekHourSchedule[n])
                             {
                                 RowPosition = m;
                             }
                         }
-                        WeightedAverageTraffic.Rows[RowPosition][i+1] = HourTotal;
+                        WeightedAverageTraffic.Rows[RowPosition][i + 1] = HourTotal;
 
                         //if (datarow.Length == 0)
                         //{
@@ -1212,13 +1212,13 @@ namespace LaborNeedsScheduling.Models
                     }
                     //row = 0;
                     //col++;
-                    WeightedAverageTraffic.Rows[WeightedAverageTraffic.Rows.Count-1][i + 1] = DayTotalHours;
+                    WeightedAverageTraffic.Rows[WeightedAverageTraffic.Rows.Count - 1][i + 1] = DayTotalHours;
                 }
 
-                for(int i = 0; i < WeightedAverageTraffic.Rows.Count; i++)
+                for (int i = 0; i < WeightedAverageTraffic.Rows.Count; i++)
                 {
                     double HourTotal = 0;
-                    for(int n = 1; n < WeightedAverageTraffic.Columns.Count-1; n++)
+                    for (int n = 1; n < WeightedAverageTraffic.Columns.Count - 1; n++)
                     {
                         HourTotal += Convert.ToDouble(WeightedAverageTraffic.Rows[i][n]);
                     }
@@ -2707,8 +2707,8 @@ namespace LaborNeedsScheduling.Models
         /// Check if all scheduling rules are satisfied, create a list of any that aren't satisfied
         /// </summary>
         /// <param name="weekday"></param>
-        /// <param name="scheduling"></param>
-        public void CheckSchedulingRules(int weekday, List<Employees> scheduling)
+        /// <param name="EmployeeList"></param>
+        public void CheckSchedulingRules(int weekday, List<Employees> EmployeeList)
         {
             //Dictionary<string, int[]> ScheduledEmployees = new Dictionary<string, int[]>();
 
@@ -2760,32 +2760,39 @@ namespace LaborNeedsScheduling.Models
             // Level 60 should work every Monday
             bool condition7 = false;
 
-            Dictionary<string, List<int>> innerDict = new Dictionary<string, List<int>>();
 
-            for (int n = 0; n < selectedHours.Length; n++)
+            for (int i = 0; i < 7; i++)
             {
-                List<int> employeeRanks = new List<int>();
+                Dictionary<string, List<int>> EmployeeRanksForHour = new Dictionary<string, List<int>>();
 
-                for (int m = 0; m < scheduling.Count; m++)
+                for (int n = 0; n < selectedHours.Length; n++)
                 {
-                    Dictionary<string, string[]> employeeDayHours = EmployeeScheduledTimes[scheduling[m].id];
+                    List<int> employeeRanks = new List<int>();
 
-                    string[] hoursForDay = employeeDayHours[daysOfWeek[weekday]];
-
-                    for (int h = 0; h < hoursForDay.Length; h++)
+                    for (int m = 0; m < EmployeeList.Count; m++)
                     {
-                        if (hoursForDay[h] == selectedHours[n])
+                        Dictionary<string, string[]> employeeDayHours = EmployeeScheduledTimes[EmployeeList[m].id];
+
+                        string[] hoursForDay = employeeDayHours[daysOfWeek[i]];
+
+                        for (int h = 0; h < hoursForDay.Length; h++)
                         {
-                            employeeRanks.Add(scheduling[m].rank);
+                            if (hoursForDay[h] == selectedHours[n])
+                            {
+                                employeeRanks.Add(EmployeeList[m].rank);
+                            }
                         }
                     }
+                    //innerDict.Add(selectedHours[n], employeeRanks);
+                    EmployeeRanksForHour[selectedHours[n]] = employeeRanks;
                 }
-                //innerDict.Add(selectedHours[n], employeeRanks);
-                innerDict[selectedHours[n]] = employeeRanks;
-            }
-            ScheduledEmployees.Add(daysOfWeek[weekday], innerDict);
 
-            innerDict = ScheduledEmployees[daysOfWeek[weekday]];
+                ScheduledEmployees.Add(daysOfWeek[i], EmployeeRanksForHour);
+            }
+
+            //ScheduledEmployees.Add(daysOfWeek[weekday], innerDict);
+
+            Dictionary<string, List<int>> SelectedDayEmployees = ScheduledEmployees[daysOfWeek[weekday]];
 
             // Level 40, 50, or 60 must be scheduled at all times
             #region Condition 1
@@ -2803,18 +2810,18 @@ namespace LaborNeedsScheduling.Models
                 {
                     if (BlackoutTimes.Rows[i][weekday + 1].ToString() == "True")
                     {
-                        innerDict.Remove(BlackoutTimes.Rows[i][0].ToString());
+                        SelectedDayEmployees.Remove(BlackoutTimes.Rows[i][0].ToString());
                     }
                 }
             }
             int hourcount = 0;
             int openslots = 2;
-            foreach (string hour in innerDict.Keys)
+            foreach (string hour in SelectedDayEmployees.Keys)
             {
-                if (hourcount > openslots - 1 && hourcount != innerDict.Keys.Count)
+                if (hourcount > openslots - 1 && hourcount != SelectedDayEmployees.Keys.Count)
                 {
                     condition1Checks.Add(hour, false);
-                    foreach (int empRank in innerDict[hour])
+                    foreach (int empRank in SelectedDayEmployees[hour])
                     {
                         if (empRank == 40)
                         {
@@ -2859,23 +2866,26 @@ namespace LaborNeedsScheduling.Models
             #region Condition 2
             if (weekday == 5 || weekday == 6)
             {
-                foreach (string day in ScheduledEmployees.Keys)
+                Dictionary<string, List<int>> FridayEmployees = ScheduledEmployees[daysOfWeek[5]];
+                Dictionary<string, List<int>> SaturdayEmployees = ScheduledEmployees[daysOfWeek[6]];
+
+                List<Dictionary<string, List<int>>> FridayAndSaturday = new List<Dictionary<string, List<int>>>();
+                FridayAndSaturday.Add(FridayEmployees);
+                FridayAndSaturday.Add(SaturdayEmployees);
+
+                for (int i = 0; i < FridayAndSaturday.Count; i++)
                 {
-                    if (day == daysOfWeek[weekday])
+                    Dictionary<string, List<int>> EmployeeRanks = FridayAndSaturday[i];
+
+                    foreach (string hour in EmployeeRanks.Keys)
                     {
-                        //var innerDict = ScheduledEmployees[day];
-                        foreach (string hour in innerDict.Keys)
+                        if (hour == closeHour)
                         {
-                            //openHour = innerDict.Keys.First();
-                            //closeHour = innerDict.Keys.Last();
-                            if (hour == closeHour)
+                            foreach (int empRank in EmployeeRanks[hour])
                             {
-                                foreach (int empRank in innerDict[hour])
+                                if (empRank == 60)
                                 {
-                                    if (empRank == 60)
-                                    {
-                                        condition2 = true;
-                                    }
+                                    condition2 = true;
                                 }
                             }
                         }
@@ -2890,43 +2900,48 @@ namespace LaborNeedsScheduling.Models
             bool dateFound = false;
             for (int n = 0; n < Sundays.Count; n++)
             {
-                if (dateFound == true)
-                {
-                    break;
-                }
                 if (RequestedDates[0] == Sundays[n])
                 {
                     dateFound = true;
-                    if (BlackoutTimes != null && BlackoutTimes.Rows.Count > 0)
-                    {
-                        List<string> includedHours = new List<string>();
-                        for (int i = 0; i < BlackoutTimes.Rows.Count; i++)
-                        {
-                            if (BlackoutTimes.Rows[i][weekday + 1].ToString() == "False")
-                                includedHours.Add(BlackoutTimes.Rows[i][0].ToString());
-                        }
+                }
 
-                        for (int i = 0; i < BlackoutTimes.Rows.Count; i++)
+            }
+            if (dateFound == true)
+            {
+                if (BlackoutTimes != null && BlackoutTimes.Rows.Count > 0)
+                {
+                    List<string> includedHours = new List<string>();
+                    for (int i = 0; i < BlackoutTimes.Rows.Count; i++)
+                    {
+                        if (BlackoutTimes.Rows[i][weekday + 1].ToString() == "False")
+                            includedHours.Add(BlackoutTimes.Rows[i][0].ToString());
+                    }
+
+                    for (int i = 0; i < BlackoutTimes.Rows.Count; i++)
+                    {
+                        if (BlackoutTimes.Rows[i][weekday + 1].ToString() == "True")
                         {
-                            if (BlackoutTimes.Rows[i][weekday + 1].ToString() == "True")
-                            {
-                                innerDict.Remove(BlackoutTimes.Rows[i][0].ToString());
-                            }
+                            SelectedDayEmployees.Remove(BlackoutTimes.Rows[i][0].ToString());
                         }
                     }
-                    foreach (string hour in innerDict.Keys)
+                }
+                foreach (string hour in SelectedDayEmployees.Keys)
+                {
+                    foreach (int empRank in SelectedDayEmployees[hour])
                     {
-                        foreach (int empRank in innerDict[hour])
+                        if (empRank == 60)
                         {
-                            if (empRank == 60)
-                            {
-                                condition3 = true;
-                                break;
-                            }
+                            condition3 = true;
+                            break;
                         }
                     }
                 }
             }
+            else
+            {
+                condition3 = true;
+            }
+
             #endregion
 
             // Stores must open with at least 2 associates
@@ -2938,13 +2953,13 @@ namespace LaborNeedsScheduling.Models
                 if (day == daysOfWeek[weekday])
                 {
                     //var innerDict = ScheduledEmployees[day];
-                    foreach (string hour in innerDict.Keys)
+                    foreach (string hour in SelectedDayEmployees.Keys)
                     {
                         //openHour = innerDict.Keys.First();
                         //closeHour = innerDict.Keys.Last();
                         if (hour == openHour)
                         {
-                            foreach (int empRank in innerDict[hour])
+                            foreach (int empRank in SelectedDayEmployees[hour])
                             {
                                 if (empRank == 10)
                                 {
@@ -2988,13 +3003,13 @@ namespace LaborNeedsScheduling.Models
                 if (day == daysOfWeek[weekday])
                 {
                     //var innerDict = ScheduledEmployees[day];
-                    foreach (string hour in innerDict.Keys)
+                    foreach (string hour in SelectedDayEmployees.Keys)
                     {
                         //openHour = innerDict.Keys.First();
                         //closeHour = innerDict.Keys.Last();
                         if (hour == closeHour)
                         {
-                            foreach (int empRank in innerDict[hour])
+                            foreach (int empRank in SelectedDayEmployees[hour])
                             {
                                 if (empRank == 10)
                                 {
@@ -3045,66 +3060,58 @@ namespace LaborNeedsScheduling.Models
                 bool openTaken = false;
                 bool closeTaken = false;
 
-                foreach (string day in ScheduledEmployees.Keys)
+                int rankTaken = 0;
+                foreach (string hour in SelectedDayEmployees.Keys)
                 {
-                    if (day == daysOfWeek[weekday])
+                    // check open hour
+                    if (hour == openHour)
                     {
-                        //var innerDict = ScheduledEmployees[day];
-                        int rankTaken = 0;
-                        foreach (string hour in innerDict.Keys)
+                        foreach (int empRank in SelectedDayEmployees[hour])
                         {
-                            //openHour = innerDict.Keys.First();
-                            //closeHour = innerDict.Keys.Last();
-                            // check open hour
-                            if (hour == openHour)
+                            if (empRank == 60 && rankTaken != 50)
                             {
-                                foreach (int empRank in innerDict[hour])
+                                flag1 = true;
+                                rankTaken = 60;
+                            }
+                            else if (empRank == 50 && rankTaken != 60)
+                            {
+                                flag1 = true;
+                                rankTaken = 50;
+                            }
+                        }
+                    }
+
+                    // check close hour
+                    if (hour == closeHour)
+                    {
+                        foreach (int empRank in SelectedDayEmployees[hour])
+                        {
+                            if (empRank == 60)
+                            {
+                                if (rankTaken == 60)
                                 {
-                                    if (empRank == 60 && rankTaken != 50)
-                                    {
-                                        flag1 = true;
-                                        rankTaken = 60;
-                                    }
-                                    else if (empRank == 50 && rankTaken != 60)
-                                    {
-                                        flag1 = true;
-                                        rankTaken = 50;
-                                    }
+                                    // error message
+                                }
+                                else
+                                {
+                                    flag2 = true;
                                 }
                             }
-
-                            // check close hour
-                            if (hour == closeHour)
+                            if (empRank == 50)
                             {
-                                foreach (int empRank in innerDict[hour])
+                                if (rankTaken == 50)
                                 {
-                                    if (empRank == 60)
-                                    {
-                                        if (rankTaken == 60)
-                                        {
-                                            // error message
-                                        }
-                                        else
-                                        {
-                                            flag2 = true;
-                                        }
-                                    }
-                                    if (empRank == 50)
-                                    {
-                                        if (rankTaken == 50)
-                                        {
-                                            // error message
-                                        }
-                                        else
-                                        {
-                                            flag2 = true;
-                                        }
-                                    }
+                                    // error message
+                                }
+                                else
+                                {
+                                    flag2 = true;
                                 }
                             }
                         }
                     }
                 }
+
                 if (flag1 == true && flag2 == true)
                 {
                     condition6 = true;
@@ -3121,9 +3128,9 @@ namespace LaborNeedsScheduling.Models
                     if (day == daysOfWeek[weekday])
                     {
                         //var innerDict = ScheduledEmployees[day];
-                        foreach (string hour in innerDict.Keys)
+                        foreach (string hour in SelectedDayEmployees.Keys)
                         {
-                            foreach (int empRank in innerDict[hour])
+                            foreach (int empRank in SelectedDayEmployees[hour])
                             {
                                 if (empRank == 60)
                                 {
