@@ -1,0 +1,111 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Diagnostics;
+@using System.Web.UI.HtmlControls;
+@using System.Data.Entity;
+@using LaborNeedsScheduling.Models
+@model Dashboard
+
+<body>
+
+    @*display employee schedule table*@
+    <div class="white-body">
+        <table border="1" cellpadding="5" id="weekhours" class="Schedule">
+            <thead>
+                <tr>
+                    <th style="text-align: center">Name</th>
+                    @for (int i = 0; i < Model.CurrentWeekDates.Length; i++)
+                    {
+                        <th>
+                            @Model.CurrentWeekDates[i].DayOfWeek
+                            <br />
+                            @Model.CurrentWeekDates[i].ToShortDateString()
+                        </th>
+                    }
+                    <th>Hours</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ double weekHourTotal = 0;}
+                @{ double[] dayTotals = new double[7];}
+                @foreach (Employees emp in Model.EmployeeListStore)
+                {
+                    double[] employeeDayHourCount = new double[7];
+                    double weekHourAmount = 0;
+                    double dayHourCount = 0;
+
+                    <tr>
+                        @{string name = emp.firstName + " " + emp.lastName[0] + ".";}
+                                                <td style="font-weight:bold">@name</td>
+                        @for (int n = 0; n < 7; n++)
+                        {
+                            List<string> startTime = new List<string>();
+                            List<string> endTime = new List<string>();
+                            for (int i = 0; i < Model.AssignedEmployeesRequestedWeek.Rows.Count; i++)
+                            {
+                                if (emp.id == Model.AssignedEmployeesRequestedWeek.Rows[i][1].ToString() && Model.CurrentWeekDates[n] == Convert.ToDateTime(Model.AssignedEmployeesRequestedWeek.Rows[i][3]))
+                                {
+                                    bool block = false;
+                                    double hourcount = 0;
+                                    for (int m = 0; m < Model.ScheduleHalfHourSlots.Length; m++)
+                                    {
+                                        if (Model.AssignedEmployeesRequestedWeek.Rows[i][4].ToString() == Model.SQLHours[m])
+                                        {
+                                            startTime.Add(Model.ScheduleHalfHourSlots[m]);
+                                            block = true;
+                                        }
+                                        if (Model.AssignedEmployeesRequestedWeek.Rows[i][5].ToString() == Model.SQLHours[m])
+                                        {
+                                            endTime.Add(Model.ScheduleHalfHourSlots[m]);
+                                            block = false;
+                                        }
+                                        if (block == true)
+                                        {
+                                            weekHourAmount += .5;
+                                            hourcount += .5;
+                                            dayHourCount += .5;
+                                        }
+                                    }
+
+                                    if (hourcount > 4)
+                                    {
+                                        hourcount = hourcount - .5;
+                                        dayHourCount = dayHourCount - .5;
+                                    }
+                                    dayTotals[n] += hourcount;
+                                }
+                            }
+                            <td>
+
+                                @for (int m = 0; m < startTime.Count; m++)
+                                {
+                                    <text>@startTime[m] - @endTime[m]</text>
+                                    <br />
+                                }
+                            </td>
+                        }
+                        <td>@dayHourCount</td>
+                    </tr>
+                            }
+                <tr>
+                    <td style="font-weight:bold">Total</td>
+                    @for (int i = 0; i < 7; i++)
+                    {
+                        <td>@dayTotals[i]</td>
+                        weekHourTotal += dayTotals[i];
+                    }
+                    <td style="font-weight:bold">@weekHourTotal</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+

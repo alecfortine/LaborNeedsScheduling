@@ -1,0 +1,231 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Diagnostics;
+@using System.Web.UI.HtmlControls;
+@using LaborNeedsScheduling.Models
+@model LaborScheduling
+
+
+<head>
+
+    <style>
+        .Banner {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .Cell {
+            font-size: 16px;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .AssignedCell {
+            font-size: 16px;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .UnassignedCell {
+            font-size: 16px;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            background-color: #ff9292;
+        }
+
+        .left {
+            display: inline;
+            float: left;
+        }
+
+        .UnassignButtonShow {
+            visibility: visible;
+        }
+
+        .UnassignButtonHide {
+            visibility: hidden;
+        }
+
+        div.ScheduleErrors {
+            display: inline-block;
+            border: 1px solid #3c69d4;
+            background-color: #dce7ff;
+            padding: 10px;
+            word-wrap: normal;
+            width: 100%;
+        }
+    </style>
+
+</head>
+
+
+<body>
+    @{ string employeeName = "";}
+    @foreach (var emp in LaborScheduling.EmployeeListStore)
+    {
+        if (emp.id == Convert.ToString(Model.ThisWeek.EmployeeAvailabilityView.Columns[0]))
+        {
+            employeeName = emp.firstName;
+        }
+    }
+    @using (Html.BeginForm("LaborScheduleEmployeeAvailability", "Home", FormMethod.Post))
+    {
+        if (Model.ThisWeek.ScheduleConflicts != null && Model.ThisWeek.ScheduleConflicts.Count > 0)
+        {
+            <div class="ScheduleErrors">
+                @for (int i = 0; i < Model.ThisWeek.ScheduleConflicts.Count; i++)
+                {
+                    <label>@Model.ThisWeek.ScheduleConflicts[i]</label>
+                }
+            </div>
+            <br />
+        }
+
+        <div style="padding-top: 10px;">
+            <div class="left">
+                <table class="AssignedView" id="AssignedView" border="1" cellpadding="5">
+                    <thead>
+                        <div class="Banner">
+                            Scheduled:
+                        </div>
+                    </thead>
+                    <tbody>
+
+                        @for (int i = 0; i < Model.ThisWeek.EmployeeScheduledView.Rows.Count; i++)
+                        {
+                            <tr>
+                                @if (Model.ThisWeek.EmployeeScheduledView.Rows[i][0].ToString() == "Not Scheduled")
+                                {
+                                    <td class="Cell">@Model.ThisWeek.EmployeeScheduledView.Rows[i][0]</td>
+                                }
+                                else if (Model.ThisWeek.EmployeeScheduledView.Rows[i][0].ToString() != "")
+                                {
+                                    <td class="AssignedCell" onclick="changeAssignment(this)">@Model.ThisWeek.EmployeeScheduledView.Rows[i][0]</td>
+                                }
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="left" style="padding-left: 20px;padding-top:30px;">
+                <button type="button" class="UnassignButtonHide" id="UnassignButton" onclick="unassignEmployee(this.value)" value="Unassign">
+                    Unassign
+                </button>
+            </div>
+
+            <div style="float:right;padding-left:40px;">
+                <table class="AvailableView" id="AvailableView" border="1" cellpadding="5">
+                    <thead>
+                        <div class="Banner">
+                            @employeeName's Availability:
+                        </div>
+                    </thead>
+                    <tbody>
+                        @{ List<string> startTimes = new List<string>();}
+                        @{ List<string> endTimes = new List<string>();}
+                        @{ bool block = false;}
+                        @{ string nextBlock = "";}
+                        @for (int i = 0; i < Model.ThisWeek.EmployeeAvailabilityView.Rows.Count; i++)
+                        {
+                            if (i == 0 && Model.ThisWeek.EmployeeAvailabilityView.Rows[i][0].ToString() != "Not Available")
+                            {
+                                block = true;
+                                startTimes.Add(Model.ThisWeek.EmployeeAvailabilityView.Rows[i][0].ToString());
+                            }
+                            if (block == false && Model.ThisWeek.EmployeeAvailabilityView.Rows[i][0].ToString() == nextBlock)
+                            {
+                                block = true;
+                                startTimes.Add(Model.ThisWeek.EmployeeAvailabilityView.Rows[i][0].ToString());
+                            }
+                            if (block == true)
+                            {
+
+                                for (int n = 0; n < Model.ThisWeek.ScheduleHalfHourSlots.Length; n++)
+                                {
+                                    if (Model.ThisWeek.EmployeeAvailabilityView.Rows[i][0].ToString() == Model.ThisWeek.ScheduleHalfHourSlots[n])
+                                    {
+                                        if (i < Model.ThisWeek.EmployeeAvailabilityView.Rows.Count - 1 &&
+                                            n < Model.ThisWeek.ScheduleHalfHourSlots.Length - 1
+                                            && Model.ThisWeek.EmployeeAvailabilityView.Rows[i + 1][0].ToString() == Model.ThisWeek.ScheduleHalfHourSlots[n + 1])
+                                        {
+                                            block = true;
+                                        }
+                                        else
+                                        {
+                                            block = false;
+                                            endTimes.Add(Model.ThisWeek.EmployeeAvailabilityView.Rows[i][0].ToString());
+                                            if (i < Model.ThisWeek.EmployeeAvailabilityView.Rows.Count - 1)
+                                            {
+                                                nextBlock = Model.ThisWeek.EmployeeAvailabilityView.Rows[i + 1][0].ToString();
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                        @if (startTimes.Count > 0)
+                        {
+                            for (int i = 0; i < startTimes.Count; i++)
+                            {
+                                <tr>
+                                    <td class="Cell">@startTimes[i] - @endTimes[i]</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td class="Cell">Not Available</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        @Html.HiddenFor(m => Model.UnassignTimes, new { id = "hiddenUnassignTimes" })
+                            }
+</body>
+
+@section scripts {
+
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+    @*<script>
+
+                // get all the cells in the table
+            var table = document.getElementsByClassName("AssignedView")[0];
+            if (table != null) {
+                var cells = table.getElementsByTagName("td");
+                var button = document.getElementById("UnassignButton");
+                var count = 0;
+
+                alert(button.innerHTML);
+
+                // iterating over each cell
+                for (var i = 0; i < cells.length; i++) {
+                    if (cells[i].className == "UnassignedCell") {
+                        button.className == "UnassignButtonShow";
+                        count++;
+                    }
+                }
+            }
+        </script>*@
+}

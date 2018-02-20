@@ -1,0 +1,252 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web
+@using System.Web.Mvc
+@using System.Data.SqlClient
+@using System.Data
+@using System.Configuration
+@using System.Text
+@using System.Diagnostics;
+@using System.Web.UI.HtmlControls;
+@using LaborNeedsScheduling.Models
+@model AvailabilityViewModel
+
+<head>
+
+    @*table*@
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 1100px;
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+            table-layout: fixed;
+            word-break: break-all;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000000;
+        }
+
+            td.highlight:hover {
+                background-color: white;
+            }
+
+            td:first-child {
+                font-weight: bold;
+                text-align: left;
+            }
+
+        .container {
+            align-content: center;
+            margin: 0;
+        }
+
+        .left-element {
+            display: inline;
+            float: left;
+        }
+
+        .right-element {
+            display: inline;
+            float: right;
+            padding-right: 50px;
+        }
+
+        body {
+            padding-left: 200px;
+            padding-top: 70px;
+        }
+
+        .testing-left {
+            display: inline;
+            float: left;
+            padding: 5px;
+            border-style: solid;
+            border-width: 1px;
+            text-align: center;
+            font-size: 70%;
+        }
+
+        td:first-child {
+            background-color: white;
+        }
+    </style>
+
+    <style>
+        .Available {
+            background: #abffb3;
+        }
+
+        .NotAvailable {
+            background: #d5d5d5;
+        }
+    </style>
+
+    <style>
+        ::-moz-selection {
+            background-color: Transparent;
+            color: #000;
+        }
+
+        ::selection {
+            background-color: Transparent;
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+        <div>
+            @for (int i = 0; i < Model.EmployeeTimeOffRequests.Count; i++)
+            {
+                List<string> employeeIds = new List<string>(Model.EmployeeTimeOffRequests.Keys);
+                if (employeeIds[i] == Model.selectedEmployeeId)
+                {
+                    @*<h3>Approved Time Off Requests</h3>*@
+
+                    Dictionary<DateTime, string[]> employeeWeek = Model.EmployeeTimeOffRequests[Model.selectedEmployeeId];
+                    List<DateTime> weekDates = new List<DateTime>(employeeWeek.Keys);
+                    for (int n = 0; n < 7; n++)
+                    {
+                        string[] employeeHoursOff = employeeWeek[weekDates[n]];
+                        if (employeeHoursOff.Length > 0)
+                        {
+                            string date = weekDates[n].ToString("M'/'dd'/'yyyy");
+                            <div style="border-width:1px; border-style:solid; background-color:#c8d6fc; padding: 10px; font-size: 15px; display:inline-block">
+                                <text>
+                                    <b>@date</b>
+                                    <br />
+                                    @if (employeeHoursOff.Length == Model.EmpAvailabilityTable[Model.selectedEmployeeId].Rows.Count)
+                                {
+                                        <text>Full day off</text>
+                                    }
+                                    else
+                                    {
+                                        for (int h = 0; h < employeeHoursOff.Length; h++)
+                                        {
+                                            if (h != employeeHoursOff.Length - 1)
+                                            {
+                                                @employeeHoursOff[h]
+                                                <text>, </text>
+                                            }
+                                            else
+                                            {
+                                                @employeeHoursOff[h]
+                                            }
+                                        }
+                                    }
+                                </text>
+                            </div>
+                        }
+                    }
+                }
+            }
+        </div>
+
+    <br />
+
+    @{ string employeeName = Model.EmpsForStore[Model.selectedEmployeeId];}
+    <h2>@employeeName's Availability</h2>
+
+    <div class="white-body">
+        <table border="1" cellpadding="5" id="weekhours" class="weekhours">
+            <thead>
+                <tr>
+                    @foreach (DataColumn col in Model.EmpAvailabilityTable[Model.selectedEmployeeId].Columns)
+                    {
+                        <th>@col.Caption</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @{ List<string> cellValues = new List<string>();}
+                @foreach (DataRow row in Model.EmpAvailabilityTable[Model.selectedEmployeeId].Rows)
+                {
+                    <tr>
+                        @foreach (var cell in row.ItemArray)
+                        {
+                            if (cell.ToString() == "True")
+                            {
+                                <td class="Available" onclick="changeCell(this)" value=cell.ToString()>
+                                    ♦
+                                </td>;
+                                cellValues.Add(cell.ToString());
+                            }
+                            else if (cell.ToString() == "False")
+                            {
+                                <td class="NotAvailable" onclick="changeCell(this)" value=cell.ToString()></td>
+                                cellValues.Add(cell.ToString());
+                            }
+                            else
+                            {
+                                <td onclick="changeCell(this)">
+                                    @cell.ToString()
+                                </td>
+                            }
+                        }
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+    <br />
+
+    <button type="button" onclick="updateSchedule()" style="float:right">Update</button><br>
+
+</body>
+
+
+
+
+
+
+
+
+<script>
+    function changeCell(cell) {
+
+        if (cell.className == "NotAvailable") {
+            cell.className = "Available";
+            cell.innerHTML = "♦";
+        }
+        else if (cell.className == "Available") {
+            cell.className = "NotAvailable";
+            cell.innerHTML = "";
+        }
+
+
+        // get all the cells in the table
+        var table = document.getElementsByTagName("table")[0];
+        var cells = table.getElementsByTagName("td");
+
+        // set of class values to pass to the model
+        var cellvalues = new Array(cells.length);
+
+        // iterating over each cell
+        for (var i = 1; i < cells.length; i++) {
+            //var cellclass = cells[i];
+            if (cells[i].className == "NotAvailable") {
+                cellvalues[i - 1] = 'False';
+            }
+            else if (cells[i].className == "Available") {
+                cellvalues[i - 1] = 'True';
+            }
+            else {
+                cellvalues[i - 1] = 'timecell';
+            }
+        }
+
+        document.getElementById("hiddenUpdatedSchedule").value = cellvalues;
+    }
+
+</script>

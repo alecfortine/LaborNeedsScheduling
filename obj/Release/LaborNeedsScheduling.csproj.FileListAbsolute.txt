@@ -17,7 +17,6 @@ C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\La
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Antlr3.Runtime.dll
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\EntityFramework.dll
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\EntityFramework.SqlServer.dll
-C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\LSAData.dll
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Microsoft.AI.Agent.Intercept.dll
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Microsoft.AI.DependencyCollector.dll
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Microsoft.AI.PerfCounterCollector.dll
@@ -49,7 +48,6 @@ C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Sy
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\System.Web.WebPages.dll
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\System.Web.WebPages.Razor.dll
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\WebGrease.dll
-C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\LSAData.pdb
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Microsoft.AI.DependencyCollector.xml
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Microsoft.AI.ServerTelemetryChannel.xml
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Microsoft.AI.Web.xml
@@ -122,3 +120,8 @@ C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Mi
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\System.Diagnostics.DiagnosticSource.dll
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Microsoft.AspNet.TelemetryCorrelation.xml
 C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\System.Diagnostics.DiagnosticSource.xml
+C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Web.config
+C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Web.Debug.config
+C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\bin\Web.Release.config
+C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\obj\Release\LaborNeedsScheduling.Properties.Resources.resources
+C:\Users\forti\Documents\Visual Studio 2015\Projects\LaborNeedsScheduling\obj\Release\LaborNeedsScheduling.csproj.GenerateResource.Cache
