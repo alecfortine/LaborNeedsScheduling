@@ -65,7 +65,7 @@
         <div style="display:inline-block;">
             <div>
                 <a href="/Home/LaborSchedule" style="text-decoration: none;">
-                    <div class="green" onclick="nextWeekSchedule()">
+                    <div class="green">
                         <div style="font-size:x-large; text-align:center;">Create Schedule</div>
                     </div>
                 </a>
@@ -91,14 +91,14 @@
                 <br />
 
                 <a href="/Home/EmployeeAvailability" style="text-decoration: none;">
-                    <div class="purple" onclick="nextWeekSchedule()">
+                    <div class="purple">
                         <div style="font-size:x-large; text-align:center;">Employee Availability</div>
                     </div>
                 </a>
             </div>
         </div>
 
-        @*<div style="display:inline-block; margin-left: 40px;">
+        <div style="display:inline-block; margin-left: 40px;">
             <div>
                 <a href="/Home/ActiveTimeOffRequests" style="text-decoration: none;">
                     <div class="purple">
@@ -106,7 +106,15 @@
                     </div>
                 </a>
             </div>
-        </div>*@
+
+            <br />
+
+            <div href="/Home/EmployeeAvailability" style="text-decoration: none; visibility:hidden;">
+                <div class="purple">
+                    <div style="font-size:x-large; text-align:center;">Employee Availability</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <br />

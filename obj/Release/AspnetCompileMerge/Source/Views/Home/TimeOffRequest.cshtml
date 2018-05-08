@@ -458,6 +458,13 @@
 
 @section scripts{
 
+<script type="text/javascript">
+    $(function () {
+        // Disable browser cache Ajax.ActionLinks
+        $.ajaxSetup({ cache: false });
+    });
+</script>
+
     <script>
         function validateEmployeeId(type) {
             var EmployeeList = @Html.Raw(Json.Encode(Model.ListOfEmployees));

@@ -355,4 +355,12 @@
 
 @section scripts{
     <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        // Disable browser cache Ajax.ActionLinks
+        $.ajaxSetup({ cache: false });
+    });
+</script>
+
 }

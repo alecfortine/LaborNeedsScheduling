@@ -14,6 +14,37 @@
 @model LaborScheduling
 
 <body>
+
+    @{ double hours = 0;}
+
+    @for (int i = 1; i < 8; i++)
+    {
+        for (int n = 0; n < Model.ThisWeek.LaborSchedule.Rows.Count; n += 2)
+        {
+            if (Model.ThisWeek.LaborSchedule.Rows[n][i].ToString() != "")
+            {
+                double hour = Convert.ToDouble(Model.ThisWeek.LaborSchedule.Rows[n][i]);
+                hours += hour;
+            }
+        }
+    }
+
+    @if (Model.ThisWeek.PayrollWeeklyHours < hours-15)
+    {
+        <h4><b>Suggested: @hours</b></h4>
+        <h4>Hours: @Model.ThisWeek.PayrollWeeklyHours</h4>
+        <i>
+            <text>Input hours are too low for the current employee minimum(s). A schedule can still be created but may suggest more employees than desired.</text>
+            <br />
+            <text>Fix by increasing the weekly hours or lowering the minimum employee requirements.</text>
+        </i>
+
+    }
+    else
+    {
+        <h4>Hours: @Model.ThisWeek.PayrollWeeklyHours</h4>
+    }
+
     @*table*@
     <div style="display:inline-block; padding-top:30px;">
         <table class="LaborSchedule" id="LaborSchedule" border="1" cellpadding="5" align="center">
@@ -102,7 +133,7 @@
                                         }
                                         var days = Html.Raw(Json.Encode(ViewBag.days));
                                         <td class="ButtonCell" id="cell">
-                                            <button onclick="getValue(this.value)" id="LaborSchedule" class="DaySelectionButton" type="button" value=@dayValue>
+                                            <button onclick="getValue(this.value);" id="LaborSchedule" class="DaySelectionButton" type="button" value=@dayValue>
                                                 @currentDay
                                             </button>
                                         </td>

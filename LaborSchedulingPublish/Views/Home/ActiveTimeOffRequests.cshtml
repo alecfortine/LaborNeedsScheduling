@@ -13,398 +13,118 @@
 @model ActiveRequests
 
 <head>
-
-    @*lightbox*@
     <style>
-        .black_overlay {
-            display: none;
-            position: fixed;
-            top: 0%;
-            left: 0%;
-            width: 100%;
-            height: 100%;
-            background-color: #ff0000;
-            z-index: 1001;
-            -moz-opacity: 0.8;
-            opacity: .80;
-            filter: alpha(opacity=80);
-        }
-
-        .white_content {
-            position: fixed;
-            top: 10%;
-            left: 25%;
-            z-index: 1050;
-            width: 80%;
-            height: 80%;
-            margin-left: -280px;
-            background-color: #ffffff;
-            -webkit-border-radius: 20px;
-            -moz-border-radius: 20px;
-            border-radius: 20px;
-            border: 2px solid #FFFFFF;
-            background-color: #FFFFFF;
-            -webkit-box-shadow: #000000 8px 8px 8px;
-            -moz-box-shadow: #000000 8px 8px 8px;
-            box-shadow: #000000 8px 8px 8px;
-            display: none;
-        }
-
-        .white-header {
-            padding: 9px 15px;
-            border-bottom: 1px solid #eee;
-            height: 30px;
-        }
-
-        .modal-header .close {
-            margin-top: 2px;
-        }
-
-        a.close {
-            padding: 0;
-            cursor: pointer;
-            border: 0;
-            -webkit-appearance: none;
-        }
-
-        .close {
-            float: right;
-            font-size: 20px;
-            font-weight: bold;
-            line-height: 20px;
-        }
-
-        /*.white-body {
-            position: relative;
-            max-height: 850px;
-            padding: 15px;
-            overflow-y: auto;
-            display: block;
-        }*/
-    </style>
-
-    @*messages*@
-    <style>
-        .approved {
-            padding: 20px;
-            background-color: #8fff9a;
-            color: black;
-            border-style: solid;
-            border-color: black;
-            border-width: .5px;
-        }
-
-        .denied {
-            padding: 20px;
-            background-color: #ff6868;
-            color: black;
-            border-style: solid;
-            border-color: black;
-            border-width: .5px;
-        }
-
-        .closebtn:hover {
-            color: black;
-        }
-
-        .closebtn {
-            margin-left: 30px;
-            color: #000000;
-            font-weight: bold;
-            float: right;
-            font-size: 30px;
-            line-height: 20px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-    </style>
-
-    <style>
-        .inline {
-            display: inline-block;
-            margin-right: 15px;
-        }
-
-        .hidden {
-            display: inline-block;
-            margin-right: 15px;
-            visibility: hidden;
-        }
-
-        .visible {
-            display: inline-block;
-            margin-right: 15px;
-            visibility: visible;
-        }
-    </style>
-
-    @*messages dropdown*@
-    <style>
-        input.messages {
-            display: none;
-            visibility: hidden;
-        }
-
-        label.messages {
-            display: block;
-            padding: 0.5em;
-            text-align: center;
-            border-bottom: 1px solid #CCC;
-            color: #666;
-        }
-
-            label.messages:hover {
-                color: #000;
-            }
-
-            label.messages::after {
-                font-family: Consolas, monaco, monospace;
-                font-weight: bold;
-                font-size: 15px;
-                content: "▼";
-                vertical-align: text-top;
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                margin-left: 3.5px;
-                background: radial-gradient(ellipse at center, #CCC 50%, transparent 50%);
-            }
-
-        #expandMessages {
-            height: 0px;
-            overflow: auto;
-            transition: height 0.5s;
-            color: #FFF;
-        }
-
-        section {
-            padding: 0 20px;
-        }
-
-        #messagesToggle:checked ~ #expandMessages {
-            height: auto;
-        }
-
-        #messagesToggle:checked ~ label::after {
-            content: "-";
-        }
-    </style>
-
-    @*table*@
-    <style>
-        table {
-            font-family: arial, sans-serif;
+        table, th, td {
             border-collapse: collapse;
-            width: 1100px;
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-            table-layout: fixed;
-            word-break: break-all;
-            margin-left: auto;
-            margin-right: auto;
-            empty-cells: show;
-            /*overflow-y: no-display;*/
         }
 
-        td, th {
-            border: 1px solid #dddddd;
-            padding: 8px;
+        th,td {
+            padding: 15px;
             text-align: center;
-            vertical-align: middle;
-            border: 1px solid #000000;
         }
 
-            td:first-child {
-                font-weight: bold;
-                text-align: left;
-            }
-
-            td.hourCell {
-                font-size: 11px;
-            }
-
-        /*.container {
-            align-content: center;
-            margin: 0;
-        }*/
-
-        .left-element {
-            display: inline;
-            float: left;
+        th {
+            border: 1px solid black;
         }
 
-        .right-element {
-            display: inline;
-            float: right;
-            padding-right: 50px;
-        }
-
-        body {
-            vertical-align: middle;
-        }
-
-        .testing-left {
-            display: inline;
-            float: left;
-            padding: 5px;
-            border-style: solid;
-            border-width: 1px;
-            text-align: center;
-            font-size: 70%;
-        }
-
-        td:first-child {
-            background-color: white;
-        }
-    </style>
-
-    @*multiple days request*@
-    <style>
-        input.requestMultiple {
-            display: none;
-            visibility: hidden;
-        }
-
-        label.requestMultiple {
+                .CancelButton {
+            width: 80px;
+            height: 40px;
             display: block;
-            padding: 0.5em;
-            text-align: left;
-            border-bottom: 1px solid #CCC;
-            color: #666;
-        }
-
-            label.requestMultiple:hover {
-                color: #000;
-            }
-
-            label.requestMultiple::after {
-                font-family: Consolas, monaco, monospace;
-                font-weight: bold;
-                font-size: 15px;
-                content: "▼";
-                vertical-align: text-top;
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                margin-left: 3px;
-            }
-
-        #expandMultiple {
-            height: 0px;
-            overflow: auto;
-            transition: height 0.5s;
+            vertical-align: middle;
+            margin: 0 auto;
+            margin-left:40px;
+            background-color: #ff7373;
             color: #000000;
-        }
-
-        section {
-            padding: 0 20px;
-        }
-
-        #requestToggleMultiple:checked ~ #expandMultiple {
-            height: auto;
-        }
-
-        #requestToggleMultiple:checked ~ label::after {
-            content: "▼";
+            border-color: #fe5353;
+            font-size: 16px;
         }
     </style>
-
-    @*single day request*@
-    <style>
-        input.requestSingle {
-            display: none;
-            visibility: hidden;
-        }
-
-        label.requestSingle {
-            display: block;
-            padding: 0.5em;
-            text-align: left;
-            border-bottom: 1px solid #CCC;
-            color: #666;
-        }
-
-            label.requestSingle:hover {
-                color: #000;
-            }
-
-            label.requestSingle::after {
-                font-family: Consolas, monaco, monospace;
-                font-weight: bold;
-                font-size: 15px;
-                content: "▼";
-                vertical-align: text-top;
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                margin-left: 3px;
-            }
-
-        #expandSingle {
-            height: 0px;
-            overflow: auto;
-            transition: height 0.5s;
-            color: #000000;
-        }
-
-        section {
-            padding: 0 20px;
-        }
-
-        #requestToggleSingle:checked ~ #expandSingle {
-            height: auto;
-        }
-
-        #requestToggleSingle:checked ~ label::after {
-            content: "▼";
-        }
-    </style>
-
 </head>
 
-<br />
+<div id="ActiveRequests">
+    <body>
+        <br />
 
-<h1>Active Time-Off Requests</h1>
+        <h1>Active Time-Off Requests</h1>
 
-<br />
-<br />
+        <br />
+        <br />
 
-@if (Model.TimeOffRequests.Rows.Count == 0)
-{
-    <h3>No upcoming employee time off</h3>
-}
-else
-{
-    <table>
-        <thead>
-            <tr>
-                <th style="text-align: center">ID</th>
-                <th style="text-align: center">Name</th>
-                <th style="text-align: center">Start Date</th>
-                <th style="text-align: center">End Date</th>
-                <th style="text-align: center">Start Time</th>
-                <th style="text-align: center">End Time</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (int i = 0; i < Model.TimeOffRequests.Rows.Count; i++)
-            {
-                <tr>
-                    <td>@Model.TimeOffRequests.Rows[i][0]</td>
-                    <td>@Model.TimeOffRequests.Rows[i][1]</td>
-                    <td>@Model.TimeOffRequests.Rows[i][2]</td>
-                    <td>@Model.TimeOffRequests.Rows[i][3]</td>
-                    <td>@Model.TimeOffRequests.Rows[i][4]</td>
-                    <td>@Model.TimeOffRequests.Rows[i][5]</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-<br />
-<br />
-<br />
+        @if (Model.TimeOffRequests.Rows.Count == 0)
+        {
+            <h3>No upcoming employee time off</h3>
+        }
+        else
+        {
+            <table style="border-width:1px; border-color:black;">
+                <thead>
+                    <tr>
+                        <th style="text-align: center">ID</th>
+                        <th style="text-align: center">Name</th>
+                        <th style="text-align: center">Date(s)</th>
+                        <th style="text-align: center">Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.TimeOffRequests.Rows.Count; i++)
+                {
+                        <tr>
+                            <td>@Model.TimeOffRequests.Rows[i][0]</td>
+
+                            <td>@Model.TimeOffRequests.Rows[i][1]</td>
+                            @if (Model.TimeOffRequests.Rows[i][3].ToString() == "")
+                    {
+                                <td>@Model.TimeOffRequests.Rows[i][2]</td>
+                                if (Model.TimeOffRequests.Rows[i][4].ToString() == "--")
+                                {
+                                    <td>All Day</td>
+                                }
+                                else
+                                {
+                                    <td>@Model.TimeOffRequests.Rows[i][4] - @Model.TimeOffRequests.Rows[i][5]</td>
+                                }
+                            }
+                            else
+                            {
+                                <td>@Model.TimeOffRequests.Rows[i][2] - @Model.TimeOffRequests.Rows[i][3]</td>
+                                <td>--</td>
+                            }
+
+                            <td><button class="CancelButton" value="@Model.TimeOffRequests.Rows[i][6]" onclick="CancelRequest(this.value)">Cancel</button></td>
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        <br />
+        <br />
+        <br />
+    </body>
+</div>
+
 
 @section scripts{
-    }
+
+<script type="text/javascript">
+    $(function () {
+        // Disable browser cache Ajax.ActionLinks
+        $.ajaxSetup({ cache: false });
+    });
+</script>
+
+<script>
+    function CancelRequest(ID) {
+
+        $.post('/Home/ActiveTimeOffRequests',
+                {
+                    MessageID: ID
+                },
+                function (data) {
+                    $('#ActiveRequests').html(data);
+                }
+                );
+        }
+</script>
+}

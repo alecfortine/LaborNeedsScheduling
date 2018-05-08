@@ -95,6 +95,13 @@
 </head>
 
 <body>
+
+    @*<br />
+    <br />
+
+    <input type="range" min="0" max="5" value="3" id="fader">
+    <input id="ex2" type="text" class="span2" value="" data-slider-min="10" data-slider-max="1000" data-slider-step="5" data-slider-value="[250,450]" />*@
+
     <div id="DashboardDisplay">
 
         @if (Model.DMStoreSelect == true)
@@ -115,12 +122,12 @@
             {
                 <br />
                 <h4> Current Store: @Model.SelectedStore</h4>
-            <br />
-            <button style="float:left" type="button" onclick="ResetStoreCode()">Change Location</button>
+                <br />
+                <button style="float:left" type="button" onclick="ResetStoreCode()">Change Location</button>
                 <br />
             }
 
-                <br />
+            <br />
                 <button style="float:right" type="button" onclick="Print()">Print Schedule</button>
                 <br />
 
@@ -232,6 +239,13 @@
 
 @section scripts{
 
+<script type="text/javascript">
+    $(function () {
+        // Disable browser cache Ajax.ActionLinks
+        $.ajaxSetup({ cache: false });
+    });
+</script>
+
     <script>
         function Print(event) {
             var prtContent = document.getElementById("weekhours");
@@ -248,6 +262,8 @@
     <script>
         function CreateSchedule(){
             var Date = document.getElementById("hiddenRequestedDate").value;
+
+            $("#WeekSchedule").html('<br><br><br><img style="display: block; margin-left: auto; margin-right: auto;" src="@Url.Content("~/Images/spinner.gif")" /><br><br><br>');
 
             $.post('/Home/Dashboard',
     {
@@ -306,21 +322,21 @@
 
     <script>
         function SelectStore(StoreCode){
-            $.get('/Home/DMDashboard/?SelectedStore=' + StoreCode, function (data) {
+            $.get('/Home/Dashboard/?SelectedStore=' + StoreCode, function (data) {
                 //load partial to page
                 $('#DashboardDisplay').html(data);
             });
         }
     </script>
 
-<script>
+    <script>
         function ResetStoreCode(){
             $.get('/Home/DMDashboard/?ResetLocation=true', function (data) {
                 //load partial to page
                 $('#DashboardDisplay').html(data);
             });
         }
-</script>
+    </script>
 
     @*<script>
             function NextWeekSchedule() {

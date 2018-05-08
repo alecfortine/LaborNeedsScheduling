@@ -15,8 +15,6 @@
 
 <body>
 
-
-    <h4>Hours: @Model.ThisWeek.PayrollWeeklyHours</h4>
     @{ double hours = 0;}
 
     @for (int i = 1; i < 8; i++)
@@ -30,7 +28,22 @@
             }
         }
     }
-    @*<h4>Suggested: @hours</h4>*@
+
+    @if (Model.ThisWeek.PayrollWeeklyHours < hours-15)
+    {
+        <h4><b>Suggested: @hours</b></h4>
+        <h4>Hours: @Model.ThisWeek.PayrollWeeklyHours</h4>
+        <i>
+            <text>Input hours are too low for the current employee minimum(s). A schedule can still be created but may suggest more employees than desired.</text>
+            <br />
+            <text>Fix by increasing the weekly hours or lowering the minimum employee requirements.</text>
+        </i>
+
+    }
+    else
+    {
+        <h4>Hours: @Model.ThisWeek.PayrollWeeklyHours</h4>
+    }
 
     @*table*@
     <div style="display:inline-block; padding-top:30px;">
@@ -132,11 +145,22 @@
 
                                         var days = Html.Raw(Json.Encode(ViewBag.days));
                                         <td class="ButtonCell" id="cell">
-                                            <button onclick="getValue(this.value)" id="LaborSchedule" class="DaySelectionButton" 
-                                                    style="background-color:@buttonColors[dayValue]; border-color:@buttonBorders[dayValue];" 
-                                                    type="button" value=@dayValue>
-                                                @currentDay
-                                            </button>
+                                            @if (Model.ThisWeek.ExcludedWeekdays[dayValue] == false)
+                                            {
+                                                <button onclick="UpdateTotals(this.value);getValue(this.value)" id="LaborSchedule" class="DaySelectionButton"
+                                                        style="background-color:@buttonColors[dayValue]; border-color:@buttonBorders[dayValue];"
+                                                        type="button" value=@dayValue>
+                                                    @currentDay
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button onclick="" id="LaborSchedule" class="DaySelectionButton"
+                                                        style="background-color:#222222; border-color:black; color:#808080"
+                                                        type="button" value=@dayValue>
+                                                    @currentDay
+                                                </button>
+                                            }
                                         </td>
                                         dayValue++;
                                     }
@@ -162,11 +186,13 @@
                             <td style="padding:5px;text-align:center">@hourtotal</td>
                         }
                     </tr>
+
                     <tr>
                         <td style="padding:5px; font-weight:bold">Current Total</td>
                         @for (int i = 0; i < 7; i++)
                         {
-                            <td style="padding:5px;text-align:center">@Model.ThisWeek.DayHourTotals[i]</td>
+                            string[] weekdays = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+                            <td id="DayTotal_@weekdays[i]" style="padding:5px;text-align:center">@Model.ThisWeek.DayHourTotals[i]</td>
                         }
                     </tr>
                 </tbody>

@@ -104,14 +104,12 @@
 </head>
 
 <body>
-        <div>
+    @*<div>
             @for (int i = 0; i < Model.EmployeeTimeOffRequests.Count; i++)
             {
                 List<string> employeeIds = new List<string>(Model.EmployeeTimeOffRequests.Keys);
                 if (employeeIds[i] == Model.selectedEmployeeId)
                 {
-                    @*<h3>Approved Time Off Requests</h3>*@
-
                     Dictionary<DateTime, string[]> employeeWeek = Model.EmployeeTimeOffRequests[Model.selectedEmployeeId];
                     List<DateTime> weekDates = new List<DateTime>(employeeWeek.Keys);
                     for (int n = 0; n < 7; n++)
@@ -149,12 +147,16 @@
                     }
                 }
             }
-        </div>
+        </div>*@
 
     <br />
 
     @{ string employeeName = Model.EmpsForStore[Model.selectedEmployeeId];}
     <h2>@employeeName's Availability</h2>
+
+    <br />
+    <button type="button" onclick="updateSchedule()" style="float:right">Update</button><br>
+    <br />
 
     <div class="white-body">
         <table border="1" cellpadding="5" id="weekhours" class="weekhours">

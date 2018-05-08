@@ -32,7 +32,7 @@ namespace LaborNeedsScheduling.Models
         public double minhours = 0;
         public double maxhours = 0;
         public int openHourSlots = 2;
-        public double[] DayHourTotals { get; set; }
+        public double[] DayHourTotals = new double[7];
         public double TotalScheduledHours { get; set; }
 
         #region Selected Employee Scheduling
@@ -78,6 +78,8 @@ namespace LaborNeedsScheduling.Models
         public DataTable EmployeeAvailabilityView = new DataTable();
         public DataTable EmployeeScheduledView = new DataTable();
         public DataTable HourView = new DataTable();
+
+        public DataTable TempDaySchedule = new DataTable();
 
         public DataTable EmployeesScheduledPartial = new DataTable();
         public DataTable EmployeesAvailablePartial = new DataTable();
@@ -297,6 +299,8 @@ namespace LaborNeedsScheduling.Models
 
             return WeightingValues;
         }
+
+        public bool[] ExcludedWeekdays = new bool[7];
 
         public WorkWeek()
         {
@@ -677,15 +681,29 @@ namespace LaborNeedsScheduling.Models
                     endPosition += 2;
                 }
 
-                for (int n = 0; n < BlackoutTableView.Rows.Count; n++)
+                //check open/close hours for 0s and if they are set the blackout to true
+                string start = WeekStartEndHours.Rows[0][i - 1].ToString();
+                string end = WeekStartEndHours.Rows[1][i - 1].ToString();
+
+                if (start == "12:00AM" && end == "12:00AM")
                 {
-                    if (n < startPosition || n > endPosition)
+                    for (int n = 0; n < BlackoutTableView.Rows.Count; n++)
                     {
                         BlackoutTableView.Rows[n][i] = "True";
                     }
-                    else
+                }
+                else
+                {
+                    for (int n = 0; n < BlackoutTableView.Rows.Count; n++)
                     {
-                        BlackoutTableView.Rows[n][i] = "False";
+                        if (n < startPosition || n > endPosition)
+                        {
+                            BlackoutTableView.Rows[n][i] = "True";
+                        }
+                        else
+                        {
+                            BlackoutTableView.Rows[n][i] = "False";
+                        }
                     }
                 }
             }
@@ -722,6 +740,7 @@ namespace LaborNeedsScheduling.Models
                 string CloseHour = endhour;
                 string StartHour = "";
                 string EndHour = "";
+
                 for (int i = 0; i < ScheduleHalfHourSlots.Length; i++)
                 {
                     if (OpenHour == ScheduleHalfHourSlots[i] && i > openHourSlots)
@@ -756,6 +775,16 @@ namespace LaborNeedsScheduling.Models
                         }
                     }
                 }
+
+                if (OpenHour == "12:00AM" && CloseHour == "12:00AM")
+                {
+                    for (int i = 0; i < AllocatedHours.Rows.Count; i++)
+                    {
+                        times.Add(AllocatedHours.Rows[i][0].ToString());
+                    }
+                    ExcludedWeekdays[weekday] = true;
+                }
+
                 string[] blackouts = new string[times.Count];
 
                 for (int j = 0; j < times.Count; j++)
@@ -887,15 +916,44 @@ namespace LaborNeedsScheduling.Models
                             CloseHourPositions.Add(j);
                         }
                     }
+                    //if (OpenHourPositions[n] == "0" && CloseHourPositions[n] == "0")
+                    //{
+                    //    OpenHourPositions[n] = "Closed";
+                    //    CloseHourPositions[n] = "Closed";
+                    //}
                 }
                 int[] opens = OpenHourPositions.ToArray();
                 int[] closes = CloseHourPositions.ToArray();
 
-                int openhour = opens.Min();
-                int closehour = closes.Max();
+                int openhour = 0;
+                int closehour = 0;
 
-                string start = ScheduleHalfHourSlots[openhour];
-                string end = ScheduleHalfHourSlots[closehour];
+                for (int n = 0; n < opens.Length; n++)
+                {
+                    if (opens[n] != 0 && closes[n] != 0)
+                    {
+                        if (openhour == 0 && closehour == 0)
+                        {
+                            openhour = opens[n];
+                            closehour = closes[n];
+                        }
+                        else
+                        {
+                            if (opens[n] < openhour)
+                            {
+                                openhour = opens[n];
+                            }
+                            if (closes[n] > closehour)
+                            {
+                                closehour = closes[n];
+                            }
+                        }
+
+                    }
+                }
+
+                string start = ScheduleHalfHourSlots[Convert.ToInt32(openhour)];
+                string end = ScheduleHalfHourSlots[Convert.ToInt32(closehour)];
 
                 for (int j = 0; j < ScheduleHalfHourSlots.Length; j++)
                 {
@@ -1516,7 +1574,15 @@ namespace LaborNeedsScheduling.Models
                         //{
                         double hourAvg = Convert.ToDouble(WeightedAverageTrafficTotal.Rows[row][col]);
 
-                        dailyPercent = (hourAvg / dailyTotal) * 100;
+                        if (hourAvg == 0 && dailyTotal == 0)
+                        {
+                            dailyPercent = 0;
+                        }
+                        else
+                        {
+                            dailyPercent = (hourAvg / dailyTotal) * 100;
+                        }
+
                         PercentDailyTotal.Rows[row][col] = Math.Round(dailyPercent, 1, MidpointRounding.AwayFromZero);
                         //}
                     }
@@ -1955,7 +2021,10 @@ namespace LaborNeedsScheduling.Models
                         {
                             for (int m = 1; m < WeekdayPowerHours * 2; m++)
                             {
-                                powerHours.Add(ScheduleHalfHourSlots[n + m]);
+                                if (n + m < ScheduleHalfHourSlots.Length)
+                                {
+                                    powerHours.Add(ScheduleHalfHourSlots[n + m]);
+                                }
                             }
                             break;
                         }

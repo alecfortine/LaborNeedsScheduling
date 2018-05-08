@@ -31,6 +31,15 @@ namespace LaborNeedsScheduling.Models
         public static List<Employees> EmployeeListStore { get; set; }
         public List<ManagerNotification> ManagerMessageList { get; set; }
 
+        public double[] DayHourTotals { get; set; }
+        public double SundayTotal { get; set; }
+        public double MondayTotal { get; set; }
+        public double TuesdayTotal { get; set; }
+        public double WednesdayTotal { get; set; }
+        public double ThursdayTotal { get; set; }
+        public double FridayTotal { get; set; }
+        public double SaturdayTotal { get; set; }
+
         public string selectedEmployeeId { get; set; }
         public string selectedEmployeeName { get; set; }
         public string[] ExcludedDates { get; set; }

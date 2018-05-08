@@ -201,6 +201,12 @@
         }
     </style>
 
+    <style>
+        a:hover {
+            cursor: pointer;
+        }
+    </style>
+
 </head>
 
 <body>
@@ -256,7 +262,9 @@
         </div>
     </div>
 
-    @using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "DayHoursForm"@*, onsubmit = "return checkTimes()"*@ }))
+    @using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new
+    {
+        name = "DayHoursForm"@*, onsubmit = "return checkTimes()"*@ }))
             {
         @*display lightbox for selection table*@
         <div id="light" class="white_content2">
@@ -306,14 +314,16 @@
 
             <div class="white-body">
                 <h2>Employee Coverage</h2>
+                <h5>[amount of employees on the floor]</h5>
                 <label>Minimum Exployees (Early):</label>
-                @Html.TextBoxFor(m => Model.ThisWeek.MinEmployeesEarly, new { style = "width:25px; text-align:center;", autocomplete = "off", id = "minEarly"})<br />
+                @Html.TextBoxFor(m => Model.ThisWeek.MinEmployeesEarly, new { style = "width:25px; text-align:center;", autocomplete = "off", id = "minEarly" })<br />
                 <label>Minimum Exployees (Later):</label>
                 @Html.TextBoxFor(m => Model.ThisWeek.MinEmployeesLater, new { style = "width:25px; text-align:center;", autocomplete = "off", id = "minLater" })<br />
                 <label>Maximum Exployees:</label>
                 @Html.TextBoxFor(m => Model.ThisWeek.MaxEmployees, new { style = "width:25px; text-align:center;", autocomplete = "off", id = "max" })<br />
                 <br />
                 <h2>Power Hours</h2>
+                <h5>[amount of priority hours on the schedule]</h5>
                 <label>Weekday:</label>
                 @Html.TextBoxFor(m => Model.ThisWeek.WeekdayPowerHours, new { style = "width:25px; text-align:center;", autocomplete = "off", id = "weekdayPowerHours" })<br />
                 <label>Weekend:</label>
@@ -324,7 +334,7 @@
                     @Html.TextBoxFor(m => Model.ThisWeek.NumberHistoricalWeeks, new { style = "width:25px; text-align:center;" })<br />*@
 
             </div>
-            <button type="submit" class="right-element" style="margin-bottom:10px;">Update</button><br>
+            <button type="submit" class="right-element" style="margin-bottom:20px;">Update</button><br>
 
         </div>
         <div id="fade" class="black_overlay"></div>
@@ -363,27 +373,27 @@
                             @{int counter = 0;}
                             @for (int i = 0; i < Model.ThisWeek.NumberHistoricalWeeks; i++)
                             {
-                            <tr>
-                                @for (int n = 0; n < 7; n++)
+                                <tr>
+                                    @for (int n = 0; n < 7; n++)
                                     {
                                         if (bools[n + counter] == true)
                                         {
-                                    <td class="ExcludedTrue" onclick="changeCell(this)">
-                                        @dates[n + counter]
-                                        @*<br />
-                                            @bools[n + counter]*@
-                                    </td>
+                                            <td class="ExcludedTrue" onclick="changeCell(this)">
+                                                @dates[n + counter]
+                                                @*<br />
+                                                    @bools[n + counter]*@
+                                            </td>
                                         }
                                         else
                                         {
-                                    <td class="ExcludedFalse" onclick="changeCell(this)">
-                                        @dates[n + counter]
-                                        @*<br />
-                                            @bools[n + counter]*@
-                                    </td>
+                                            <td class="ExcludedFalse" onclick="changeCell(this)">
+                                                @dates[n + counter]
+                                                @*<br />
+                                                    @bools[n + counter]*@
+                                            </td>
                                         }
                                     }
-                            </tr>
+                                </tr>
                                 {
                                     counter += 7;
                                 }
@@ -434,6 +444,13 @@
 
     <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
 
+    <script type="text/javascript">
+        $(function () {
+            // Disable browser cache Ajax.ActionLinks
+            $.ajaxSetup({ cache: false });
+        });
+    </script>
+
     <script>
         function validateInput()
         {
@@ -454,10 +471,13 @@
 
                 return false;
             }
-            //else{
-            //    alert("Variables updated.")
-            //    return true;
-            //}
+            if (weekdayPowerHours > 8 || weekendPowerHours > 8)
+            {
+                alert("Power hours must be lower. Limit is 8 hours.");
+
+                return false;
+            }
+            
         }
     </script>
 

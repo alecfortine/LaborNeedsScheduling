@@ -208,24 +208,11 @@
 
     <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
 
-    @*<script>
+<script type="text/javascript">
+    $(function () {
+        // Disable browser cache Ajax.ActionLinks
+        $.ajaxSetup({ cache: false });
+    });
+</script>
 
-                // get all the cells in the table
-            var table = document.getElementsByClassName("AssignedView")[0];
-            if (table != null) {
-                var cells = table.getElementsByTagName("td");
-                var button = document.getElementById("UnassignButton");
-                var count = 0;
-
-                alert(button.innerHTML);
-
-                // iterating over each cell
-                for (var i = 0; i < cells.length; i++) {
-                    if (cells[i].className == "UnassignedCell") {
-                        button.className == "UnassignButtonShow";
-                        count++;
-                    }
-                }
-            }
-        </script>*@
 }

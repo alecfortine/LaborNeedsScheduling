@@ -124,10 +124,17 @@
             @{ double dayHours = Model.ThisWeek.AssignmentView.Rows[0][Model.ThisWeek.AssignmentView.Columns.Count - 1] - Model.ThisWeek.AssignmentView.Rows.[1][Model.ThisWeek.AssignmentView.Columns.Count - 1]}
             <h4>Current: @dayHours</h4>
         </div>*@
-    @if (1 == 1)
-    {
 
-    }
+        @Html.HiddenFor(m => Model.SundayTotal, new { id = "SundayTotal" })
+        @Html.HiddenFor(m => Model.MondayTotal, new { id = "MondayTotal" })
+        @Html.HiddenFor(m => Model.TuesdayTotal, new { id = "TuesdayTotal" })
+        @Html.HiddenFor(m => Model.WednesdayTotal, new { id = "WednesdayTotal" })
+        @Html.HiddenFor(m => Model.ThursdayTotal, new { id = "ThursdayTotal" })
+        @Html.HiddenFor(m => Model.FridayTotal, new { id = "FridayTotal" })
+        @Html.HiddenFor(m => Model.SaturdayTotal, new { id = "SaturdayTotal" })
+
+    <input type="hidden" id="please" value="@Model.SundayTotal">
+
     <div style="text-align:center; width:200px; padding:5px; margin: 0 auto; border:solid 1px black">
         <h4>Week Goal: @Model.ThisWeek.PayrollWeeklyHours</h4>
         <h4>Current: @Model.ThisWeek.TotalScheduledHours</h4>
@@ -180,39 +187,7 @@
                             <th class="AssignmentCell" style="background-color:@buttonColors[Model.ThisWeek.selectedWeekday]">Total</th>
 
                         </tr>
-                        @*<tr>
-                                @for (int i = 0; i < Model.ThisWeek.AssignmentView.Columns.Count; i++)
-                                {
-                                    DataColumn c = Model.ThisWeek.AssignmentView.Columns[i];
-                                    if (Model.ThisWeek.AssignmentView.Rows[0][i].ToString() == "")
-                                    {
-                                        if (Model.ThisWeek.openHourSlots == 2)
-                                        {
-                                            <td id="1" onclick="ToggleStartHour(this.id)" style="text-align:center; font-size:18px; border: solid 1px black; cursor:pointer">-</td>
-                                        }
-                                        else
-                                        {
-                                            <td id="2" onclick="ToggleStartHour(this.id)" style="text-align:center; font-size:18px; border: solid 1px black; cursor:pointer">+</td>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (Model.ThisWeek.BlackoutAssignmentView.Rows.Count > 0)
-                                        {
-                                            if (Model.ThisWeek.BlackoutAssignmentView.Rows[0][i].ToString() != "True")
-                                            {
-                                                <th class="AssignmentCell">@c.Caption</th>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <th class="AssignmentCell">@c.Caption</th>
-                                        }
-                                    }
-                                }
-                                <th class="AssignmentCell">Total</th>
 
-                            </tr>*@
                     </thead>
                     <tbody>
                         @{double totalhours = 0; }
@@ -250,23 +225,11 @@
 
 
                                     }
-                                    @*else
-                                            {
-                                                if (Model.ThisWeek.BlackoutAssignmentView.Rows.Count > 0 && Convert.ToString(Model.ThisWeek.BlackoutAssignmentView.Rows[n][h]) == "True")
-                                                {
-                                            columnCount++;
-                                        }
-                                        else
-                                        {
-                                            <td class="AssignmentCell" id="AssignmentCell" onclick="getHour(@columnCount)">0</td>
-                                                    columnCount++;
-                                                }
-                                            }*@
                                 }
                                 @if (n == 0)
                                 {
                                     totalhours = houramount / 2;
-                                    <td class="AssignmentCell">@totalhours</td>
+                                    <td class="AssignmentCell" id="TotalSuggested">@totalhours</td>
                                 }
                                 @if (n == 1)
                                 {
@@ -315,7 +278,7 @@
                                     }
                                     //totalhours = totalhours - (hoursassigned / 2);
                                     totalhours = totalhours - (Model.ThisWeek.DayHourTotals[Model.ThisWeek.selectedWeekday]);
-                                    <td class="AssignmentCell">@totalhours</td>
+                                    <td class="AssignmentCell" id="TotalRemaining">@totalhours</td>
                                 }
                             </tr>
                         }
@@ -714,7 +677,7 @@
         <br />
 
         <div class="EmployeeScheduler" align="center" style="display: inline"></div>
-
+        <br /><br /><br />
         <div class="EmployeesAndErrors">
             @*<div>*@
             <div>
@@ -788,20 +751,21 @@
                     <div style="padding-top:10px; display: inline-block;">
                         <div id="EmployeeAvailabilityTimes"></div>
 
-                        @using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "BorrowEmployeeForm" }))
-            {
+                        @*@using (Html.BeginForm("ManagerConfiguration", "Home", FormMethod.Post, new { name = "BorrowEmployeeForm" }))
+            {*@
                             <h2>Borrow employee</h2>
                             <br />
                             <div class="main">
                                 <div>
                                     Search by store code / employee id / employee name: <br />
-                                    @Html.TextBoxFor(m => Model.ThisWeek.EmployeeSearch, new { id = "EmployeeSearch", autocomplete = "off" })
+                                    @*@Html.TextBoxFor(m => Model.ThisWeek.EmployeeSearch, new { id = "EmployeeSearch", autocomplete = "off" })*@
+                                    <input type="text" id="EmployeeSearch" autocomplete = "off"/>
                                     <button type="button" onclick="findEmployee(document.getElementById('EmployeeSearch').value)" id="SearchButton">Search</button>
                                 </div>
                                 <br />
                                 <div id="FoundEmployee"></div>
                             </div>
-                        }
+                        @*}*@
                     </div>
                 </div>
 
@@ -835,6 +799,23 @@
 @section scripts
 {
     <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        // Disable browser cache Ajax.ActionLinks
+        $.ajaxSetup({ cache: false });
+    });
+</script>
+
+    <script>
+        $(document).ready(function () {
+            $("#EmployeeSearch").keypress(function (event) {
+                if (event.keyCode == 13) {
+                    alert('you pressed enter');
+                }
+            });
+        });
+    </script>
 
     <script>
         function AddHourEnd(employeeId) {

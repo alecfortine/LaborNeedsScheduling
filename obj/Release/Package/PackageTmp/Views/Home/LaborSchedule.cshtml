@@ -494,77 +494,77 @@
 
 <body>
     @*@if (Model.ThisWeek.employeeStatus == false)
+        {
+            <div class="mainalt">
+                <h2>You don't have permission to view the page.</h2>
+            </div>
+            <br />
+            <br />
+        }
+        else
+        {*@
+    <br />
+    <div id="SelectedWeekDates" style="text-align:center; user-select: none;">
+        <h2>Create Schedule (@Model.ThisWeek.RequestedDates[0].ToShortDateString() - @Model.ThisWeek.RequestedDates[6].ToShortDateString())</h2>
+        <div id="WeekChange" style="font-size: 18px; float:right;" onclick="TwoWeeksSchedule()">Next Week >></div> <br />
+    </div>
+    <br>
+    @*<a href="/Home/LaborSchedule" style="text-decoration: none;">*@
+    @*<div id="WeekChange" style="font-size: 18px; float:right;" onclick="NextWeekSchedule()">Next Week >></div> <br />*@
+    @*</a>*@
+    <br>
+
+    <input id="toggle" type="checkbox" class="messages">
+    @Html.HiddenFor(m => m.ManagerMessageList.Count, new { id = "hiddenMessageCount" })
+    <input type="hidden" id="hiddenMessageCounter" value=0>
+    <label for="toggle" class="messages" id="messages">@Model.ManagerMessageList.Count Messages</label>
+    <div id="expand">
+        <section>
+            @foreach (ManagerNotification notification in Model.ManagerMessageList)
+            {
+                int messageId = notification.messageId;
+
+                <div class="messagebox">
+                    <span class="approve" onclick="approveRequest(@messageId)">&#10003;</span>
+                    <span class="deny" onclick="denyRequest(@messageId)">&times;</span>
+                    <text style="font-size: 14px;">@notification.message</text>
+                </div>
+            }
+        </section>
+    </div>
+
+    <br />
+    <br />
+
+
+    @using (Ajax.BeginForm("LaborSchedule", "Home", new AjaxOptions
     {
-        <div class="mainalt">
-            <h2>You don't have permission to view the page.</h2>
-        </div>
-        <br />
-        <br />
-    }
-    else
-    {*@
-        <br />
-        <div id="SelectedWeekDates" style="text-align:center; user-select: none;">
-            <h2>Create Schedule (@Model.ThisWeek.RequestedDates[0].ToShortDateString() - @Model.ThisWeek.RequestedDates[6].ToShortDateString())</h2>
-            <div id="WeekChange" style="font-size: 18px; float:right;" onclick="TwoWeeksSchedule()">Next Week >></div> <br />
-        </div>
-        <br>
-        @*<a href="/Home/LaborSchedule" style="text-decoration: none;">*@
-        @*<div id="WeekChange" style="font-size: 18px; float:right;" onclick="NextWeekSchedule()">Next Week >></div> <br />*@
-        @*</a>*@
-        <br>
-
-        <input id="toggle" type="checkbox" class="messages">
-        @Html.HiddenFor(m => m.ManagerMessageList.Count, new { id = "hiddenMessageCount" })
-        <input type="hidden" id="hiddenMessageCounter" value=0>
-        <label for="toggle" class="messages" id="messages">@Model.ManagerMessageList.Count Messages</label>
-        <div id="expand">
-            <section>
-                @foreach (ManagerNotification notification in Model.ManagerMessageList)
-                {
-                    int messageId = notification.messageId;
-
-                    <div class="messagebox">
-                        <span class="approve" onclick="approveRequest(@messageId)">&#10003;</span>
-                        <span class="deny" onclick="denyRequest(@messageId)">&times;</span>
-                        <text style="font-size: 14px;">@notification.message</text>
-                    </div>
-                }
-            </section>
-        </div>
-
-        <br />
-        <br />
-
-
-        @using (Ajax.BeginForm("LaborSchedule", "Home", new AjaxOptions
-        {
-            HttpMethod = "post",
-            InsertionMode = InsertionMode.Replace,
-            UpdateTargetId = "LaborScheduleTable",
-            OnBegin = "return checkInp()"
-        },
-        new { id = "ScheduleForm" }))
-        {
-            <div style="overflow:auto">
-                <div class="left-element" >
-                    <div style="padding: 20px;">
-                        <div>
-                            <div class="left-element">
-                                <label>Weekly Hours: </label><br />
-                            </div>
-
-                            <div class="left-element">
-                                @Html.TextBoxFor(m => m.ThisWeek.PayrollWeeklyHours, new { id = "weeklyHours", style = "width:50px;", autocomplete = "off" })
-                                <button type="submit" id="LaborScheduleButton" style="display:inline-block; margin-left: 30px;" @*onclick="CreateSchedule()"*@>Update</button>
-                            </div>
+        HttpMethod = "post",
+        InsertionMode = InsertionMode.Replace,
+        UpdateTargetId = "LaborScheduleTable",
+        OnBegin = "return checkInp()"
+    },
+                        new { id = "ScheduleForm", onkeydown = "return event.keyCode!=13" }))
+    {
+        <div style="overflow:auto">
+            <div class="left-element">
+                <div style="padding: 20px;">
+                    <div>
+                        <div class="left-element">
+                            <label>Weekly Hours: </label><br />
                         </div>
-                        <br />
+
+                        <div class="left-element">
+                            @Html.TextBoxFor(m => m.ThisWeek.PayrollWeeklyHours, new { id = "weeklyHours", style = "width:50px;", autocomplete = "off" })
+                            <button type="submit" id="LaborScheduleButton" style="display:inline-block; margin-left: 30px;" @*onclick="CreateSchedule()"*@>Update</button>
+                        </div>
                     </div>
+                    <br />
                 </div>
             </div>
+        </div>
 
-            <br />
+        <br />
             <br />
 
             <div id="LaborScheduleTable"></div>
@@ -575,11 +575,15 @@
             @Html.HiddenFor(m => Model.ThisWeek.ExcludedDates, new { id = "hiddenExcludedDatesData" })
             @Html.HiddenFor(m => Model.ThisWeek.selectedHour, new { id = "hiddenSelectedHour" })
             @Html.HiddenFor(m => Model.ThisWeek.startdateRequested, new { id = "hiddenRequestedDate" })
-        }
+        <input type="hidden" id="LastDaySelected" value=""/>
 
-        <br />
-        <br />
+
+    }
+
+    <br />
+    <br />
     @*}*@
+
 </body>
 
 
@@ -588,10 +592,36 @@
 {
     <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
 
+    <script type="text/javascript">
+        $(function () {
+            // Disable browser cache Ajax.ActionLinks
+            $.ajaxSetup({ cache: false });
+        });
+    </script>
+
+    <script>
+        $(window).keypress(function (event) {
+            if (event.which == 13) {
+                document.forms[0].submit();
+                // assuming that you have just one form on the whole page
+            }
+        });
+    </script>
 
     @*search for an employee to add*@
     <script>
+        //$(document).ready(function () {
+        //    $("#EmployeeSearch").keypress(function (event) {
+        //        if(event.keyCode == 13){
+        //            alert('you pressed enter');
+        //        }
+        //    });
+        //});
+
         function findEmployee(emp) {
+
+            $("#FoundEmployee").html('<img style="display: block; margin-left: auto; margin-right: auto;" src="@Url.Content("~/Images/spinner.gif")" />');
+
             $.get('/Home/FindEmployee/?EmployeeId=' + emp, function (data) {
                 //load partial to page
                 $('#FoundEmployee').html(data);
@@ -602,6 +632,9 @@
     @*add a found employee*@
     <script>
         function addEmployee(empid) {
+
+            $("#AssignmentTablePartial").html('<img style="display: block; margin-left: auto; margin-right: auto;" src="@Url.Content("~/Images/spinner.gif")" /><br><br><br>');
+
             $.post('/Home/AddEmployee',
                 {
                     EmployeeId: empid
@@ -616,6 +649,9 @@
     @*remove a borrowed employee from the schedule*@
     <script>
         function RemoveEmployee(EmployeeId){
+
+            $("#AssignmentTablePartial").html('<img style="display: block; margin-left: auto; margin-right: auto;" src="@Url.Content("~/Images/spinner.gif")" /><br><br><br>');
+
             $.post('/Home/RemoveEmployee',
     {
         EmployeeId: EmployeeId
@@ -691,26 +727,28 @@ function (data){
 },
     function (data){
         $('#AssignmentTablePartial').html(data);
+
     }
     );
+
         }
 
     </script>
 
     @*update the schedule partial - not needed with form submit*@
     @*<script>
-        function CreateSchedule(){
-            var Date = document.getElementById("hiddenRequestedDate").value;
+            function CreateSchedule(){
+                var Date = document.getElementById("hiddenRequestedDate").value;
 
-            $.post('/Home/_LaborScheduleAssignmentView',
-    {
-    },
-    function (data){
-        $('#LaborSchedule').html(data);
-    }
-    );
+                $.post('/Home/_LaborScheduleAssignmentView',
+        {
+        },
+        function (data){
+            $('#LaborSchedule').html(data);
         }
-    </script>*@
+        );
+            }
+        </script>*@
 
     @*determine which week to create a schedule for, change values when changing selection*@
     <script>
@@ -802,72 +840,69 @@ function (data){
         });
     </script>
 
+    <script>
+        function UpdateTotals(value){
+
+            //alert('selected value: ' + value);        
+
+            var Total = document.getElementById("TotalSuggested");
+            if(Total){
+                var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+                var suggested = document.getElementById("TotalSuggested").innerHTML;
+                var remaining = document.getElementById("TotalRemaining").innerHTML;
+                var dayTotal = suggested - remaining;
+
+                var lastValue = document.getElementById("LastDaySelected").value;
+
+                //alert('current hidden last value: ' + lastValue);
+
+                document.getElementById("DayTotal_"+days[lastValue]).innerHTML = dayTotal;
+
+            }
+            document.getElementById("LastDaySelected").value = value;
+            //alert('updated hidden last value: ' + document.getElementById("LastDaySelected").value);
+
+
+        }
+    </script>
     @*open the assignment partial by clicking table buttons*@
     <script>
         function getValue(value){
 
-            $("#AssignmentTablePartial").html('<img style="display: block; margin-left: auto; margin-right: auto;" src="@Url.Content("~/Images/spinner.gif")" />');
+            $("#AssignmentTablePartial").html('<img style="display: block; margin-left: auto; margin-right: auto;" src="@Url.Content("~/Images/spinner.gif")" /><br><br><br>');
 
             $.get('/Home/_LaborScheduleAssignmentView/?selectedColumn=' + value, function (data) {
-
                 //load partial to page
                 $('#AssignmentTablePartial').html(data);
+                //$("#partialmodel").html(data);
+
             });
-        }
-    </script>
 
-    @*old method of assigning an employee and validating input - changed how this works*@
-    @*<script>
-        function updateAssignmentView(value){
 
-            var selectedEmployeeId = document.getElementById("hiddenEmployeeId").value;
-            var startHour = document.getElementById("startHour");
-            var startHourValue = startHour.options[startHour.selectedIndex].value;
+            //var myEle = document.getElementById("please");
+            //if(myEle){
+            //    var sun = myEle.value;
+            //    alert(sun);
 
-            //var endHour = document.getElementById("endHour");
-            //var endHourValue = endHour.options[endHour.selectedIndex].value;
+            //    var frig = document.getElementById("DayTotal_Sunday").innerHTML;
+            //    alert(frig);
 
-            //var hours = ["6AM-7AM","7AM-8AM","8AM-9AM","9AM-10AM","10AM-11AM","11AM-12PM","12PM-1PM","1PM-2PM","2PM-3PM","3PM-4PM",
-            //             "4PM-5PM","5PM-6PM","6PM-7PM","7PM-8PM","8PM-9PM","9PM-10PM","10PM-11PM","11PM-12AM","12AM-1AM"];
-
-            var hours = [ "6:00AM", "6:30AM", "7:00AM", "7:30AM","8:00AM", "8:30AM","9:00AM", "9:30AM","10:00AM", "10:30AM",
-                          "11:00AM", "11:30AM","12:00PM","12:30PM", "1:00PM", "1:30PM", "2:00PM", "2:30PM", "3:00PM", "3:30PM",
-                          "4:00PM", "4:30PM", "5:00PM", "5:30PM", "6:00PM", "6:30PM", "7:00PM", "7:30PM", "8:00PM", "8:30PM",
-                          "9:00PM", "9:30PM", "10:00PM", "10:30PM", "11:00PM", "11:30PM", "12:00AM"];
-
-            var start;
-            var end;
-
-            for (i = 0; i < hours.length; i++){
-                if(startHourValue == hours[i]){
-                    start = i;
-                }
-                //if(endHourValue == hours[i]){
-                //    end = i;
-                //}
-            }
-            if(selectedEmployeeId == ""){
-                alert('Select an employee to assign.');
-                return false;
-            }
-            //if(end < start){
-            //    alert('The assigned start hour must come before the end hour.')
-            //    return false;
+            //    document.getElementById("DayTotal_Sunday").innerHTML = sun;
             //}
 
-            $.post('/Home/_LaborScheduleAssignmentView',
-                {
-                    employeeId: selectedEmployeeId,
-                    startHour: startHourValue,
-                    //endHour: endHourValue
-                },
-                function (data){
-                    $('#AssignmentTablePartial').html(data);
-                }
-                );
-            alert('Employee assigned');
+
+
+            @*var myArray = '@Model.DayHourTotals[0]';*@
+
+            @*@foreach (var d in Model.DayHourTotals)
+            {
+                @:myArray.push("@d");
+            }*@
+            //alert(myArray[0]);
+            //alert(myArray.length);
         }
-    </script>*@
+    </script>
 
     @*import last week's schedule or clear the selected week's schedule on button click*@
     <script>
@@ -875,7 +910,7 @@ function (data){
             var result = confirm("Warning: This will replace the current schedule.");
             if (result) {
 
-                $("#AssignmentTablePartial").html('<img style="display: block; margin-left: auto; margin-right: auto;" src="@Url.Content("~/Images/spinner.gif")" />');
+                $("#AssignmentTablePartial").html('<img style="display: block; margin-left: auto; margin-right: auto;" src="@Url.Content("~/Images/spinner.gif")" /><br><br><br>');
 
                 $.post('/Home/ImportSchedule',
                     {
@@ -884,6 +919,12 @@ function (data){
                         $('#AssignmentTablePartial').html(data);
                     }
                     );
+
+                var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+                for (i = 0; i < days.length; i++) {
+                    document.getElementById("DayTotal_"+days[i]).innerHTML = '-';
+                }
             }
         }
 
@@ -891,7 +932,7 @@ function (data){
             var result = confirm("Warning: This will clear the current schedule.");
             if (result) {
 
-                $("#AssignmentTablePartial").html('<img style="display: block; margin-left: auto; margin-right: auto;" src="@Url.Content("~/Images/spinner.gif")" />');
+                $("#AssignmentTablePartial").html('<img style="display: block; margin-left: auto; margin-right: auto;" src="@Url.Content("~/Images/spinner.gif")" /><br><br><br>');
 
                 $.post('/Home/ClearSchedule',
                     {
@@ -900,6 +941,12 @@ function (data){
                         $('#AssignmentTablePartial').html(data);
                     }
                     );
+
+                var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+                for (i = 0; i < days.length; i++) {
+                    document.getElementById("DayTotal_"+days[i]).innerHTML = '0';
+                }
             }
         }
     </script>
@@ -919,176 +966,7 @@ function (data){
                 );
         }
 
-        //old method of unassigning
-        //function unassignEmployee(value){
-        //    var unassignTimes = document.getElementById("hiddenUnassignTimes").value
-        //    $.post('/Home/_LaborScheduleEmployeeAvailability',
-        //        {
-        //            unassignTimes: unassignTimes
-        //        },
-        //        function (data){
-        //            $('#AssignmentTablePartial').html(data);
-        //        }
-        //        );
-        //    alert('Employee unassigned');
-        //}
     </script>
-
-    @*old method of assigning and unassigning employees*@
-    @*<script>
-        function changeAssignment(cell) {
-            if (cell.className == "AssignedCell") {
-                cell.className = "UnassignedCell";
-            }
-            else if (cell.className == "UnassignedCell") {
-                cell.className = "AssignedCell";
-            }
-
-            // get all the cells in the table
-            var table = document.getElementsByClassName("AssignedView")[0];
-            var cells = table.getElementsByTagName("td");
-            var button = document.getElementById("UnassignButton");
-
-            // set of class values to pass to the model
-            var cellvalues = []; //new Array(cells.length);
-            var counter = 0;
-
-            // iterating over each cell
-            for (var i = 0; i < cells.length; i++) {
-                if (cells[i].className == "UnassignedCell") {
-                    cellvalues[counter] = cells[i].innerHTML;
-                    counter++;
-                }
-            }
-
-            if (counter > 0) {
-                document.getElementById("UnassignButton").classList.add('UnassignButtonShow');
-                document.getElementById("UnassignButton").classList.remove('UnassignButtonHide');
-            }
-            else if (counter == 0 && document.getElementById("UnassignButton").className == 'UnassignButtonShow') {
-                document.getElementById("UnassignButton").classList.add('UnassignButtonHide');
-                document.getElementById("UnassignButton").classList.remove('UnassignButtonShow');
-            }
-
-            document.getElementById("hiddenUnassignTimes").value = cellvalues;
-        }
-    </script>*@
-
-    @*highlight the selected employee on the employee list and display the partial*@
-    @*<script>
-        //get the name/id of the selected employee and highlight their row on the selection table
-        function getEmployee(emp) {
-            var employee = emp;
-            var EmployeeList = @Html.Raw(Json.Encode(Model.ThisWeek.employeeListStore));
-            var CurrentEmployee = @Html.Raw(Json.Encode(Model.ThisWeek.selectedEmployee));
-            var CurrentEmployeeId = @Html.Raw(Json.Encode(Model.ThisWeek.selectedEmployeeId));
-            var selectedEmployeeName = '';
-            var selectedEmployeeId = '';
-
-            // set the current employee model variable
-            for(i = 0; i < EmployeeList.length; i++){
-                //alert(employee + " / " + EmployeeList[i].id);
-                if (employee == EmployeeList[i].id){
-                    selectedEmployeeName = EmployeeList[i].firstName + " " + EmployeeList[i].lastName;
-                    selectedEmployeeId = EmployeeList[i].id;
-
-                    document.getElementById("employeeName").innerHTML = 'Schedule ' + selectedEmployeeName;
-                }
-            }
-
-            var employeeCells = document.querySelectorAll("td.EmployeeCell");
-            var selectedEmployeeCells = document.querySelectorAll("td.EmployeeCellSelected");
-
-            if (selectedEmployeeId != document.getElementById("hiddenEmployeeId").value){
-                // highlight selected employee row
-                for(i = 0; i < employeeCells.length; i++){
-                    if (employeeCells[i].innerHTML == employee){
-                        for(n = 0; n < 6; n++){
-                            employeeCells[i + n].classList.remove('EmployeeCell');
-                            employeeCells[i + n].classList.add('EmployeeCellSelected');
-                        }
-                    }
-                }
-
-                // unhighlight all other cells
-                for(i = 0; i < selectedEmployeeCells.length; i++){
-                    for (i = 0; i < selectedEmployeeCells.length; i++){
-                        selectedEmployeeCells[i].classList.remove('EmployeeCellSelected');
-                        selectedEmployeeCells[i].classList.add('EmployeeCell');
-                    }
-                }
-            }
-            // display the employee availability partial
-            $.get('/Home/_LaborScheduleEmployeeAvailability/?employeeId=' + emp, function (data) {
-                $('#EmployeeAvailabilityTimes').html(data);
-            });
-
-            document.getElementById("hiddenEmployeeId").value = selectedEmployeeId;
-            document.getElementById("hiddenEmployeeName").value = selectedEmployeeName;
-        }
-    </script>*@
-
-    @*highlight the selected employee on the availability list and display the buttons*@
-    @*<script>
-        //get the name/id of the selected employee and highlight their row on the selection table
-        function selectEmployee(emp) {
-            var employee = emp;
-            var EmployeeList = @Html.Raw(Json.Encode(Model.ThisWeek.employeeListStore));
-            var CurrentEmployee = @Html.Raw(Json.Encode(Model.ThisWeek.selectedEmployee));
-            var CurrentEmployeeId = @Html.Raw(Json.Encode(Model.ThisWeek.selectedEmployeeId));
-            var selectedEmployeeName = '';
-            var selectedEmployeeId = '';
-
-            for(i = 0; i < EmployeeList.length; i++){
-                if (employee == EmployeeList[i].id){
-                    selectedEmployeeName = EmployeeList[i].firstName + " " + EmployeeList[i].lastName;
-                    selectedEmployeeId = EmployeeList[i].id;
-                }
-            }
-
-            document.getElementById("hiddenEmployeeId").value = selectedEmployeeId;
-            document.getElementById("hiddenEmployeeName").value = selectedEmployeeName;
-
-            var availabilityCells = document.querySelectorAll("td.HourAvailabilityCell, td.HiddenCell");
-            var selectedAvailabilityCells = document.querySelectorAll("td.HourAvailabilityCellSelected, td.AssignButtonCell");
-
-            // highlight selected employee row
-            for(i = 0; i < availabilityCells.length; i++){
-                if (availabilityCells[i].innerHTML == selectedEmployeeName){
-                    for(n = 0; n < 4; n++){
-                        if(n < 3){
-                            availabilityCells[i + n].classList.remove('HourAvailabilityCell');
-                            availabilityCells[i + n].classList.add('HourAvailabilityCellSelected');
-                        }
-                        else
-                        {
-                            availabilityCells[i + n].classList.remove('HiddenCell');
-                            availabilityCells[i + n].classList.add('AssignButtonCell');
-                        }
-                    }
-                }
-            }
-
-            for(i = 0; i < selectedAvailabilityCells.length; i++){
-                if (selectedAvailabilityCells[i].innerHTML != selectedEmployeeName){
-                    for(n = 0; n < 5; n++){
-                        if(n < 3){
-                            selectedAvailabilityCells[i + n].classList.remove('HourAvailabilityCellSelected');
-                            selectedAvailabilityCells[i + n].classList.add('HourAvailabilityCell');
-                        }
-                        else
-                        {
-                            selectedAvailabilityCells[i + n].classList.remove('AssignButtonCell');
-                            selectedAvailabilityCells[i + n].classList.add('HiddenCell');
-                        }
-                    }
-                }
-            }
-        }
-
-        document.getElementById("hiddenEmployeeId").value = selectedEmployeeId;
-        document.getElementById("hiddenEmployeeName").value = selectedEmployeeName;
-    </script>*@
 
     @*assign an employee at the selected hour on the assignment table*@
     <script>
@@ -1110,6 +988,9 @@ function (data){
     <script>
         function getHour(hour) {
             document.getElementById("hiddenSelectedHour").value = hour;
+
+            $("#HourAvailability").html('<img style="display: block; margin-left: auto; margin-right: auto; margin-top: 40px;" src="@Url.Content("~/Images/spinner.gif")" />');
+
             $.get('/Home/_LaborScheduleHourAvailability/?selectedHour=' + hour, function (data) {
                 $('#HourAvailability').html(data);
             });
@@ -1127,46 +1008,6 @@ function (data){
             }
         }
     </script>
-
-    @*excluded dates - moved to variables page*@
-    @*<script>
-        function changeCell(cell) {
-            if (cell.className == "ExcludedFalse") {
-                cell.className = "ExcludedTrue";
-            }
-            else if (cell.className == "ExcludedTrue") {
-                cell.className = "ExcludedFalse";
-            }
-
-            // get all the cells in the table
-            var exlusiontable = document.getElementsByClassName("ExcludedDates")[0];
-            var exclusioncells = exlusiontable.getElementsByTagName("td");
-
-            // set of class values to pass to the model
-            var cellvalues = new Array(exclusioncells.length);
-
-            // iterating over each cell
-            for (var i = 0; i < exclusioncells.length; i++) {
-
-                if (exclusioncells[i].className == "ExcludedFalse")
-                {
-                    cellvalues[i] = 'False';
-                }
-                else if (exclusioncells[i].className == "ExcludedTrue")
-                {
-                    cellvalues[i] = 'True';
-                }
-            }
-
-            //for (var i = 1; i < cellvalues.length; i++) {
-
-            //    alert(cellvalues[i]);
-            //}
-
-            document.getElementById("hiddenExcludedDates").value = cellvalues;
-            document.getElementById("hiddenExcludedDatesData").value = cellvalues;
-        }
-    </script>*@
 
     @*validate that input is a number*@
     <script>

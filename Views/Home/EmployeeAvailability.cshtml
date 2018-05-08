@@ -71,17 +71,14 @@
 
 @section scripts
 {
+<script type="text/javascript">
+    $(function () {
+        // Disable browser cache Ajax.ActionLinks
+        $.ajaxSetup({ cache: false });
+    });
+</script>
+
     <script>
-        //function updateSchedule() {
-        //    alert(document.getElementById("hiddenUpdatedSchedule").value);
-        //    $.post('/Home/EmployeeAvailability/?UpdatedSchedule=' + document.getElementById("hiddenUpdatedSchedule").value, function (data) {
-
-        //        //load partial to page
-        //        $('#EmployeeAvailability').html(data);
-        //    });
-        //    alert(document.getElementById("hiddenSelectedEmployeeId").value + "'s availability has been updated.")
-        //}
-
         function updateSchedule() {
             var table = document.getElementById("hiddenUpdatedSchedule").value
             $.post('/Home/EmployeeAvailability',
@@ -104,6 +101,8 @@
             var selectedName = $("#EmployeeDropdown option:selected").text();
             document.getElementById("hiddenSelectedEmployeeId").value = selectedID;
             document.getElementById("hiddenSelectedEmployeeName").value = selectedName;
+
+            $("#EmployeeAvailability").html('<img style="display: block; margin-left: auto; margin-right: auto;" src="@Url.Content("~/Images/spinner.gif")" />');
 
             /* Request the partial view with .get request. */
             $.get('/Home/_EmployeeAvailabilityTable/?EmployeeId=' + selectedID, function (data) {
